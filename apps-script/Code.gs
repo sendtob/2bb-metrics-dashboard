@@ -8,7 +8,7 @@
  *         Who has access: (Anyone in your org, or Anyone with the link) ▸ Deploy.
  *         Copy the web-app URL and share it with the team.
  */
-const SHEET_ID = "1QY1BFYuSgjPOj5lUb6y4NrLmFnG0OmTarILdGRu92bc";
+const SHEET_ID = "1tDl5V-2wJrlgX3b9hOOkTVxlYIKgiEaMkHLl6BFoYe0";  // 2BB Weekly Metrics — team entry. Col A = label, Col B = code, Col C+ = weeks.
 
 const METRICS = [
   // Development (donors + partners)
@@ -61,7 +61,7 @@ function sheet_() {
 function getConfig() {
   const sh = sheet_();
   const header = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getValues()[0];
-  const weeks = header.slice(1).map(String).filter(function (s) { return s !== ''; });
+  const weeks = header.slice(2).map(String).filter(function (s) { return s !== ''; });
   return { metrics: METRICS, areas: AREAS, weeks: weeks };
 }
 
@@ -72,7 +72,7 @@ function getValues(week) {
   const col = header.indexOf(String(week));
   const out = {};
   if (col < 0) return out;
-  for (var r = 1; r < data.length; r++) { out[String(data[r][0])] = data[r][col]; }
+  for (var r = 1; r < data.length; r++) { if (String(data[r][1]) === '') continue; out[String(data[r][1])] = data[r][col]; }
   return out;
 }
 
@@ -89,7 +89,7 @@ function saveValues(week, values) {
     col = pos - 1;
   }
   var idRow = {};
-  for (var r = 1; r < data.length; r++) idRow[String(data[r][0])] = r; // 0-based
+  for (var r = 1; r < data.length; r++) idRow[String(data[r][1])] = r; // 0-based (col B = code)
   var n = 0;
   Object.keys(values).forEach(function (id) {
     var v = values[id];

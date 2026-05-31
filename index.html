@@ -99,7 +99,7 @@
 </footer>
 
 <script>
-const SHEET_ID="1QY1BFYuSgjPOj5lUb6y4NrLmFnG0OmTarILdGRu92bc";
+const SHEET_ID="1tDl5V-2wJrlgX3b9hOOkTVxlYIKgiEaMkHLl6BFoYe0";
 let WEEKS=["Feb 27","Mar 6","Mar 13","Mar 20","Mar 27","Apr 3","Apr 10","Apr 17","Apr 24","May 1","May 8","May 15","May 22","May 29"];
 
 const NS=[
@@ -280,9 +280,9 @@ function applyLive(map){
 window.__gv=function(resp){
   try{
     const t=resp.table,map={};
-    if(t.cols&&t.cols.length>1){ WEEKS=t.cols.slice(1).map(c=>String(c.label||c.id||"")); var wd=document.getElementById("wkdate"); if(wd&&WEEKS.length) wd.textContent=WEEKS[WEEKS.length-1]; }
-    t.rows.forEach(r=>{ if(!r.c||!r.c[0]||r.c[0].v==null) return;
-      map[String(r.c[0].v)]=r.c.slice(1).map(c=>(c&&c.v!=null)?Number(c.v):0); });
+    if(t.cols&&t.cols.length>2){ WEEKS=t.cols.slice(2).map(c=>String(c.label||c.id||"")); var wd=document.getElementById("wkdate"); if(wd&&WEEKS.length) wd.textContent=WEEKS[WEEKS.length-1]; }
+    t.rows.forEach(r=>{ if(!r.c||!r.c[1]||r.c[1].v==null||r.c[1].v==="") return;
+      map[String(r.c[1].v)]=r.c.slice(2).map(c=>(c&&c.v!=null)?Number(c.v):0); });
     const hit=applyLive(map);
     setStatus(hit>0); render();
   }catch(e){ setStatus(false); }
