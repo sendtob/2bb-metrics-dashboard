@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root{--navy:#1F3864;--line:#e5e9f0;--muted:#6b7280;}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#eef2f7;margin:0;color:#1f2937}
+  .hdr{background:linear-gradient(120deg,#16284a,#2a4878);color:#fff;padding:18px 20px}
+  .hdr .b{font-size:11px;letter-spacing:.2em;font-weight:700;opacity:.85}
+  .hdr h1{font-size:19px;margin:3px 0 0}
+  .wrap{max-width:620px;margin:0 auto;padding:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(20,40,80,.08)}
+  label.top{display:block;font-size:12px;font-weight:700;color:var(--navy);margin:12px 0 4px}
+  label.top:first-child{margin-top:0}
+  select,input[type=text]{width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px;background:#fff}
+  .grp{margin-top:14px}
+  .field{padding:10px 0;border-top:1px dashed var(--line)}
+  .field:first-child{border-top:none}
+  .field label{display:block;font-size:13.5px;margin-bottom:4px}
+  .field .hint{color:var(--muted);font-size:11.5px;font-weight:600}
+  .field input{width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px}
+  button{margin-top:16px;width:100%;background:var(--navy);color:#fff;border:0;border-radius:9px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  #msg{margin-top:12px;font-size:13px;font-weight:600;min-height:18px}
+  .note{font-size:11.5px;color:var(--muted);margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="hdr"><div class="b">TWO BLIND BROTHERS</div><h1>Update Weekly Metrics</h1></div>
+<div class="wrap"><div class="card">
+  <label class="top">Your area</label>
+  <select id="area"></select>
+  <label class="top">Week</label>
+  <select id="week"></select>
+  <input type="text" id="newweek" placeholder="New week label, e.g. Jun 5" style="display:none;margin-top:8px">
+  <div class="grp" id="fields"></div>
+  <button id="save">Save this week’s numbers</button>
+  <div id="msg"></div>
+  <div class="note">Saves straight into the dashboard’s data sheet — it updates the next time the dashboard is opened or refreshed. Only fill the boxes you have numbers for; blanks are left untouched.</div>
+</div></div>
+<script>
+var CFG=null;
+function $(id){return document.getElementById(id);}
+function msg(t,err){var m=$('msg');m.textContent=t;m.style.color=err?'#b91c1c':'#15803d';}
+function curWeek(){var w=$('week');return w.value==='__new'?$('newweek').value.trim():w.value;}
+function init(cfg){
+  CFG=cfg;
+  $('area').innerHTML=cfg.areas.map(function(a){return '<option>'+a+'</option>';}).join('');
+  $('week').innerHTML=cfg.weeks.map(function(w){return '<option>'+w+'</option>';}).join('')+'<option value="__new">➕ Add a new week…</option>';
+  if(cfg.weeks.length)$('week').value=cfg.weeks[cfg.weeks.length-1];
+  $('area').onchange=loadVals;
+  $('week').onchange=onWeek;
+  onWeek();
+}
+function onWeek(){
+  if($('week').value==='__new'){$('newweek').style.display='block';renderFields({});}
+  else{$('newweek').style.display='none';loadVals();}
+}
+function loadVals(){
+  var wk=curWeek();
+  if(!wk){renderFields({});return;}
+  google.script.run.withSuccessHandler(renderFields).getValues(wk);
+}
+function renderFields(vals){
+  vals=vals||{};
+  var area=$('area').value;
+  var ms=CFG.metrics.filter(function(m){return m.area===area;});
+  $('fields').innerHTML=ms.map(function(m){
+    var v=(vals[m.id]!=null&&vals[m.id]!=='')?vals[m.id]:'';
+    return '<div class="field"><label>'+m.label+(m.hint?' <span class="hint">('+m.hint+')</span>':'')+
+      '</label><input type="number" step="any" inputmode="decimal" data-id="'+m.id+'" value="'+v+'"></div>';
+  }).join('');
+}
+$('save').onclick=function(){
+  var btn=this,wk=curWeek();
+  if(!wk){msg('Pick a week — or type a new one — first.',true);return;}
+  var vals={};
+  document.querySelectorAll('#fields input').forEach(function(i){if(i.value!=='')vals[i.dataset.id]=i.value;});
+  if(!Object.keys(vals).length){msg('Enter at least one number.',true);return;}
+  btn.disabled=true;msg('Saving…',false);
+  google.script.run
+    .withSuccessHandler(function(n){
+      btn.disabled=false;
+      msg('✓ Saved '+n+' number'+(n===1?'':'s')+' for “'+wk+'.” Thank you!',false);
+      if($('week').value==='__new'){
+        google.script.run.withSuccessHandler(function(c){var keep=$('area').value;init(c);$('area').value=keep;loadVals();}).getConfig();
+      }
+    })
+    .withFailureHandler(function(e){btn.disabled=false;msg('Error: '+e.message,true);})
+    .saveValues(wk,vals);
+};
+google.script.run.withSuccessHandler(init).getConfig();
+</script>
+</body>
+</html>
