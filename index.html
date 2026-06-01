@@ -296,7 +296,7 @@ window.__gv=function(resp){
 setStatus(false); render();
 (function(){
   const s=document.createElement("script");
-  s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gv&gid=0&_="+Date.now();
+  s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gv&headers=1&gid=0&_="+Date.now();
   s.onerror=function(){ setStatus(false); };
   document.head.appendChild(s);
 })();
