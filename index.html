@@ -19,6 +19,9 @@
   header h1{font-size:24px;font-weight:700;margin-top:2px}
   header .meta{text-align:right;font-size:12px;opacity:.85}
   header .meta b{color:var(--gold)}
+  .navlink{display:inline-block;color:#fff;text-decoration:none;font-weight:700;font-size:12px;
+    border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 11px;transition:background .15s}
+  .navlink:hover{background:rgba(255,255,255,.14)}
   .wrap{max-width:1320px;margin:0 auto;padding:22px 28px 60px}
   .status{font-size:12px;font-weight:600;padding:9px 14px;border-radius:9px;margin:0 0 16px;background:#eef0f3;color:#6b7280}
   .status a{font-weight:700;text-decoration:none;border-bottom:1px solid currentColor}
@@ -78,7 +81,10 @@
     <div class="brand">TWO BLIND BROTHERS</div>
     <h1>Weekly Metrics Dashboard</h1>
   </div>
-  <div class="meta">Week of <b id="wkdate">May 29</b><br>Live — reads from your Google Sheet</div>
+  <div class="meta">
+    <a class="navlink" href="ecomm.html">Ecomm Metrics &rarr;</a><br>
+    Week of <b id="wkdate">May 29</b><br>Live — reads from your Google Sheet
+  </div>
 </header>
 <div class="wrap">
   <div class="status" id="status">Connecting to live data…</div>
