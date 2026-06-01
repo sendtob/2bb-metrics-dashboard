@@ -105,70 +105,10 @@
 </footer>
 
 <script>
-const SHEET_ID="1tDl5V-2wJrlgX3b9hOOkTVxlYIKgiEaMkHLl6BFoYe0";
+const SHEET_ID="1Tw8YtjTB8WykKcaNVmiDf6jXb-fZOAnTkO08NUtOTNE";
 let WEEKS=["Feb 27","Mar 6","Mar 13","Mar 20","Mar 27","Apr 3","Apr 10","Apr 17","Apr 24","May 1","May 8","May 15","May 22","May 29"];
 
-const NS=[
- {star:"Major Donors",desc:"The big gift that funds the mission.",goals:[
-   {id:"g1",tag:"GOAL 1",accent:"#4F46E5",name:"Land a $100,000 gift",win:"$100K gift",fmt:"int",
-    key:{id:"g1_ask",label:"Asks made this week",series:[0,0,0,0,0,1,0,1,2,1,2,2,3,2]},
-    subs:[
-     {id:"g1_pros",label:"Good prospects on our list (total)",series:[2,4,5,7,9,11,12,14,15,16,18,19,21,22]},
-     {id:"g1_rate",label:"Confirmed they can give $100K and care (total)",series:[0,1,1,3,4,5,6,7,9,10,11,12,13,14]},
-     {id:"g1_off",label:"Specific projects priced and ready",series:[0,0,1,1,1,1,2,2,2,2,2,2,3,3]},
-     {id:"g1_cult",label:"Donor meetings held this week",series:[0,1,1,2,2,3,3,4,3,4,5,4,5,5]}],
-    floor:"Every ask goes to someone we’ve confirmed can give $100K and cares — and asks for a specific, priced project. Don’t just “build the relationship” forever."}]},
-
- {star:"Major Partners",desc:"A marquee brand in our corner.",goals:[
-   {id:"g2",tag:"GOAL 2",accent:"#0EA5A4",name:"Land a major brand collaboration",win:"1 deal signed",fmt:"int",
-    key:{id:"g2_meet",label:"Meetings with decision-makers this week",series:[0,0,0,1,0,1,1,0,2,1,1,2,1,2]},
-    subs:[
-     {id:"g2_tar",label:"Target companies found (total)",series:[3,5,8,10,12,14,15,17,18,19,20,21,22,23]},
-     {id:"g2_sh",label:"Companies with an idea and a way in (total)",series:[0,1,2,3,4,5,6,6,7,8,9,9,10,11]},
-     {id:"g2_out",label:"Outreach attempts this week",series:[2,3,4,5,6,5,7,6,8,7,9,8,10,9]}],
-    floor:"Only chase real overlaps — a genuine reason to work together, not big-name logos for their own sake."}]},
-
- {star:"Operating Leverage",desc:"More output from the team we have.",goals:[
-   {id:"g3",tag:"GOAL 3",accent:"#7C3AED",name:"Build 100 AI agents we actually use",win:"100 agents",fmt:"int",
-    key:{id:"g3_inu",label:"AI agents actually in use",series:[1,2,3,5,6,8,11,14,17,20,24,28,33,38]},
-    subs:[
-     {id:"g3_task",label:"Repeating tasks an agent could take over (total)",series:[5,9,14,18,22,27,31,36,40,45,50,54,59,63]},
-     {id:"g3_blt",label:"AI agents built (total)",series:[2,4,6,9,12,15,19,23,27,32,37,42,48,54]},
-     {id:"g3_solo",label:"Agents that run on their own",series:[0,0,0,0,1,1,1,2,2,2,2,3,3,4]}],
-    floor:"An agent only counts if it does real work people accept and use — no demos padding the count."}]},
-
- {star:"Major Impact",desc:"The whole reason the rest exists.",goals:[
-   {id:"5a",tag:"A",accent:"#DB2777",name:"Breadth: be the name people think of",win:"Best-known in blindness",fmt:"int",
-    key:{id:"5a_key",label:"People reached who changed their minds",series:[0,0,0,0,5040,7000,9240,10500,14400,16560,21250,26000,31860,39200]},
-    subs:[
-     {id:"5a_reach",label:"New people reached (first time)",series:[5000,9000,14000,20000,28000,35000,42000,50000,60000,72000,85000,100000,118000,140000]},
-     {id:"5a_shift",label:"Share who changed their minds",series:[0,0,0,0,.18,.2,.22,.21,.24,.23,.25,.26,.27,.28],fmt:"pct"},
-     {id:"5a_sov",label:"Our share of the blindness conversation",series:[.05,.06,.07,.08,.1,.11,.12,.13,.15,.16,.17,.18,.19,.21],fmt:"pct"}],
-    floor:"It has to be a real, measured change in thinking — not just views or impressions."},
-   {id:"5b",tag:"B",accent:"#D97706",name:"Depth: change real lives, deeply",win:"Deepest impact",fmt:"int",
-    key:{id:"5b_key",label:"People we funded, taught, or connected to help",series:[0,0,1,2,3,2,4,5,4,6,7,6,8,9]},
-    subs:[
-     {id:"5b_enr",label:"People in a program right now",series:[0,5,8,12,15,18,22,28,34,40,48,55,63,72]},
-     {id:"5b_prog",label:"Programs running",series:[0,1,1,1,2,2,2,2,3,3,3,3,3,3]},
-     {id:"5b_sto",label:"Verified life-change stories (total)",series:[0,0,1,2,3,4,5,6,7,9,11,13,15,18]}],
-    floor:"Programs stay lean and use what we’re best at — reach, media, AI, and e-commerce."}]},
-
- {star:"ECOM Strengthening",desc:"Protect and grow the engine that pays for it all.",goals:[
-   {id:"4a",tag:"A",accent:"#16a34a",name:"Beat last year, every month",win:"Beat last year",fmt:"usdk",
-    key:{id:"4a_nm",vsId:"4a_nm_vs",label:"Money left after ads and shipping",
-         series:[42,45,38,51,55,48,60,58,62,57,65,70,68,75],vs:[40,41,39,44,46,45,50,49,52,50,55,57,58,60]},
-    subs:[
-     {id:"4a_sales",label:"Sales (revenue)",series:[180,190,170,210,225,205,245,238,255,235,268,285,278,305],fmt:"usdk"},
-     {id:"4a_roas",label:"Return on ad spend (ROAS)",series:[1.8,1.9,1.85,2.0,2.1,2.0,2.2,2.1,2.3,2.2,2.4,2.3,2.5,2.6],fmt:"x"}],
-    floor:"Don’t hit the number by cutting ads or quality so far that sales or new customers drop."},
-   {id:"4b",tag:"B",accent:"#EA580C",name:"Build next season’s products & campaigns",win:"Mostly hits",fmt:"int",
-    key:{id:"4b_win",label:"Winners — products & campaigns that hit their goal",series:[0,0,0,0,0,1,1,1,2,2,2,3,3,3]},
-    subs:[
-     {id:"4b_rate",label:"Win rate (share of launches that worked)",series:[0,0,0,0,0,.5,.5,.5,.5,.5,.5,.5,.5,.55],fmt:"pct"},
-     {id:"4b_launch",label:"Products & campaigns launched this season",series:[0,0,1,1,2,2,3,3,4,4,5,5,6,6]},
-     {id:"4b_dev",label:"Products & campaigns in development",series:[3,4,5,5,6,6,7,7,7,8,8,8,9,9]}],
-    floor:"Set the success bar before launch — a product wins by selling out and earning a reorder; a campaign wins by beating our usual return (or hitting the reach/press goal we set). Most of what we launch should win."}]}
-];
+const NS=[{"star": "Major Donors", "desc": "The big gift that funds the mission.", "goals": [{"id": "don", "tag": "GOAL 1", "accent": "#4F46E5", "name": "Land a $100,000 gift", "win": "$100K gift", "fmt": "int", "key": {"id": "d_ask", "label": "Asks made this week", "series": [0, 0, 0, 0, 0, 1, 0, 1, 2, 1, 2, 2, 3, 2]}, "subs": [{"id": "d_pros", "label": "Prospects identified (running total)", "series": [2, 4, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 40]}, {"id": "d_reach", "label": "First reaches made (running total)", "series": [0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24]}, {"id": "d_follow", "label": "Follow-up conversations held (running total)", "series": [0, 0, 1, 2, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21]}], "floor": "Every ask goes to someone we’ve confirmed can give $100K and cares — tied to a specific priced project."}]}, {"star": "Major Partners", "desc": "A marquee brand in our corner.", "goals": [{"id": "par", "tag": "GOAL 2", "accent": "#0EA5A4", "name": "Land a major brand collaboration", "win": "1 deal signed", "fmt": "int", "key": {"id": "p_meet", "label": "Decision-maker meetings this week", "series": [0, 0, 0, 1, 0, 1, 1, 0, 2, 1, 1, 2, 1, 2]}, "subs": [{"id": "p_pros", "label": "Prospects identified (running total)", "series": [3, 5, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]}, {"id": "p_conn", "label": "Initial connection made (running total)", "series": [0, 1, 2, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18]}, {"id": "p_follow", "label": "Follow-up conversations held (running total)", "series": [0, 0, 1, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13]}], "floor": "Only chase real overlaps — a genuine reason to work together, not big-name logos for their own sake."}]}, {"star": "Operating Leverage", "desc": "More output from the team we have.", "goals": [{"id": "lev", "tag": "GOAL 3", "accent": "#7C3AED", "name": "Build 100 AI agents we actually use", "win": "100 agents", "fmt": "int", "key": {"id": "g3_inu", "label": "AI agents actually in use", "series": [1, 2, 3, 5, 6, 8, 11, 14, 17, 20, 24, 28, 33, 38]}, "subs": [{"id": "g3_task", "label": "Repeating tasks an agent could take over (running total)", "series": [5, 9, 14, 18, 22, 27, 31, 36, 40, 45, 50, 54, 59, 63]}, {"id": "g3_blt", "label": "AI agents built (running total)", "series": [2, 4, 6, 9, 12, 15, 19, 23, 27, 32, 37, 42, 48, 54]}, {"id": "g3_solo", "label": "Agents that run on their own", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4]}], "floor": "An agent only counts if it does real work people accept and use — no demos padding the count."}]}, {"star": "Major Impact", "desc": "The whole reason the rest exists.", "goals": [{"id": "brd", "tag": "A", "accent": "#DB2777", "name": "Breadth — top-tier media inbound inquiry", "win": "A top-tier inbound", "fmt": "int", "key": {"id": "b_key", "label": "Top-tier media inbound inquiries", "series": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1]}, "subs": [{"id": "b_ideas", "label": "Mainstream campaign ideas generated (running total)", "series": [2, 3, 5, 6, 8, 10, 11, 13, 14, 16, 18, 19, 21, 23]}, {"id": "b_launch", "label": "Mainstream campaign ideas launched (running total)", "series": [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8]}, {"id": "b_1m", "label": "Mainstream campaigns with 1M+ impressions (running total)", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]}], "floor": "Real mainstream reach, not vanity — a campaign counts only when it actually ships and lands."}, {"id": "dep", "tag": "B", "accent": "#D97706", "name": "Depth — 1,000 heartfelt thank-you messages", "win": "1,000 messages", "fmt": "int", "key": {"id": "dp_key", "label": "Heartfelt thank-you messages received (running total)", "series": [0, 3, 7, 13, 22, 35, 52, 75, 105, 145, 195, 260, 340, 440]}, "subs": [{"id": "dp_prog", "label": "People in a program right now", "series": [0, 5, 8, 12, 15, 18, 22, 28, 34, 40, 48, 55, 63, 72]}, {"id": "dp_serve", "label": "People receiving or experiencing a program (running total)", "series": [0, 8, 15, 25, 38, 52, 70, 92, 118, 150, 188, 230, 278, 330]}, {"id": "dp_favor", "label": "Favors done — personalized, cared-for interactions (running total)", "series": [0, 4, 9, 16, 25, 36, 50, 68, 90, 116, 148, 185, 228, 278]}], "floor": "Messages are genuine and unprompted — we don’t solicit thank-yous."}]}, {"star": "Commercial Success", "desc": "Protect and grow the engine that pays for it all.", "goals": [{"id": "com", "tag": "A", "accent": "#16a34a", "name": "Beat last year, every month", "win": "Beat last year", "fmt": "usdk", "key": {"id": "c_nm", "label": "Net margin — money left after ads & shipping", "series": [42, 45, 38, 51, 55, 48, 60, 58, 62, 57, 65, 70, 68, 75], "vsId": "c_nm_vs", "vs": [40, 41, 39, 44, 46, 45, 50, 49, 52, 50, 55, 57, 58, 60]}, "subs": [{"id": "c_mear", "label": "MEAR — revenue ÷ total marketing spend", "series": [1.9, 1.95, 1.9, 2.0, 2.05, 2.0, 2.1, 2.05, 2.15, 2.1, 2.2, 2.15, 2.25, 2.3], "fmt": "x"}, {"id": "c_ret", "label": "Returning customers", "series": [120, 135, 128, 150, 160, 148, 175, 168, 185, 172, 198, 210, 205, 225], "fmt": "int"}, {"id": "c_sales", "label": "Sales / revenue ($ thousands)", "series": [180, 190, 170, 210, 225, 205, 245, 238, 255, 235, 268, 285, 278, 305], "fmt": "usdk"}], "floor": "Don’t hit the number by cutting ads or quality so far that sales or new customers drop."}, {"id": "win", "tag": "B", "accent": "#EA580C", "name": "Build winning products & campaigns", "win": "More winners", "fmt": "int", "key": {"id": "w_key", "label": "Winners — products & campaigns that hit the bar", "series": [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3]}, "subs": [{"id": "w_pdev", "label": "New products in development", "series": [3, 4, 4, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 9]}, {"id": "w_cdev", "label": "New campaigns in development", "series": [2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7]}, {"id": "w_papp", "label": "New products approved (running total)", "series": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]}, {"id": "w_capp", "label": "New campaigns approved (running total)", "series": [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7]}, {"id": "w_psell", "label": "New products selling (running total)", "series": [0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6]}, {"id": "w_claunch", "label": "New campaigns launched (running total)", "series": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]}], "floor": "A win is earned by the market — a product in the top 25% of sales for its category or site-wide, or a campaign with 250K+ impressions at break-even or better. Bar set before launch."}]}];
 
 function fmt(v,t){
   if(v===""||v==null) return "–";
