@@ -21,7 +21,7 @@ ECOMM_ID=""
 if [ -n "$ECOMM_ID" ]; then
   curl -sL "https://docs.google.com/spreadsheets/d/${ECOMM_ID}/gviz/tq?tqx=out:csv" -o "backups/ecomm_${DATE}.csv"
 else
-  curl -sL "https://sendtob.github.io/2bb-metrics-dashboard/ecomm.html" -o "backups/ecomm_${DATE}.html"
+  cp ecomm.html "backups/ecomm_${DATE}.html"   # ecomm data is hard-coded in ecomm.html — snapshot the source file
 fi
 
 # --- Store it (cloud-durable via the repo; falls back to local if push can't auth) ---
