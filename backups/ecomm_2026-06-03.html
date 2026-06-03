@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two Blind Brothers — E-Comm Metrics (Weekly Business Review)</title>
+<style>
+  :root{
+    --navy:#1F3864; --blue:#2E5496; --ink:#1f2937; --muted:#6b7280; --line:#e5e9f0;
+    --bg:#eef2f7; --card:#ffffff; --gold:#E8B84B;
+    --green:#16a34a; --greenbg:#e8f5e9; --amber:#b8860b; --amberbg:#fff8e1;
+    --red:#dc2626; --redbg:#fdecea; --gray:#6b7280; --graybg:#f3f4f6;
+    --navygrad:linear-gradient(120deg,#16284a,#2a4878);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+  header{background:var(--navygrad);color:#fff;padding:22px 32px;
+    display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  header .brand{font-size:13px;letter-spacing:.22em;font-weight:700;opacity:.85}
+  header h1{font-size:24px;font-weight:700;margin-top:2px}
+  header .meta{text-align:right;font-size:12px;opacity:.9;line-height:1.7}
+  header .meta b{color:var(--gold)}
+  .navlink{display:inline-block;color:#fff;text-decoration:none;font-weight:700;font-size:12px;
+    border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 11px;transition:background .15s}
+  .navlink:hover{background:rgba(255,255,255,.14)}
+  .wrap{max-width:1320px;margin:0 auto;padding:22px 28px 60px}
+  .livechip{display:inline-block;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;margin:0 0 12px}
+  .summary{font-size:12.5px;font-weight:600;padding:11px 15px;border-radius:10px;margin:0 0 14px;
+    background:#fff;border:1px solid var(--line);box-shadow:0 1px 3px rgba(20,40,80,.06)}
+  .summary .seg{margin-right:16px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted);margin:4px 4px 20px}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .banner{background:var(--navygrad);color:#fff;padding:11px 18px;display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;
+    border-radius:14px 14px 0 0}
+  .banner .bdot{width:10px;height:10px;border-radius:50%;align-self:center;flex:none}
+  .banner .bname{font-weight:700;letter-spacing:.15em;font-size:13.5px}
+  .banner .bdesc{font-size:11.5px;opacity:.82;font-style:italic}
+  .card{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 14px 14px;
+    box-shadow:0 1px 4px rgba(20,40,80,.08);margin-bottom:18px;overflow:hidden}
+  .cbody{padding:15px 18px 16px}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:12px}
+  .metric{background:var(--bg2,#fff);border:1px solid var(--line);border-top:3px solid var(--c,#6b7280);
+    border-radius:11px;padding:11px 13px 10px;display:flex;flex-direction:column;gap:1px}
+  .mlab{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+  .mnum{font-size:23px;font-weight:800;margin:3px 0 1px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .mwow{font-size:12.5px;font-weight:700;color:var(--c)}
+  .mago{color:var(--muted);font-weight:500;font-size:10.5px}
+  .mstat{font-size:9.5px;font-weight:800;color:var(--c);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;opacity:.92}
+  footer{max-width:1320px;margin:0 auto;padding:2px 28px 40px;font-size:11.5px;color:var(--muted)}
+  footer b{color:#4b5563}
+  footer code{background:#eef0f3;padding:1px 5px;border-radius:4px;font-size:11px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="brand">TWO BLIND BROTHERS</div>
+    <h1>Weekly Business Review — E-Comm Metrics</h1>
+  </div>
+  <div class="meta">
+    <a class="navlink" href="index.html">← Goal Tree</a><br>
+    Week ending <b id="wkdate">—</b> · vs prior week
+  </div>
+</header>
+<div class="wrap">
+  <div class="livechip" id="livechip"></div>
+  <div class="summary" id="summary"></div>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--green)"></span>On track</span>
+    <span><span class="dot" style="background:var(--amber)"></span>Watch</span>
+    <span><span class="dot" style="background:var(--red)"></span>Needs review</span>
+    <span><span class="dot" style="background:var(--gray)"></span>Context (no target)</span>
+    <span style="margin-left:auto">▲ / ▼ = vs the prior week</span>
+  </div>
+  <div id="blocks"></div>
+</div>
+<footer>
+  Reads the <b>WBR KPI history Sheet</b> (the durable store the pipeline appends to each Monday) and shows the latest week vs the prior one.
+  Status colors mirror <b>scorecard.py</b>: green only when flat-or-improving, amber on a soft decline, red on a material one.
+  To connect the live Sheet, paste its ID into <code>SHEET_ID</code> below (Share → <b>Anyone with the link → Viewer</b>, and share it with the pipeline service account as Editor). Until then it shows the latest snapshot.
+</footer>
+
+<script>
+/* ----------------------------------------------------------------------------
+   Live source: the WBR KPI history Google Sheet that review/delivery.py's
+   append_kpis_to_sheet() writes — header row + one row per week (newest last),
+   columns keyed by KPI (period_end, ..., net_revenue, orders, ..., mer, cac).
+   Paste the Sheet ID below to go live; leave "" to show the built-in snapshot.
+---------------------------------------------------------------------------- */
+const SHEET_ID = "";          // <-- paste the WBR KPI Sheet ID here to go live
+const SHEET_GID = "0";        // first tab
+
+// KPI specs MIRROR review/scorecard.py KPI_SPECS — keep in sync if thresholds move.
+// mode "wow": green only if flat-or-improving; red past |act|. "abs": vs target/floor. "none": context only.
+const FLAT = 0.03;
+const BLOCK_DEFS = [
+  {key:"shopify",   name:"SHOPIFY — TOTAL BUSINESS",            desc:"the whole store, all channels"},
+  {key:"meta",      name:"META — PAID ACQUISITION",             desc:"self-reported in Ads Manager"},
+  {key:"email_sms", name:"EMAIL & SMS — OWNED / RETENTION",     desc:"Klaviyo campaigns & flows"},
+  {key:"northbeam", name:"NORTHBEAM — ATTRIBUTION & EFFICIENCY", desc:"blended, cross-channel truth"},
+];
+const SPECS = [
+  {key:"net_revenue",     block:"shopify",   label:"Net revenue",          fmt:"money", good:"up",      mode:"wow", act:-0.20},
+  {key:"orders",          block:"shopify",   label:"Orders",               fmt:"int",   good:"up",      mode:"wow", act:-0.20},
+  {key:"aov",             block:"shopify",   label:"AOV",                  fmt:"money", good:"up",      mode:"wow", act:-0.20},
+  {key:"new_customers",   block:"shopify",   label:"New customers",        fmt:"int",   good:"up",      mode:"wow", act:-0.25},
+  {key:"sessions",        block:"shopify",   label:"Sessions (GA4)",       fmt:"int",   good:"up",      mode:"wow", act:-0.25},
+  {key:"conversion_rate", block:"shopify",   label:"Conversion rate",      fmt:"pct",   good:"up",      mode:"wow", act:-0.20},
+  {key:"meta_spend",      block:"meta",      label:"Meta spend",           fmt:"money", good:"neutral", mode:"none"},
+  {key:"meta_conversions",block:"meta",      label:"Meta purchases",       fmt:"int",   good:"up",      mode:"wow", act:-0.25},
+  {key:"meta_cpa",        block:"meta",      label:"Meta cost/purchase",   fmt:"money", good:"down",    mode:"wow", act:0.30},
+  {key:"meta_roas",       block:"meta",      label:"ROAS (Meta-reported)", fmt:"ratio", good:"up",      mode:"wow", act:-0.30},
+  {key:"email_campaigns", block:"email_sms", label:"Campaigns sent",       fmt:"int",   good:"neutral", mode:"none"},
+  {key:"email_open_rate", block:"email_sms", label:"Open rate",            fmt:"pct",   good:"up",      mode:"none"},
+  {key:"email_click_rate",block:"email_sms", label:"Click rate",           fmt:"pct",   good:"up",      mode:"abs", target:0.020, floor:0.010},
+  {key:"email_revenue",   block:"email_sms", label:"Email revenue (attr.)",fmt:"money", good:"up",      mode:"wow", act:-0.25},
+  {key:"sms_revenue",     block:"email_sms", label:"SMS revenue (attr.)",  fmt:"money", good:"up",      mode:"wow", act:-0.25},
+  {key:"ad_spend",        block:"northbeam", label:"Total ad spend",       fmt:"money", good:"neutral", mode:"none"},
+  {key:"roas",            block:"northbeam", label:"Blended ROAS (NB)",    fmt:"ratio", good:"up",      mode:"abs", target:2.5, floor:1.5},
+  {key:"mer",             block:"northbeam", label:"MER (rev / ad spend)", fmt:"ratio", good:"up",      mode:"abs", target:3.0, floor:2.0},
+  {key:"cac",             block:"northbeam", label:"CAC (blended)",        fmt:"money", good:"down",    mode:"wow", act:0.30},
+];
+
+// Built-in fallback — week ending May 31, 2026 (from the corrected pipeline).
+// Shown until SHEET_ID is set. Refreshed by re-running the WBR extraction.
+const SNAPSHOT = {
+  period_end: "May 31, 2026",
+  values: {net_revenue:15509, orders:141, aov:110, new_customers:248, sessions:9865, conversion_rate:0.0143,
+           meta_spend:5624, meta_conversions:51, meta_cpa:110, meta_roas:0.90,
+           email_campaigns:5, email_open_rate:0.5215, email_click_rate:0.0019, email_revenue:2608, sms_revenue:173,
+           ad_spend:7831, roas:1.96, mer:1.98, cac:32},
+  wow: {net_revenue:-0.182, orders:-0.156, aov:-0.031, new_customers:-0.162, sessions:-0.122, conversion_rate:-0.038,
+        meta_spend:-0.004, meta_conversions:-0.136, meta_cpa:0.153, meta_roas:-0.211,
+        email_campaigns:0.250, email_open_rate:0.003, email_click_rate:-0.240, email_revenue:-0.003, sms_revenue:0.430,
+        ad_spend:0.017, roas:-0.187, mer:-0.195, cac:0.213},
+};
+
+const COLORS = {
+  good:   {c:"var(--green)", bg:"var(--greenbg)", word:"On track"},
+  watch:  {c:"var(--amber)", bg:"var(--amberbg)", word:"Watch"},
+  review: {c:"var(--red)",   bg:"var(--redbg)",   word:"Needs review"},
+  neutral:{c:"var(--gray)",  bg:"var(--graybg)",  word:"Context"},
+};
+const RANK = {review:3, watch:2, good:1, neutral:0};
+
+function fmtVal(fmt, v){
+  if(v==null || isNaN(v)) return "n/a";
+  if(fmt==="money") return "$"+Math.round(v).toLocaleString();
+  if(fmt==="int")   return Math.round(v).toLocaleString();
+  if(fmt==="ratio") return v.toFixed(2)+"x";
+  if(fmt==="pct")   return (v*100).toFixed(2)+"%";
+  return String(v);
+}
+function wowStr(w){
+  if(w==null) return "—";
+  if(Math.abs(w) < 0.0005) return "— flat";
+  return (w>0 ? "▲ " : "▼ ") + Math.abs(w*100).toFixed(1).replace(/\.0$/,"") + "%";
+}
+// Mirrors review/scorecard.py _status().
+function statusOf(spec, value, wow){
+  if(value==null) return "neutral";
+  if(spec.mode==="none") return "neutral";
+  if(spec.mode==="abs"){
+    if(spec.good==="up")   return value>=spec.target ? "good" : (value<spec.floor ? "review" : "watch");
+    return value<=spec.target ? "good" : (value>spec.floor ? "review" : "watch");
+  }
+  if(wow==null) return "neutral";
+  const d = spec.good==="up" ? wow : -wow;   // signed move in the good direction
+  if(d <= -Math.abs(spec.act)) return "review";
+  if(d < -FLAT) return "watch";
+  return "good";
+}
+
+function tile(spec, value, wow){
+  const status = statusOf(spec, value, wow);
+  const k = COLORS[status] || COLORS.neutral;
+  return `<div class="metric" style="--c:${k.c};--bg2:${k.bg}">
+    <div class="mlab">${spec.label}</div>
+    <div class="mnum">${fmtVal(spec.fmt, value)}</div>
+    <div class="mwow">${wowStr(wow)} <span class="mago">vs last wk</span></div>
+    <div class="mstat">${k.word}</div>
+  </div>`;
+}
+
+function renderFrom(data){
+  const reds = [], watches = [];
+  const html = BLOCK_DEFS.map(b => {
+    const specs = SPECS.filter(s => s.block === b.key);
+    let worst = "neutral";
+    const tiles = specs.map(sp => {
+      const v = data.values ? data.values[sp.key] : null;
+      const w = data.wow ? data.wow[sp.key] : null;
+      const st = statusOf(sp, v, w);
+      if((RANK[st]||0) > (RANK[worst]||0)) worst = st;
+      if(st==="review") reds.push(sp.label);
+      else if(st==="watch") watches.push(sp.label);
+      return tile(sp, v, w);
+    }).join("");
+    const dot = (COLORS[worst]||COLORS.neutral).c;
+    return `<div class="banner"><span class="bdot" style="background:${dot}"></span>
+      <span class="bname">${b.name}</span><span class="bdesc">${b.desc}</span></div>
+      <div class="card"><div class="cbody"><div class="metrics">${tiles}</div></div></div>`;
+  }).join("");
+  document.getElementById("blocks").innerHTML = html;
+
+  document.getElementById("summary").innerHTML =
+    (reds.length    ? `<span class="seg"><b style="color:var(--red)">Needs review:</b> ${reds.join(", ")}</span>` : "") +
+    (watches.length ? `<span class="seg"><b style="color:var(--amber)">Watch:</b> ${watches.join(", ")}</span>` : "") +
+    (!reds.length && !watches.length ? `<b style="color:var(--green)">All metrics on track.</b>` : "");
+
+  const wk = document.getElementById("wkdate");
+  if(wk && data.period_end) wk.textContent = data.period_end;
+}
+
+function setLiveChip(live){
+  const el = document.getElementById("livechip");
+  if(live){ el.style.background="var(--greenbg)"; el.style.color="var(--green)";
+    el.innerHTML = "● Live — auto-updating from the WBR Sheet"; }
+  else { el.style.background="var(--amberbg)"; el.style.color="var(--amber)";
+    el.innerHTML = "● Latest snapshot — connect the WBR Sheet (set SHEET_ID) to auto-update"; }
+}
+
+// gviz JSONP callback for the live Sheet.
+window.__wbr = function(resp){
+  try{
+    const t = resp.table, cols = t.cols.map(c => String(c.label || c.id || ""));
+    const idx = {}; cols.forEach((c,i) => idx[c] = i);
+    const rows = t.rows || [];
+    if(!rows.length){ setLiveChip(false); renderFrom(SNAPSHOT); return; }
+    const cur = rows[rows.length-1].c;
+    const prior = rows.length > 1 ? rows[rows.length-2].c : null;
+    const num = (row, key) => {
+      const i = idx[key]; if(i==null || !row[i]) return null;
+      const v = row[i].v; return (v==null || v==="") ? null : Number(v);
+    };
+    const peCell = cur[idx["period_end"]];
+    const data = {period_end: peCell ? String(peCell.f || peCell.v || "") : "", values:{}, wow:{}};
+    SPECS.forEach(sp => {
+      const c = num(cur, sp.key); data.values[sp.key] = c;
+      const p = prior ? num(prior, sp.key) : null;
+      data.wow[sp.key] = (c!=null && p!=null && p!==0) ? (c - p) / p : null;
+    });
+    setLiveChip(true); renderFrom(data);
+  }catch(e){ setLiveChip(false); renderFrom(SNAPSHOT); }
+};
+
+// Boot: show the snapshot immediately, then try the live Sheet if configured.
+setLiveChip(false); renderFrom(SNAPSHOT);
+if(SHEET_ID){
+  const s = document.createElement("script");
+  s.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
+          "/gviz/tq?tqx=out:json;responseHandler:__wbr&gid=" + SHEET_GID + "&_=" + Date.now();
+  s.onerror = function(){ setLiveChip(false); renderFrom(SNAPSHOT); };
+  document.head.appendChild(s);
+}
+</script>
+</body>
+</html>
