@@ -71,6 +71,9 @@
   .wow{font-size:11.5px;font-weight:700;margin-top:3px}
   .floor{margin-top:11px;padding-top:9px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
   .floor b{color:#4b5563}
+  .srcbadge{font-size:9px;font-weight:800;letter-spacing:.02em;color:#0e7490;background:#ecfeff;
+    border:1px solid #a5f3fc;border-radius:20px;padding:1px 7px;text-decoration:none;white-space:nowrap;vertical-align:middle}
+  .srcbadge:hover{background:#cffafe}
   svg.sp{display:block}
   footer{max-width:1320px;margin:0 auto;padding:0 28px 40px;font-size:11.5px;color:var(--muted)}
 </style>
@@ -104,6 +107,7 @@
   Two Blind Brothers — Goal Tree, May 2026.
 </footer>
 
+<script src="ecomm-data.js"></script>
 <script>
 const SHEET_ID="1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w";
 let WEEKS=["Feb 27","Mar 6","Mar 13","Mar 20","Mar 27","Apr 3","Apr 10","Apr 17","Apr 24","May 1","May 8","May 15","May 22","May 29"];
@@ -114,8 +118,10 @@ function fmt(v,t){
   if(v===""||v==null) return "–";
   if(t==="usd") return "$"+Math.round(v).toLocaleString();
   if(t==="usdk") return "$"+Math.round(v).toLocaleString()+"k";
+  if(t==="usdk1") return "$"+(Math.round(v*10)/10).toFixed(1)+"k";
   if(t==="pct") return Math.round(v*100)+"%";
   if(t==="x") return v.toFixed(1)+"x";
+  if(t==="x2") return v.toFixed(2)+"x";
   return Math.round(v).toLocaleString();
 }
 function spark(vals,{w=128,h=34,color="#2E5496",fill=true,dots=false,dotr=1.7,labels=null,vfmt=null}={}){
@@ -154,6 +160,7 @@ function statusOf(g){
 }
 function fmtDelta(d,f){
   if(f==="usdk") return "$"+Math.round(d).toLocaleString()+"k";
+  if(f==="usdk1") return "$"+(Math.round(d*10)/10).toFixed(1)+"k";
   if(f==="pct") return Math.round(d*100)+"%";
   if(f==="x") return d.toFixed(1)+"x";
   return Math.round(d).toLocaleString();
@@ -169,17 +176,20 @@ function wow(series,f,{mini=false}={}){
 function metricBlock(g){
   const s=g.key.series,last=s[s.length-1];
   const [stxt,scol,sbg]=statusOf(g);
-  const ksvg=g.key.vs?spark2(g.key.series,g.key.vs,{color:g.accent,dots:true,labels:WEEKS,vfmt:g.fmt})
-                     :spark(s,{color:g.accent,w:150,h:42,dots:true,labels:WEEKS,vfmt:g.fmt});
+  const wl=(g.src==="ecomm"&&window.ECOMM_HIST)?window.ECOMM_HIST.weeks:WEEKS;
+  const ksvg=g.key.vs?spark2(g.key.series,g.key.vs,{color:g.accent,dots:true,labels:wl,vfmt:g.fmt})
+                     :spark(s,{color:g.accent,w:150,h:42,dots:true,labels:wl,vfmt:g.fmt});
   const subs=g.subs.map(sb=>{const f=sb.fmt||g.fmt;const sl=sb.series;
-    return `<div class="sub"><span class="sl">${sb.label}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:WEEKS,vfmt:f})}
+    return `<div class="sub"><span class="sl">${sb.label}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f})}
       <span class="sv">${fmt(sl[sl.length-1],f)}</span>${wow(sl,f,{mini:true})}</div>`;}).join("");
+  const badge=g.src==="ecomm"?` <a class="srcbadge" href="ecomm.html" title="Pulled from the E-Comm Metrics page — the current week is live; prior weeks and last year are the filled-in baseline. Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
+  const cap=g.key.vs?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.src==="ecomm"?" · current week live from e-comm":""}</div>`:"";
   return `<div class="keyblock"><div>
-      <div class="kl"><span class="star">★</span>${g.key.label}</div>
+      <div class="kl"><span class="star">★</span>${g.key.label}${badge}</div>
       <div class="kv" style="color:${g.accent}">${fmt(last,g.fmt)}</div>
       ${wow(s,g.fmt)}
       <span class="pill" style="color:${scol};background:${sbg}">${stxt}${g.key.vs?"":" · target "+g.win}</span>
-    </div><div style="text-align:right">${ksvg}${g.key.vs?'<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year</div>':""}</div></div>
+    </div><div style="text-align:right">${ksvg}${cap}</div></div>
     <div class="subs">${subs}</div>
     <div class="floor"><b>Floor:</b> ${g.floor}</div>`;
 }
@@ -214,12 +224,39 @@ function setStatus(live){
   else { b.style.background="#fef3c7"; b.style.color="#92400e";
     b.innerHTML='<b>● Showing example data</b> — the live sheet isn’t shared yet. In the sheet: <b>Share → Anyone with the link → Viewer</b>, then refresh. &nbsp;·&nbsp; <a href="example.html">example ↗</a>'; }
 }
+// The "Beat last year" goal is sourced from e-comm (see ecomm-data.js), not the team sheet.
+const ECOMM_IDS=new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales"]);
+function findGoal(id){ for(const n of NS) for(const g of n.goals) if(g.id===id) return g; return null; }
+function applyEcomm(){
+  const E=window.ECOMM_HIST; if(!E) return;
+  const g=findGoal("com"); if(!g) return;
+  g.src="ecomm"; g.fmt="usdk1";
+  g.key.series=E.marginK(E.thisYear);
+  g.key.vs    =E.marginK(E.lastYear);
+  g.subs.forEach(sb=>{
+    if(sb.id==="c_mear"){ sb.series=E.mearX(E.thisYear); sb.fmt="x2"; }
+    if(sb.id==="c_ret")   sb.series=E.thisYear.returning.slice();
+    if(sb.id==="c_sales"){ sb.series=E.salesK(E.thisYear); sb.fmt="usdk1"; }
+  });
+}
+function syncCurrentFromEcomm(){
+  return fetch("ecomm.html",{cache:"no-store"}).then(r=>r.ok?r.text():"").then(html=>{
+    if(!html||!window.ECOMM_HIST) return;
+    const pick=re=>{ const m=html.match(re); return m?m[1]:null; };
+    const rev=pick(/net_revenue:\s*([\d.]+)/), ad=pick(/ad_spend:\s*([\d.]+)/), pe=pick(/period_end:\s*"([^"]+)"/);
+    const E=window.ECOMM_HIST, i=E.thisYear.net_revenue.length-1;
+    if(rev) E.thisYear.net_revenue[i]=Number(rev);
+    if(ad)  E.thisYear.ad_spend[i]=Number(ad);
+    if(pe)  E.weeks[i]=pe.replace(/,?\s*20\d\d\s*$/,"");
+  }).catch(()=>{});
+}
 function applyLive(map){
+  const skip=window.ECOMM_HIST?ECOMM_IDS:new Set();
   let hit=0;
   NS.forEach(n=>n.goals.forEach(g=>{
-    if(map[g.key.id]&&map[g.key.id].length){ g.key.series=map[g.key.id]; hit++; }
-    if(g.key.vsId&&map[g.key.vsId]&&map[g.key.vsId].length){ g.key.vs=map[g.key.vsId]; }
-    g.subs.forEach(sb=>{ if(map[sb.id]&&map[sb.id].length){ sb.series=map[sb.id]; } });
+    if(!skip.has(g.key.id)&&map[g.key.id]&&map[g.key.id].length){ g.key.series=map[g.key.id]; hit++; }
+    if(g.key.vsId&&!skip.has(g.key.vsId)&&map[g.key.vsId]&&map[g.key.vsId].length){ g.key.vs=map[g.key.vsId]; }
+    g.subs.forEach(sb=>{ if(!skip.has(sb.id)&&map[sb.id]&&map[sb.id].length){ sb.series=map[sb.id]; } });
   }));
   return hit;
 }
@@ -230,10 +267,12 @@ window.__gv=function(resp){
     t.rows.forEach(r=>{ if(!r.c||!r.c[1]||r.c[1].v==null||r.c[1].v==="") return;
       map[String(r.c[1].v)]=r.c.slice(2).map(c=>(c&&c.v!=null)?Number(c.v):0); });
     const hit=applyLive(map);
+    applyEcomm();
     setStatus(hit>0); render();
   }catch(e){ setStatus(false); }
 };
-setStatus(false); render();
+applyEcomm(); setStatus(false); render();
+syncCurrentFromEcomm().then(()=>{ applyEcomm(); render(); });
 (function(){
   const s=document.createElement("script");
   s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gv&headers=1&gid=0&_="+Date.now();

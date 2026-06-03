@@ -24,6 +24,9 @@ else
   cp ecomm.html "backups/ecomm_${DATE}.html"   # ecomm data is hard-coded in ecomm.html — snapshot the source file
 fi
 
+# --- Goal Tree's e-comm net-margin history (feeds the "Beat last year" goal) ---
+cp ecomm-data.js "backups/ecomm-data_${DATE}.js" 2>/dev/null || true
+
 # --- Store it (cloud-durable via the repo; falls back to local if push can't auth) ---
 git add backups/
 if git commit -q -m "Weekly metrics backup ${DATE}" 2>/dev/null; then
