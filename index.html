@@ -112,7 +112,7 @@
 const SHEET_ID="1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w";
 let WEEKS=["Feb 27","Mar 6","Mar 13","Mar 20","Mar 27","Apr 3","Apr 10","Apr 17","Apr 24","May 1","May 8","May 15","May 22","May 29"];
 
-const NS=[{"star": "Major Donors", "desc": "The big gift that funds the mission.", "goals": [{"id": "don", "tag": "GOAL 1", "accent": "#4F46E5", "name": "Land a $100,000 gift", "win": "$100K gift", "fmt": "int", "key": {"id": "d_ask", "label": "Asks made this week", "series": [0, 0, 0, 0, 0, 1, 0, 1, 2, 1, 2, 2, 3, 2]}, "subs": [{"id": "d_pros", "label": "Prospects identified (running total)", "series": [2, 4, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 40]}, {"id": "d_reach", "label": "First reaches made (running total)", "series": [0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24]}, {"id": "d_follow", "label": "Follow-up conversations held (running total)", "series": [0, 0, 1, 2, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21]}], "floor": "Every ask goes to someone we’ve confirmed can give $100K and cares — tied to a specific priced project."}]}, {"star": "Major Partners", "desc": "A marquee brand in our corner.", "goals": [{"id": "par", "tag": "GOAL 2", "accent": "#0EA5A4", "name": "Land a major brand collaboration", "win": "1 deal signed", "fmt": "int", "key": {"id": "p_meet", "label": "Decision-maker meetings this week", "series": [0, 0, 0, 1, 0, 1, 1, 0, 2, 1, 1, 2, 1, 2]}, "subs": [{"id": "p_pros", "label": "Prospects identified (running total)", "series": [3, 5, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]}, {"id": "p_conn", "label": "Initial connection made (running total)", "series": [0, 1, 2, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18]}, {"id": "p_follow", "label": "Follow-up conversations held (running total)", "series": [0, 0, 1, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13]}], "floor": "Only chase real overlaps — a genuine reason to work together, not big-name logos for their own sake."}]}, {"star": "Operating Leverage", "desc": "More output from the team we have.", "goals": [{"id": "lev", "tag": "GOAL 3", "accent": "#7C3AED", "name": "Build 100 AI agents we actually use", "win": "100 agents", "fmt": "int", "key": {"id": "g3_inu", "label": "AI agents actually in use", "series": [1, 2, 3, 5, 6, 8, 11, 14, 17, 20, 24, 28, 33, 38]}, "subs": [{"id": "g3_task", "label": "Repeating tasks an agent could take over (running total)", "series": [5, 9, 14, 18, 22, 27, 31, 36, 40, 45, 50, 54, 59, 63]}, {"id": "g3_blt", "label": "AI agents built (running total)", "series": [2, 4, 6, 9, 12, 15, 19, 23, 27, 32, 37, 42, 48, 54]}, {"id": "g3_solo", "label": "Agents that run on their own", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4]}], "floor": "An agent only counts if it does real work people accept and use — no demos padding the count."}]}, {"star": "Major Impact", "desc": "The whole reason the rest exists.", "goals": [{"id": "brd", "tag": "A", "accent": "#DB2777", "name": "Breadth — top-tier media inbound inquiry", "win": "A top-tier inbound", "fmt": "int", "key": {"id": "b_key", "label": "Top-tier media inbound inquiries", "series": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1]}, "subs": [{"id": "b_ideas", "label": "Mainstream campaign ideas generated (running total)", "series": [2, 3, 5, 6, 8, 10, 11, 13, 14, 16, 18, 19, 21, 23]}, {"id": "b_launch", "label": "Mainstream campaign ideas launched (running total)", "series": [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8]}, {"id": "b_1m", "label": "Mainstream campaigns with 1M+ impressions (running total)", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]}, {"id": "b_social", "label": "Organic social posts with 10K+ impressions (running total)", "series": [1, 2, 4, 5, 7, 9, 11, 13, 15, 18, 21, 24, 28, 32]}], "floor": "Real mainstream reach, not vanity — a campaign or post counts only when it actually lands."}, {"id": "dep", "tag": "B", "accent": "#D97706", "name": "Depth — 1,000 heartfelt thank-you messages", "win": "1,000 messages", "fmt": "int", "key": {"id": "dp_key", "label": "Heartfelt thank-you messages received (running total)", "series": [0, 3, 7, 13, 22, 35, 52, 75, 105, 145, 195, 260, 340, 440]}, "subs": [{"id": "dp_helped", "label": "People helped in a significant way (running total)", "series": [0, 3, 7, 12, 18, 25, 34, 45, 58, 73, 90, 110, 135, 165]}], "floor": "Messages are genuine and unprompted — we don’t solicit thank-yous."}]}, {"star": "Commercial Success", "desc": "Protect and grow the engine that pays for it all.", "goals": [{"id": "com", "tag": "A", "accent": "#16a34a", "name": "Beat last year, every month", "win": "Beat last year", "fmt": "usdk", "key": {"id": "c_nm", "label": "Net margin — money left after ads & shipping", "series": [42, 45, 38, 51, 55, 48, 60, 58, 62, 57, 65, 70, 68, 75], "vsId": "c_nm_vs", "vs": [40, 41, 39, 44, 46, 45, 50, 49, 52, 50, 55, 57, 58, 60]}, "subs": [{"id": "c_mear", "label": "MEAR — revenue ÷ total marketing spend", "series": [1.9, 1.95, 1.9, 2.0, 2.05, 2.0, 2.1, 2.05, 2.15, 2.1, 2.2, 2.15, 2.25, 2.3], "fmt": "x"}, {"id": "c_ret", "label": "Returning customers", "series": [120, 135, 128, 150, 160, 148, 175, 168, 185, 172, 198, 210, 205, 225], "fmt": "int"}, {"id": "c_sales", "label": "Sales / revenue ($ thousands)", "series": [180, 190, 170, 210, 225, 205, 245, 238, 255, 235, 268, 285, 278, 305], "fmt": "usdk"}], "floor": "Don’t hit the number by cutting ads or quality so far that sales or new customers drop."}, {"id": "prod", "tag": "B", "accent": "#EA580C", "name": "Build winning products", "win": "Top-25% products", "fmt": "int", "key": {"id": "wp_key", "label": "Winning products (top 25% of their category)", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4]}, "subs": [{"id": "wp_dev", "label": "New products or versions in development", "series": [2, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 8]}, {"id": "wp_score", "label": "New products or versions passing the scorecard ✱ (running total)", "series": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]}], "floor": "A win is earned by the market — a product ranking in the top 25% of its category. The scorecard ✱ is the screen to get there."}, {"id": "camp", "tag": "C", "accent": "#0891B2", "name": "Build winning campaigns", "win": "Campaigns that hold", "fmt": "int", "key": {"id": "wc_key", "label": "Winning campaigns — 250K+ impressions at neutral margin (after ads & product cost)", "series": [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3]}, "subs": [{"id": "wc_ideas", "label": "New campaign ideas (running total)", "series": [2, 3, 5, 6, 8, 9, 11, 12, 14, 15, 17, 18, 20, 22]}, {"id": "wc_dev", "label": "New campaigns in development", "series": [1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6]}, {"id": "wc_score", "label": "Campaigns passing the scorecard ✱ (running total)", "series": [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7]}, {"id": "wc_launch", "label": "New campaigns launched (running total)", "series": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]}], "floor": "A winning campaign holds 250K+ impressions at neutral-or-better margin after ad and product cost."}]}];
+const NS=[{"star": "Major Donors", "desc": "The big gift that funds the mission.", "goals": [{"id": "don", "tag": "GOAL 1", "accent": "#4F46E5", "name": "Land a $100,000 gift", "win": "$100K gift", "fmt": "int", "key": {"id": "d_ask", "label": "Asks made this week", "series": [0, 0, 0, 0, 0, 1, 0, 1, 2, 1, 2, 2, 3, 2]}, "subs": [{"id": "d_pros", "label": "Prospects identified (running total)", "series": [2, 4, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 40]}, {"id": "d_reach", "label": "First reaches made (running total)", "series": [0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24]}, {"id": "d_follow", "label": "Follow-up conversations held (running total)", "series": [0, 0, 1, 2, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21]}], "floor": "Every ask goes to someone we’ve confirmed can give $100K and cares — tied to a specific priced project."}]}, {"star": "Major Partners", "desc": "A marquee brand in our corner.", "goals": [{"id": "par", "tag": "GOAL 2", "accent": "#0EA5A4", "name": "Land a major brand collaboration", "win": "1 deal signed", "fmt": "int", "key": {"id": "p_meet", "label": "Decision-maker meetings this week", "series": [0, 0, 0, 1, 0, 1, 1, 0, 2, 1, 1, 2, 1, 2]}, "subs": [{"id": "p_pros", "label": "Prospects identified (running total)", "series": [3, 5, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]}, {"id": "p_conn", "label": "Initial connection made (running total)", "series": [0, 1, 2, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18]}, {"id": "p_follow", "label": "Follow-up conversations held (running total)", "series": [0, 0, 1, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13]}], "floor": "Only chase real overlaps — a genuine reason to work together, not big-name logos for their own sake."}]}, {"star": "Operating Leverage", "desc": "More output from the team we have.", "goals": [{"id": "lev", "tag": "GOAL 3", "accent": "#7C3AED", "name": "Build 100 AI agents we actually use", "win": "100 agents", "fmt": "int", "key": {"id": "g3_inu", "label": "AI agents actually in use", "series": [1, 2, 3, 5, 6, 8, 11, 14, 17, 20, 24, 28, 33, 38]}, "subs": [{"id": "g3_task", "label": "Repeating tasks an agent could take over (running total)", "series": [5, 9, 14, 18, 22, 27, 31, 36, 40, 45, 50, 54, 59, 63]}, {"id": "g3_blt", "label": "AI agents built (running total)", "series": [2, 4, 6, 9, 12, 15, 19, 23, 27, 32, 37, 42, 48, 54]}, {"id": "g3_solo", "label": "Agents that run on their own", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4]}], "floor": "An agent only counts if it does real work people accept and use — no demos padding the count."}]}, {"star": "Major Impact", "desc": "The whole reason the rest exists.", "goals": [{"id": "brd", "tag": "A", "accent": "#DB2777", "name": "Breadth — top-tier media inbound inquiry", "win": "A top-tier inbound", "fmt": "int", "key": {"id": "b_key", "label": "Top-tier media inbound inquiries", "series": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1]}, "subs": [{"id": "b_ideas", "label": "Mainstream campaign ideas generated (running total)", "series": [2, 3, 5, 6, 8, 10, 11, 13, 14, 16, 18, 19, 21, 23]}, {"id": "b_launch", "label": "Mainstream campaign ideas launched (running total)", "series": [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8]}, {"id": "b_1m", "label": "Mainstream campaigns with 1M+ impressions (running total)", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]}, {"id": "b_social", "label": "Organic social posts with 10K+ impressions (running total)", "series": [1, 2, 4, 5, 7, 9, 11, 13, 15, 18, 21, 24, 28, 32]}], "floor": "Real mainstream reach, not vanity — a campaign or post counts only when it actually lands."}, {"id": "dep", "tag": "B", "accent": "#D97706", "name": "Depth — 1,000 heartfelt thank-you messages", "win": "1,000 messages", "fmt": "int", "key": {"id": "dp_key", "label": "Heartfelt thank-you messages received (running total)", "series": [0, 3, 7, 13, 22, 35, 52, 75, 105, 145, 195, 260, 340, 440]}, "subs": [{"id": "dp_helped", "label": "People helped in a significant way (running total)", "series": [0, 3, 7, 12, 18, 25, 34, 45, 58, 73, 90, 110, 135, 165]}], "floor": "Messages are genuine and unprompted — we don’t solicit thank-yous."}]}, {"star": "Commercial Success", "desc": "Protect and grow the engine that pays for it all.", "goals": [{"id": "com", "tag": "A", "accent": "#16a34a", "name": "Beat last year, every month", "win": "Beat last year", "fmt": "usdk", "key": {"id": "c_nm", "label": "Net margin — money left after ads & shipping", "series": []}, "subs": [{"id": "c_mear", "label": "MEAR — revenue ÷ total marketing spend", "series": [], "fmt": "x"}, {"id": "c_sales", "label": "Sales / revenue ($ thousands)", "series": [], "fmt": "usdk"}], "floor": "Don’t hit the number by cutting ads or quality so far that sales or new customers drop."}, {"id": "prod", "tag": "B", "accent": "#EA580C", "name": "Build winning products", "win": "Top-25% products", "fmt": "int", "key": {"id": "wp_key", "label": "Winning products (top 25% of their category)", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4]}, "subs": [{"id": "wp_dev", "label": "New products or versions in development", "series": [2, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 8]}, {"id": "wp_score", "label": "New products or versions passing the scorecard ✱ (running total)", "series": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]}], "floor": "A win is earned by the market — a product ranking in the top 25% of its category. The scorecard ✱ is the screen to get there."}, {"id": "camp", "tag": "C", "accent": "#0891B2", "name": "Build winning campaigns", "win": "Campaigns that hold", "fmt": "int", "key": {"id": "wc_key", "label": "Winning campaigns — 250K+ impressions at neutral margin (after ads & product cost)", "series": [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3]}, "subs": [{"id": "wc_ideas", "label": "New campaign ideas (running total)", "series": [2, 3, 5, 6, 8, 9, 11, 12, 14, 15, 17, 18, 20, 22]}, {"id": "wc_dev", "label": "New campaigns in development", "series": [1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6]}, {"id": "wc_score", "label": "Campaigns passing the scorecard ✱ (running total)", "series": [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7]}, {"id": "wc_launch", "label": "New campaigns launched (running total)", "series": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]}], "floor": "A winning campaign holds 250K+ impressions at neutral-or-better margin after ad and product cost."}]}];
 
 function fmt(v,t){
   if(v===""||v==null) return "–";
@@ -125,8 +125,9 @@ function fmt(v,t){
   return Math.round(v).toLocaleString();
 }
 function spark(vals,{w=128,h=34,color="#2E5496",fill=true,dots=false,dotr=1.7,labels=null,vfmt=null}={}){
+  if(!vals||!vals.length) return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"></svg>`;
   const n=vals.length,mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1;
-  const X=i=>2+(i/(n-1))*(w-4), Y=v=>h-3-((v-mn)/rng)*(h-6);
+  const X=n<2?(_=>w/2):(i=>2+(i/(n-1))*(w-4)), Y=v=>h-3-((v-mn)/rng)*(h-6);
   const pts=vals.map((v,i)=>[X(i),Y(v)]);
   const line=pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
   const area=`M2,${h} L`+line.replace(/ /g," L")+` L${(w-2).toFixed(1)},${h} Z`;
@@ -140,8 +141,9 @@ function spark(vals,{w=128,h=34,color="#2E5496",fill=true,dots=false,dotr=1.7,la
     ${marks}</svg>`;
 }
 function spark2(a,b,{w=128,h=34,c1="#16a34a",c2="#9aa6b8",dots=false,labels=null,vfmt=null}={}){
+  if(!a||!a.length) return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"></svg>`;
   const all=a.concat(b),n=a.length,mn=Math.min(...all),mx=Math.max(...all),rng=(mx-mn)||1;
-  const X=i=>2+(i/(n-1))*(w-4),Y=v=>h-3-((v-mn)/rng)*(h-6);
+  const X=n<2?(_=>w/2):(i=>2+(i/(n-1))*(w-4)),Y=v=>h-3-((v-mn)/rng)*(h-6);
   const L=arr=>arr.map((v,i)=>X(i).toFixed(1)+","+Y(v).toFixed(1)).join(" ");
   const marks=dots?a.map((v,i)=>{const t=labels?`<title>${labels[i]}: ${fmt(v,vfmt)}</title>`:"";
       return `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i===n-1?2.6:1.6}" fill="${c1}" opacity="${i===n-1?1:.5}">${t}</circle>`;}).join("")
@@ -183,7 +185,9 @@ function metricBlock(g){
     return `<div class="sub"><span class="sl">${sb.label}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f})}
       <span class="sv">${fmt(sl[sl.length-1],f)}</span>${wow(sl,f,{mini:true})}</div>`;}).join("");
   const badge=g.src==="ecomm"?` <a class="srcbadge" href="ecomm.html" title="Pulled from the E-Comm Metrics page — the current week is live; prior weeks and last year are the filled-in baseline. Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
-  const cap=g.key.vs?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.src==="ecomm"?" · live from WBR e-comm history":""}</div>`:"";
+  const cap=g.key.vs
+    ?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.src==="ecomm"?" · live from WBR e-comm history":""}</div>`
+    :(g.src==="ecomm"?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">real net margin from the WBR history · last-year comparison pending real data</div>`:"");
   return `<div class="keyblock"><div>
       <div class="kl"><span class="star">★</span>${g.key.label}${badge}</div>
       <div class="kv" style="color:${g.accent}">${fmt(last,g.fmt)}</div>
@@ -231,42 +235,46 @@ function applyEcomm(){
   const E=window.ECOMM_HIST; if(!E) return;
   const g=findGoal("com"); if(!g) return;
   g.src="ecomm"; g.fmt="usdk1";
-  g.key.series=E.marginK(E.thisYear);
-  g.key.vs    =E.marginK(E.lastYear);
+  delete g.key.vs; delete g.key.vsId;             // last-year estimates removed — no fabricated baseline
+  g.subs = g.subs.filter(sb=> sb.id!=="c_ret");   // returning-customers isn't in the WBR feed
+  g.key.series=E.marginK(E.thisYear);             // real net margin from the WBR history
   g.subs.forEach(sb=>{
     if(sb.id==="c_mear"){ sb.series=E.mearX(E.thisYear); sb.fmt="x2"; }
-    if(sb.id==="c_ret")   sb.series=E.thisYear.returning.slice();
     if(sb.id==="c_sales"){ sb.series=E.salesK(E.thisYear); sb.fmt="usdk1"; }
   });
 }
+// Fallback only if kpi_history.json is unavailable: read the single current week
+// from ecomm.html's SNAPSHOT (still real data, just one week).
 function syncCurrentFromEcomm(){
   return fetch("ecomm.html",{cache:"no-store"}).then(r=>r.ok?r.text():"").then(html=>{
-    if(!html||!window.ECOMM_HIST) return;
+    if(!html||!window.ECOMM_HIST) return false;
     const pick=re=>{ const m=html.match(re); return m?m[1]:null; };
     const rev=pick(/net_revenue:\s*([\d.]+)/), ad=pick(/ad_spend:\s*([\d.]+)/), pe=pick(/period_end:\s*"([^"]+)"/);
-    const E=window.ECOMM_HIST, i=E.thisYear.net_revenue.length-1;
-    if(rev) E.thisYear.net_revenue[i]=Number(rev);
-    if(ad)  E.thisYear.ad_spend[i]=Number(ad);
-    if(pe)  E.weeks[i]=pe.replace(/,?\s*20\d\d\s*$/,"");
-  }).catch(()=>{});
+    if(rev==null||ad==null) return false;
+    const E=window.ECOMM_HIST;
+    E.thisYear.net_revenue=[Number(rev)]; E.thisYear.ad_spend=[Number(ad)];
+    E.weeks=[ pe?pe.replace(/,?\s*20\d\d\s*$/,""):"" ]; E._realWeeks=1;
+    return true;
+  }).catch(()=>false);
 }
 function prettyShort(s){
   const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||""));
   if(!m) return String(s||"");
   return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m[2]-1]+" "+(+m[3]);
 }
-// Fold real WBR weeks (kpi_history.json) into the tail of the 14-week window.
-// As history accrues, more of the "this year" line becomes real; earlier weeks stay estimated.
+// Build the "this year" net-margin series entirely from the REAL WBR history
+// (kpi_history.json). Only weeks that have both net_revenue and ad_spend can form
+// a net margin. No estimates, no padding — the line is exactly as long as the data.
 function loadKpiHistory(){
   return fetch("kpi_history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(h=>{
     if(!Array.isArray(h)||!h.length||!window.ECOMM_HIST) return false;
-    const E=window.ECOMM_HIST, W=E.weeks.length, real=h.slice(-W), off=W-real.length;
-    real.forEach((row,k)=>{ const i=off+k;
-      if(row.net_revenue!=null) E.thisYear.net_revenue[i]=Number(row.net_revenue);
-      if(row.ad_spend!=null)    E.thisYear.ad_spend[i]=Number(row.ad_spend);
-      if(row.period_end)        E.weeks[i]=prettyShort(row.period_end);
-    });
-    E._realWeeks=real.length;
+    const E=window.ECOMM_HIST;
+    const rows=h.filter(r=> r.net_revenue!=null && r.ad_spend!=null);
+    if(!rows.length) return false;
+    E.weeks                = rows.map(r=>prettyShort(r.period_end));
+    E.thisYear.net_revenue = rows.map(r=>Number(r.net_revenue));
+    E.thisYear.ad_spend    = rows.map(r=>Number(r.ad_spend));
+    E._realWeeks           = rows.length;
     return true;
   }).catch(()=>false);
 }
