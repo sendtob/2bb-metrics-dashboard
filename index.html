@@ -183,7 +183,7 @@ function metricBlock(g){
     return `<div class="sub"><span class="sl">${sb.label}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f})}
       <span class="sv">${fmt(sl[sl.length-1],f)}</span>${wow(sl,f,{mini:true})}</div>`;}).join("");
   const badge=g.src==="ecomm"?` <a class="srcbadge" href="ecomm.html" title="Pulled from the E-Comm Metrics page — the current week is live; prior weeks and last year are the filled-in baseline. Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
-  const cap=g.key.vs?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.src==="ecomm"?" · current week live from e-comm":""}</div>`:"";
+  const cap=g.key.vs?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.src==="ecomm"?" · live from WBR e-comm history":""}</div>`:"";
   return `<div class="keyblock"><div>
       <div class="kl"><span class="star">★</span>${g.key.label}${badge}</div>
       <div class="kv" style="color:${g.accent}">${fmt(last,g.fmt)}</div>
@@ -250,6 +250,26 @@ function syncCurrentFromEcomm(){
     if(pe)  E.weeks[i]=pe.replace(/,?\s*20\d\d\s*$/,"");
   }).catch(()=>{});
 }
+function prettyShort(s){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||""));
+  if(!m) return String(s||"");
+  return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m[2]-1]+" "+(+m[3]);
+}
+// Fold real WBR weeks (kpi_history.json) into the tail of the 14-week window.
+// As history accrues, more of the "this year" line becomes real; earlier weeks stay estimated.
+function loadKpiHistory(){
+  return fetch("kpi_history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(h=>{
+    if(!Array.isArray(h)||!h.length||!window.ECOMM_HIST) return false;
+    const E=window.ECOMM_HIST, W=E.weeks.length, real=h.slice(-W), off=W-real.length;
+    real.forEach((row,k)=>{ const i=off+k;
+      if(row.net_revenue!=null) E.thisYear.net_revenue[i]=Number(row.net_revenue);
+      if(row.ad_spend!=null)    E.thisYear.ad_spend[i]=Number(row.ad_spend);
+      if(row.period_end)        E.weeks[i]=prettyShort(row.period_end);
+    });
+    E._realWeeks=real.length;
+    return true;
+  }).catch(()=>false);
+}
 function applyLive(map){
   const skip=window.ECOMM_HIST?ECOMM_IDS:new Set();
   let hit=0;
@@ -272,7 +292,7 @@ window.__gv=function(resp){
   }catch(e){ setStatus(false); }
 };
 applyEcomm(); setStatus(false); render();
-syncCurrentFromEcomm().then(()=>{ applyEcomm(); render(); });
+loadKpiHistory().then(used=>used?null:syncCurrentFromEcomm()).then(()=>{ applyEcomm(); render(); });
 (function(){
   const s=document.createElement("script");
   s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gv&headers=1&gid=0&_="+Date.now();

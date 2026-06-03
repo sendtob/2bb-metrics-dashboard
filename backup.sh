@@ -27,6 +27,14 @@ fi
 # --- Goal Tree's e-comm net-margin history (feeds the "Beat last year" goal) ---
 cp ecomm-data.js "backups/ecomm-data_${DATE}.js" 2>/dev/null || true
 
+# --- Publish the WBR KPI history the dashboards read (captures this week, grows the store) ---
+if python3 tools/publish_kpi_history.py; then
+  cp kpi_history.json "backups/kpi_history_${DATE}.json" 2>/dev/null || true
+  git add kpi_history.json
+else
+  echo "kpi history publish skipped"
+fi
+
 # --- Store it (cloud-durable via the repo; falls back to local if push can't auth) ---
 git add backups/
 if git commit -q -m "Weekly metrics backup ${DATE}" 2>/dev/null; then

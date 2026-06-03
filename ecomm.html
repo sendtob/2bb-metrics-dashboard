@@ -76,9 +76,9 @@
   <div id="blocks"></div>
 </div>
 <footer>
-  Reads the <b>WBR KPI history Sheet</b> (the durable store the pipeline appends to each Monday) and shows the latest week vs the prior one.
+  Reads <b>kpi_history.json</b> — the durable weekly store published by <code>tools/publish_kpi_history.py</code> (one row per week; newest shown vs the prior one).
   Status colors mirror <b>scorecard.py</b>: green only when flat-or-improving, amber on a soft decline, red on a material one.
-  To connect the live Sheet, paste its ID into <code>SHEET_ID</code> below (Share → <b>Anyone with the link → Viewer</b>, and share it with the pipeline service account as Editor). Until then it shows the latest snapshot.
+  History grows one week per Monday backup; when the WBR pipeline writes its own rows they take over automatically. Set <code>SHEET_ID</code> to read a live Google Sheet instead.
 </footer>
 
 <script>
@@ -213,12 +213,39 @@ function renderFrom(data){
   if(wk && data.period_end) wk.textContent = data.period_end;
 }
 
-function setLiveChip(live){
+function setLiveChip(live, msg){
   const el = document.getElementById("livechip");
   if(live){ el.style.background="var(--greenbg)"; el.style.color="var(--green)";
-    el.innerHTML = "● Live — auto-updating from the WBR Sheet"; }
+    el.innerHTML = msg || "● Live — auto-updating from the WBR Sheet"; }
   else { el.style.background="var(--amberbg)"; el.style.color="var(--amber)";
-    el.innerHTML = "● Latest snapshot — connect the WBR Sheet (set SHEET_ID) to auto-update"; }
+    el.innerHTML = msg || "● Latest snapshot — connect the WBR Sheet (set SHEET_ID) to auto-update"; }
+}
+
+// Published history: kpi_history.json (built weekly by tools/publish_kpi_history.py).
+// One row per week, newest last. This is the durable store the dashboards read.
+function prettyDate(s){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||""));
+  if(!m) return s||"";
+  return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m[2]-1]+" "+(+m[3])+", "+m[1];
+}
+function dataFromRows(cur, prior){
+  const data={period_end: prettyDate(cur.period_end), values:{}, wow:{}};
+  SPECS.forEach(sp=>{
+    const c=(cur[sp.key]!=null)?Number(cur[sp.key]):null;
+    data.values[sp.key]=c;
+    const p=(prior&&prior[sp.key]!=null)?Number(prior[sp.key]):null;
+    data.wow[sp.key]=(c!=null&&p!=null&&p!==0)?(c-p)/p:null;
+  });
+  return data;
+}
+function loadHistory(){
+  return fetch("kpi_history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(h=>{
+    if(!Array.isArray(h)||!h.length) return false;
+    const cur=h[h.length-1], prior=h.length>1?h[h.length-2]:null, n=h.length;
+    setLiveChip(true, "● Live — from the WBR history ("+n+" week"+(n>1?"s":"")+" captured)");
+    renderFrom(dataFromRows(cur,prior));
+    return true;
+  }).catch(()=>false);
 }
 
 // gviz JSONP callback for the live Sheet.
@@ -245,15 +272,16 @@ window.__wbr = function(resp){
   }catch(e){ setLiveChip(false); renderFrom(SNAPSHOT); }
 };
 
-// Boot: show the snapshot immediately, then try the live Sheet if configured.
+// Boot: snapshot immediately, then prefer the published WBR history, then the live Sheet.
 setLiveChip(false); renderFrom(SNAPSHOT);
-if(SHEET_ID){
+loadHistory().then(used=>{
+  if(used || !SHEET_ID) return;          // history wins; otherwise try the Sheet if configured
   const s = document.createElement("script");
   s.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
           "/gviz/tq?tqx=out:json;responseHandler:__wbr&gid=" + SHEET_GID + "&_=" + Date.now();
   s.onerror = function(){ setLiveChip(false); renderFrom(SNAPSHOT); };
   document.head.appendChild(s);
-}
+});
 </script>
 </body>
 </html>
