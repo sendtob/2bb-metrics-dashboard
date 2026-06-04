@@ -235,9 +235,13 @@ function applyEcomm(){
   const E=window.ECOMM_HIST; if(!E) return;
   const g=findGoal("com"); if(!g) return;
   g.src="ecomm"; g.fmt="usdk1";
-  delete g.key.vs; delete g.key.vsId;             // last-year estimates removed — no fabricated baseline
   g.subs = g.subs.filter(sb=> sb.id!=="c_ret");   // returning-customers isn't in the WBR feed
-  g.key.series=E.marginK(E.thisYear);             // real net margin from the WBR history
+  g.key.series=E.marginK(E.thisYear);             // real net margin (this year)
+  if(E.lastYear && E.lastYear.net_revenue && E.lastYear.net_revenue.length){
+    g.key.vs=E.marginK(E.lastYear); g.key.vsId="c_nm_vs";   // REAL last-year line (margin_yoy.json)
+  } else {
+    delete g.key.vs; delete g.key.vsId;           // no last-year data — no fabricated baseline
+  }
   g.subs.forEach(sb=>{
     if(sb.id==="c_mear"){ sb.series=E.mearX(E.thisYear); sb.fmt="x2"; }
     if(sb.id==="c_sales"){ sb.series=E.salesK(E.thisYear); sb.fmt="usdk1"; }
@@ -261,6 +265,27 @@ function prettyShort(s){
   const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||""));
   if(!m) return String(s||"");
   return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m[2]-1]+" "+(+m[3]);
+}
+// Preferred source: margin_yoy.json — REAL this-year AND last-year weekly net margin
+// (Shopify revenue + Northbeam ad spend), from tools/backfill_margin_yoy.py.
+// Keeps only weeks where both years are complete, so the comparison is clean.
+function loadMarginYoY(){
+  return fetch("margin_yoy.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{
+    if(!d||!window.ECOMM_HIST||!Array.isArray(d.weeks)||!d.weeks.length) return false;
+    const E=window.ECOMM_HIST, ty=d.thisYear||{}, ly=d.lastYear||{};
+    const num=(o,k,i)=>{ const v=(o[k]||[])[i]; return (v==null||isNaN(v))?null:+v; };
+    const keep=[];
+    for(let i=0;i<d.weeks.length;i++){
+      if([num(ty,"net_revenue",i),num(ty,"ad_spend",i),num(ly,"net_revenue",i),num(ly,"ad_spend",i)].every(v=>v!=null)) keep.push(i);
+    }
+    if(!keep.length) return false;
+    if(typeof d.shipPct==="number") E.shipPct=d.shipPct;
+    E.weeks    = keep.map(i=>d.weeks[i]);
+    E.thisYear = {net_revenue:keep.map(i=>+ty.net_revenue[i]), ad_spend:keep.map(i=>+ty.ad_spend[i])};
+    E.lastYear = {net_revenue:keep.map(i=>+ly.net_revenue[i]), ad_spend:keep.map(i=>+ly.ad_spend[i])};
+    E._realWeeks=keep.length; E._yoy=true;
+    return true;
+  }).catch(()=>false);
 }
 // Build the "this year" net-margin series entirely from the REAL WBR history
 // (kpi_history.json). Only weeks that have both net_revenue and ad_spend can form
@@ -300,7 +325,8 @@ window.__gv=function(resp){
   }catch(e){ setStatus(false); }
 };
 applyEcomm(); setStatus(false); render();
-loadKpiHistory().then(used=>used?null:syncCurrentFromEcomm()).then(()=>{ applyEcomm(); render(); });
+loadMarginYoY().then(used=> used ? null : loadKpiHistory().then(u2=> u2?null:syncCurrentFromEcomm()))
+  .then(()=>{ applyEcomm(); render(); });
 (function(){
   const s=document.createElement("script");
   s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gv&headers=1&gid=0&_="+Date.now();
