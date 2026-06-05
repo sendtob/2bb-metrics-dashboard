@@ -316,9 +316,23 @@ function applyLive(map){
 window.__gv=function(resp){
   try{
     const t=resp.table,map={};
-    if(t.cols&&t.cols.length>2){ WEEKS=t.cols.slice(2).map(c=>String(c.label||c.id||"")); var wd=document.getElementById("wkdate"); if(wd&&WEEKS.length) wd.textContent=WEEKS[WEEKS.length-1]; }
+    if(t.cols&&t.cols.length>2){ WEEKS=t.cols.slice(2).map(c=>String(c.label||c.id||"")); }
     t.rows.forEach(r=>{ if(!r.c||!r.c[1]||r.c[1].v==null||r.c[1].v==="") return;
       map[String(r.c[1].v)]=r.c.slice(2).map(c=>(c&&c.v!=null)?Number(c.v):0); });
+    // Sort weeks chronologically so the sheet's COLUMN ORDER doesn't matter — the team
+    // can keep the current week in any column (e.g. first, right next to the names).
+    if(WEEKS.length>1){
+      const MI={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+      const parsed=WEEKS.map(l=>{const m=String(l).match(/([a-z]{3})[a-z]*\.?\s*(\d{1,2})/i);return m?{mo:MI[m[1].toLowerCase()]||0,d:+m[2]}:null;});
+      if(parsed.every(p=>p&&p.mo)){
+        const mos=parsed.map(p=>p.mo), wrap=Math.max(...mos)>=10&&Math.min(...mos)<=3;
+        const key=parsed.map(p=>(wrap&&p.mo<=6?p.mo+12:p.mo)*100+p.d);
+        const order=WEEKS.map((_,i)=>i).sort((a,b)=>key[a]-key[b]);
+        WEEKS=order.map(i=>WEEKS[i]);
+        Object.keys(map).forEach(id=>{ map[id]=order.map(i=>map[id][i]); });
+      }
+    }
+    var wd=document.getElementById("wkdate"); if(wd&&WEEKS.length) wd.textContent=WEEKS[WEEKS.length-1];
     const hit=applyLive(map);
     applyEcomm();
     setStatus(hit>0); render();
