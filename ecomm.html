@@ -88,7 +88,7 @@
    columns keyed by KPI (period_end, ..., net_revenue, orders, ..., mer, cac).
    Paste the Sheet ID below to go live; leave "" to show the built-in snapshot.
 ---------------------------------------------------------------------------- */
-const SHEET_ID = "";          // <-- paste the WBR KPI Sheet ID here to go live
+const SHEET_ID = "1GaAvdk2kcsIA5R6-zmj6lGgxBbwmyEAYkrq3Jj9O35M";  // WBR KPI Sheet — cloud fallback (pipeline appends weekly)
 const SHEET_GID = "0";        // first tab
 
 // KPI specs MIRROR review/scorecard.py KPI_SPECS — keep in sync if thresholds move.
@@ -238,49 +238,60 @@ function dataFromRows(cur, prior){
   });
   return data;
 }
-function loadHistory(){
+// Normalize any period_end (ISO, gviz "Date(y,m,d)", or formatted) to ISO YYYY-MM-DD,
+// so rows from kpi_history.json and the Sheet can be merged + sorted by week.
+function isoDate(s){
+  s = String(s==null?"":s).trim();
+  let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);   if(m) return m[1]+"-"+m[2]+"-"+m[3];
+  m=/Date\((\d+),(\d+),(\d+)/.exec(s);        if(m) return m[1]+"-"+String(+m[2]+1).padStart(2,"0")+"-"+String(+m[3]).padStart(2,"0");
+  const d=new Date(s);                        if(!isNaN(d)) return d.toISOString().slice(0,10);
+  return s;
+}
+// kpi_history.json -> [{period_end(iso), <kpi>:num}, ...]
+function historyRows(){
   return fetch("kpi_history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(h=>{
-    if(!Array.isArray(h)||!h.length) return false;
-    const cur=h[h.length-1], prior=h.length>1?h[h.length-2]:null, n=h.length;
-    setLiveChip(true, "● Live — from the WBR history ("+n+" week"+(n>1?"s":"")+" captured)");
-    renderFrom(dataFromRows(cur,prior));
-    return true;
-  }).catch(()=>false);
+    if(!Array.isArray(h)) return [];
+    return h.map(row=>{ const o={period_end:isoDate(row.period_end)};
+      SPECS.forEach(sp=>{ if(row[sp.key]!=null) o[sp.key]=Number(row[sp.key]); }); return o;
+    }).filter(o=>o.period_end);
+  }).catch(()=>[]);
+}
+// Live Sheet via gviz JSONP -> same row shape (or [] if absent/private/slow).
+function sheetRows(){
+  if(!SHEET_ID) return Promise.resolve([]);
+  return new Promise(resolve=>{
+    let done=false; const finish=v=>{ if(!done){ done=true; resolve(v); } };
+    window.__wbr = function(resp){
+      try{
+        const t=resp.table, cols=t.cols.map(c=>String(c.label||c.id||"")), idx={};
+        cols.forEach((c,i)=>idx[c]=i);
+        finish((t.rows||[]).map(r=>{ const c=r.c||[], o={};
+          const pe=c[idx["period_end"]]; o.period_end=isoDate(pe?(pe.v!=null?pe.v:pe.f):"");
+          SPECS.forEach(sp=>{ const cell=c[idx[sp.key]]; if(cell&&cell.v!=null&&cell.v!=="") o[sp.key]=Number(cell.v); });
+          return o; }).filter(o=>o.period_end));
+      }catch(e){ finish([]); }
+    };
+    const s=document.createElement("script");
+    s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__wbr&gid="+SHEET_GID+"&_="+Date.now();
+    s.onerror=function(){ finish([]); };
+    document.head.appendChild(s);
+    setTimeout(()=>finish([]), 6000);     // don't hang if the Sheet isn't shared/reachable
+  });
 }
 
-// gviz JSONP callback for the live Sheet.
-window.__wbr = function(resp){
-  try{
-    const t = resp.table, cols = t.cols.map(c => String(c.label || c.id || ""));
-    const idx = {}; cols.forEach((c,i) => idx[c] = i);
-    const rows = t.rows || [];
-    if(!rows.length){ setLiveChip(false); renderFrom(SNAPSHOT); return; }
-    const cur = rows[rows.length-1].c;
-    const prior = rows.length > 1 ? rows[rows.length-2].c : null;
-    const num = (row, key) => {
-      const i = idx[key]; if(i==null || !row[i]) return null;
-      const v = row[i].v; return (v==null || v==="") ? null : Number(v);
-    };
-    const peCell = cur[idx["period_end"]];
-    const data = {period_end: peCell ? String(peCell.f || peCell.v || "") : "", values:{}, wow:{}};
-    SPECS.forEach(sp => {
-      const c = num(cur, sp.key); data.values[sp.key] = c;
-      const p = prior ? num(prior, sp.key) : null;
-      data.wow[sp.key] = (c!=null && p!=null && p!==0) ? (c - p) / p : null;
-    });
-    setLiveChip(true); renderFrom(data);
-  }catch(e){ setLiveChip(false); renderFrom(SNAPSHOT); }
-};
-
-// Boot: snapshot immediately, then prefer the published WBR history, then the live Sheet.
+// Boot: snapshot instantly, then merge history + Sheet and show the NEWEST week — so once
+// the Monday cloud Action writes the Sheet, it drives the dashboard hands-off (laptop off).
 setLiveChip(false); renderFrom(SNAPSHOT);
-loadHistory().then(used=>{
-  if(used || !SHEET_ID) return;          // history wins; otherwise try the Sheet if configured
-  const s = document.createElement("script");
-  s.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
-          "/gviz/tq?tqx=out:json;responseHandler:__wbr&gid=" + SHEET_GID + "&_=" + Date.now();
-  s.onerror = function(){ setLiveChip(false); renderFrom(SNAPSHOT); };
-  document.head.appendChild(s);
+Promise.all([historyRows(), sheetRows()]).then(([hist, sheet])=>{
+  const byWeek={};
+  hist.forEach(r=>byWeek[r.period_end]=Object.assign({}, byWeek[r.period_end], r));
+  sheet.forEach(r=>byWeek[r.period_end]=Object.assign({}, byWeek[r.period_end], r));  // same week: Sheet wins
+  const weeks=Object.keys(byWeek).sort();                 // ISO strings sort chronologically
+  if(!weeks.length) return;                               // nothing live -> keep snapshot
+  const cur=byWeek[weeks[weeks.length-1]], prior=weeks.length>1?byWeek[weeks[weeks.length-2]]:null;
+  const fromSheet=sheet.some(r=>r.period_end===weeks[weeks.length-1]);
+  setLiveChip(true, "● Live — "+(fromSheet?"WBR Sheet":"WBR history")+" ("+weeks.length+" week"+(weeks.length>1?"s":"")+", newest "+prettyDate(weeks[weeks.length-1])+")");
+  renderFrom(dataFromRows(cur,prior));
 });
 </script>
 </body>
