@@ -79,6 +79,30 @@
   .srcbadge:hover{background:#cffafe}
   svg.sp{display:block}
   footer{max-width:1320px;margin:0 auto;padding:0 28px 40px;font-size:11.5px;color:var(--muted)}
+  /* ---- live edit panel ---- */
+  .fab{position:fixed;right:20px;bottom:20px;z-index:40;background:var(--gold);color:#15233f;border:none;
+    border-radius:30px;padding:12px 19px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(20,40,80,.28)}
+  .fab:hover{background:#f1cc63}
+  .editmask{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:50;display:none}
+  .editmask.open{display:block}
+  .editpanel{position:fixed;top:0;right:0;height:100%;width:min(460px,94vw);background:#fff;z-index:51;
+    box-shadow:-6px 0 24px rgba(20,40,80,.25);transform:translateX(100%);transition:transform .22s;display:flex;flex-direction:column}
+  .editmask.open .editpanel{transform:translateX(0)}
+  .ephead{background:var(--navygrad);color:#fff;padding:16px 18px;position:relative}
+  .ephead h2{font-size:16px;font-weight:800;margin:0}
+  .ephead .sub{font-size:11.5px;opacity:.85;margin-top:3px}
+  .ephead .x{position:absolute;top:12px;right:15px;color:#fff;font-size:22px;cursor:pointer;opacity:.85;text-decoration:none;line-height:1}
+  .epwarn{background:#fff8e1;color:#92400e;font-size:11.5px;padding:9px 16px;border-bottom:1px solid #fde68a}
+  .epbody{flex:1;overflow:auto;padding:6px 16px 14px}
+  .epsec{font-size:11px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--navy);padding:6px 10px;border-radius:7px;margin:14px 0 6px}
+  .eprow{display:flex;align-items:center;gap:10px;padding:6px 2px;border-bottom:1px dashed var(--line)}
+  .eprow label{flex:1;font-size:12.5px;color:#374151;line-height:1.25}
+  .eprow input{width:86px;text-align:right;font-size:14px;font-weight:700;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-variant-numeric:tabular-nums}
+  .eprow input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+  .epfoot{border-top:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;gap:12px;background:#fbfcfe}
+  .savewk{background:var(--green);color:#fff;border:none;border-radius:9px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer;flex:none}
+  .savewk:hover{filter:brightness(1.07)}
+  .epstatus{font-size:12px;color:var(--muted);flex:1}
 </style>
 </head>
 <body>
@@ -110,6 +134,23 @@
   Live data from Google Sheet <b>2BB Dashboard Data</b>. Edit the sheet and refresh to update. ·
   Two Blind Brothers — Goal Tree, May 2026.
 </footer>
+
+<button class="fab" id="fab" onclick="openEdit()">✏️ Update metrics</button>
+<div class="editmask" id="editmask" onclick="if(event.target===this)closeEdit()">
+  <div class="editpanel">
+    <div class="ephead">
+      <a class="x" onclick="closeEdit()">×</a>
+      <h2>Update this week's numbers</h2>
+      <div class="sub" id="epweek">Type your numbers — they save automatically.</div>
+    </div>
+    <div class="epwarn" id="epwarn" style="display:none"></div>
+    <div class="epbody" id="epbody"></div>
+    <div class="epfoot">
+      <button class="savewk" onclick="saveWeekAction()">💾 Save Week</button>
+      <span class="epstatus" id="epstatus"></span>
+    </div>
+  </div>
+</div>
 
 <script src="ecomm-data.js"></script>
 <script>
@@ -342,6 +383,70 @@ window.__gv=function(resp){
     setStatus(hit>0); render();
   }catch(e){ setStatus(false); }
 };
+// ===== Live editing — writes back to the sheet via the deployed Apps Script web app =====
+const APPS_URL = "";   // <-- paste the deployed Apps Script /exec URL here to switch editing on
+const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales"]);  // auto from e-comm — not edited
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cb="__cb"+Math.random().toString(36).slice(2);
+    let s=document.createElement("script");
+    const done=()=>{ try{delete window[cb];}catch(e){window[cb]=undefined;} if(s){s.remove();} s=null; };
+    window[cb]=d=>{ resolve(d); done(); };
+    s.onerror=()=>{ reject(new Error("network")); done(); };
+    s.src=url+(url.indexOf("?")>=0?"&":"?")+"callback="+cb+"&_="+Date.now();
+    document.head.appendChild(s);
+    setTimeout(()=>{ if(window[cb]){ reject(new Error("timeout")); done(); } },15000);
+  });
+}
+function epStatus(m){ const e=document.getElementById("epstatus"); if(e) e.textContent=m||""; }
+function buildEditPanel(){
+  const warn=document.getElementById("epwarn");
+  warn.style.display = APPS_URL ? "none" : "block";
+  if(!APPS_URL) warn.innerHTML="Editing isn’t connected yet — deploy the Apps Script and paste its URL into the dashboard. You can preview the fields below.";
+  let html="";
+  NS.forEach(n=>{
+    const mets=[];
+    n.goals.forEach(g=>[g.key].concat(g.subs).forEach(m=>{ if(m&&m.id&&!NOEDIT.has(m.id)) mets.push(m); }));
+    if(!mets.length) return;
+    html+=`<div class="epsec">${n.star.toUpperCase()}</div>`;
+    mets.forEach(m=>{ const cur=(m.series&&m.series.length)?m.series[m.series.length-1]:"";
+      html+=`<div class="eprow"><label>${m.label}</label><input type="number" inputmode="numeric" data-code="${m.id}" value="${(cur===''||cur==null)?'':cur}"></div>`; });
+  });
+  const body=document.getElementById("epbody");
+  body.innerHTML=html;
+  body.querySelectorAll("input[data-code]").forEach(inp=> inp.addEventListener("change",()=>saveField(inp)));
+  const wd=document.getElementById("wkdate");
+  document.getElementById("epweek").textContent="Week of "+(wd&&wd.textContent?wd.textContent:"now")+" — numbers save as you type.";
+}
+function saveField(inp){
+  const code=inp.getAttribute("data-code"), val=String(inp.value).trim();
+  if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
+  epStatus("Saving…");
+  jsonp(APPS_URL+"?fn=save&code="+encodeURIComponent(code)+"&value="+encodeURIComponent(val))
+    .then(r=>{ if(r&&r.ok){ epStatus("Saved ✓"); optimistic(code,val); } else epStatus("Couldn’t save: "+((r&&r.error)||"?")); })
+    .catch(()=>epStatus("Save failed — check connection"));
+}
+function optimistic(code,val){
+  const v=(val===""?0:Number(val));
+  NS.forEach(n=>n.goals.forEach(g=>{
+    if(g.key.id===code && g.key.series.length) g.key.series[g.key.series.length-1]=v;
+    g.subs.forEach(s=>{ if(s.id===code && s.series.length) s.series[s.series.length-1]=v; });
+  }));
+  applyEcomm(); render();
+}
+function saveWeekAction(){
+  if(!APPS_URL){ alert("Editing isn’t connected yet — deploy the Apps Script and add its URL."); return; }
+  if(!confirm("Save this week and start a new one?\n\nThis locks the current numbers as a completed week and opens a fresh column for next week.")) return;
+  epStatus("Saving week…");
+  jsonp(APPS_URL+"?fn=saveweek")
+    .then(r=>{ if(r&&r.ok){ epStatus("New week started ("+r.newWeek+") — reloading…"); setTimeout(()=>location.reload(),1200); }
+               else epStatus("Couldn’t save week: "+((r&&r.error)||"?")); })
+    .catch(()=>epStatus("Save Week failed — check connection"));
+}
+function openEdit(){ buildEditPanel(); document.getElementById("editmask").classList.add("open"); }
+function closeEdit(){ document.getElementById("editmask").classList.remove("open"); }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeEdit(); });
+
 applyEcomm(); setStatus(false); render();
 loadMarginYoY().then(used=> used ? null : loadKpiHistory().then(u2=> u2?null:syncCurrentFromEcomm()))
   .then(()=>{ applyEcomm(); render(); });
