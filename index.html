@@ -384,7 +384,7 @@ window.__gv=function(resp){
   }catch(e){ setStatus(false); }
 };
 // ===== Live editing — writes back to the sheet via the deployed Apps Script web app =====
-const APPS_URL = "";   // <-- paste the deployed Apps Script /exec URL here to switch editing on
+const APPS_URL = "https://script.google.com/macros/s/AKfycbxFYl7yMenuUkVCV9nSDSIvfP0-UnPN-R1NOYVrQM0kRzk8Z2WYtb9JTZBK-aQYwJGu3A/exec";   // deployed Apps Script web app
 const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales"]);  // auto from e-comm — not edited
 function jsonp(url){
   return new Promise((resolve,reject)=>{
