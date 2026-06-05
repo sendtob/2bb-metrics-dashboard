@@ -103,6 +103,8 @@
   .savewk{background:var(--green);color:#fff;border:none;border-radius:9px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer;flex:none}
   .savewk:hover{filter:brightness(1.07)}
   .epstatus{font-size:12px;color:var(--muted);flex:1}
+  .epsave{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 18px;font-weight:800;font-size:14px;cursor:pointer;flex:none}
+  .epsave:hover{background:#2a4878}
   /* ---- end-of-week (Save Week) band at the bottom of the page ---- */
   .weekclose{max-width:1320px;margin:24px auto 0;padding:0 28px}
   .wcbox{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;
@@ -172,7 +174,8 @@
     <div class="epwarn" id="epwarn" style="display:none"></div>
     <div class="epbody" id="epbody"></div>
     <div class="epfoot">
-      <span class="epstatus" id="epstatus">Numbers save automatically as you type.</span>
+      <button class="epsave" onclick="saveAll()">💾 Save</button>
+      <span class="epstatus" id="epstatus">Type your numbers, then click Save.</span>
     </div>
   </div>
 </div>
@@ -443,13 +446,32 @@ function buildEditPanel(){
   const wd=document.getElementById("wkdate");
   document.getElementById("epweek").textContent="Week of "+(wd&&wd.textContent?wd.textContent:"now")+" — numbers save as you type.";
 }
+// Writes use a fire-and-forget request (mode:no-cors). Apps Script runs the write
+// when the URL is hit; reading the response back in-browser (JSONP) is the flaky part
+// (its 302 redirect + cold start don't reliably execute as a script), so we don't
+// depend on it — the Save button re-reads the sheet to confirm everything landed.
+function sendSave(code,value){
+  return fetch(APPS_URL+"?fn=save&code="+encodeURIComponent(code)+"&value="+encodeURIComponent(value)+"&_="+Date.now(),
+               {method:"GET", mode:"no-cors"});
+}
 function saveField(inp){
   const code=inp.getAttribute("data-code"), val=String(inp.value).trim();
+  optimistic(code,val);
   if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
   epStatus("Saving…");
-  jsonp(APPS_URL+"?fn=save&code="+encodeURIComponent(code)+"&value="+encodeURIComponent(val))
-    .then(r=>{ if(r&&r.ok){ epStatus("Saved ✓"); optimistic(code,val); } else epStatus("Couldn’t save: "+((r&&r.error)||"?")); })
-    .catch(()=>epStatus("Save failed — check connection"));
+  sendSave(code,val).then(()=>epStatus("Saved ✓  ·  click Save to confirm all"))
+    .catch(()=>epStatus("Save failed — check your connection"));
+}
+function saveAll(){
+  if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
+  const inps=[].slice.call(document.querySelectorAll("#epbody input[data-code]"));
+  if(!inps.length) return;
+  epStatus("Saving "+inps.length+" metrics…");
+  Promise.all(inps.map(inp=> sendSave(inp.getAttribute("data-code"), String(inp.value).trim())
+      .then(()=>optimistic(inp.getAttribute("data-code"), String(inp.value).trim()))))
+    .then(()=>{ epStatus("Saved — re-reading the sheet to confirm…");
+                loadSheet(()=>{ buildEditPanel(); epStatus("✓ All "+inps.length+" metrics saved & confirmed in the sheet"); }); })
+    .catch(()=>epStatus("Some saves failed — check your connection and click Save again"));
 }
 function optimistic(code,val){
   const v=(val===""?0:Number(val));
@@ -477,9 +499,8 @@ function saveWeekAction(){
   clearTimeout(_wcTimer);
   if(!APPS_URL){ wcAction('<span class="wcstatus">Editing isn’t connected yet.</span>'); return; }
   wcAction('<span class="wcstatus">Saving the week…</span>');
-  jsonp(APPS_URL+"?fn=saveweek")
-    .then(r=>{ if(r&&r.ok){ wcAction('<span class="wcstatus">✓ New week started ('+r.newWeek+') — reloading…</span>'); setTimeout(()=>location.reload(),1500); }
-               else { wcAction('<span class="wcstatus">Couldn’t save: '+((r&&r.error)||"?")+'</span>'); setTimeout(disarmSaveWeek,2800); } })
+  fetch(APPS_URL+"?fn=saveweek&_="+Date.now(), {method:"GET", mode:"no-cors"})
+    .then(()=>{ wcAction('<span class="wcstatus">✓ Week saved — reloading…</span>'); setTimeout(()=>location.reload(),2200); })
     .catch(()=>{ wcAction('<span class="wcstatus">Save failed — check connection</span>'); setTimeout(disarmSaveWeek,2800); });
 }
 function openEdit(){ buildEditPanel(); document.getElementById("editmask").classList.add("open"); }
@@ -489,12 +510,14 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeEdit(); });
 applyEcomm(); setStatus(false); render();
 loadMarginYoY().then(used=> used ? null : loadKpiHistory().then(u2=> u2?null:syncCurrentFromEcomm()))
   .then(()=>{ applyEcomm(); render(); });
-(function(){
+function loadSheet(after){
   const s=document.createElement("script");
   s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gv&headers=1&gid=0&_="+Date.now();
-  s.onerror=function(){ setStatus(false); };
+  s.onload=function(){ if(after) setTimeout(after,300); };
+  s.onerror=function(){ setStatus(false); if(after) after(); };
   document.head.appendChild(s);
-})();
+}
+loadSheet();
 </script>
 </body>
 </html>
