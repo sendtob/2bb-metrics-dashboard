@@ -103,6 +103,20 @@
   .savewk{background:var(--green);color:#fff;border:none;border-radius:9px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer;flex:none}
   .savewk:hover{filter:brightness(1.07)}
   .epstatus{font-size:12px;color:var(--muted);flex:1}
+  /* ---- end-of-week (Save Week) band at the bottom of the page ---- */
+  .weekclose{max-width:1320px;margin:24px auto 0;padding:0 28px}
+  .wcbox{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;
+    padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(20,40,80,.07)}
+  .wctitle{font-size:15px;font-weight:800;color:var(--navy)}
+  .wcsub{font-size:12px;color:var(--muted);margin-top:2px;max-width:560px;line-height:1.45}
+  .wcaction{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .wcbtn{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 17px;font-weight:800;font-size:13.5px;cursor:pointer}
+  .wcbtn:hover{background:#2a4878}
+  .wcconfirm{font-size:13px;font-weight:800;color:var(--red)}
+  .wcyes{background:var(--red);color:#fff;border:none;border-radius:9px;padding:10px 16px;font-weight:800;font-size:13.5px;cursor:pointer}
+  .wcyes:hover{filter:brightness(1.08)}
+  .wccancel{background:#eef0f3;color:#374151;border:none;border-radius:9px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer}
+  .wcstatus{font-size:12.5px;color:var(--muted);font-weight:600}
 </style>
 </head>
 <body>
@@ -130,6 +144,18 @@
   <div class="singles" id="singles"></div>
   <div id="groups"></div>
 </div>
+
+<div class="weekclose">
+  <div class="wcbox">
+    <div>
+      <div class="wctitle">📅 End of the week?</div>
+      <div class="wcsub">Locks the current week's numbers as final and opens a fresh week column. This is deliberate and one-way — only do it once everyone's numbers are in for the week.</div>
+    </div>
+    <div class="wcaction" id="wcaction">
+      <button class="wcbtn" onclick="armSaveWeek()">Save &amp; Close This Week</button>
+    </div>
+  </div>
+</div>
 <footer><div style="margin-bottom:10px;line-height:1.5"><b>✱ Scorecard</b> — a screening test that pulls in: (1) a successful comparable product in the market (function, material details, looks); (2) brand details built into the product; (3) the product’s story.</div>
   Live data from Google Sheet <b>2BB Dashboard Data</b>. Edit the sheet and refresh to update. ·
   Two Blind Brothers — Goal Tree, May 2026.
@@ -146,8 +172,7 @@
     <div class="epwarn" id="epwarn" style="display:none"></div>
     <div class="epbody" id="epbody"></div>
     <div class="epfoot">
-      <button class="savewk" onclick="saveWeekAction()">💾 Save Week</button>
-      <span class="epstatus" id="epstatus"></span>
+      <span class="epstatus" id="epstatus">Numbers save automatically as you type.</span>
     </div>
   </div>
 </div>
@@ -434,14 +459,28 @@ function optimistic(code,val){
   }));
   applyEcomm(); render();
 }
+// Save Week lives at the bottom of the page and takes TWO deliberate clicks.
+let _wcTimer=null;
+function wcAction(html){ const e=document.getElementById("wcaction"); if(e) e.innerHTML=html; }
+function armSaveWeek(){
+  clearTimeout(_wcTimer);
+  wcAction('<span class="wcconfirm">Lock this week &amp; start a new one?</span>'+
+    '<button class="wcyes" onclick="saveWeekAction()">Yes, save the week</button>'+
+    '<button class="wccancel" onclick="disarmSaveWeek()">Cancel</button>');
+  _wcTimer=setTimeout(disarmSaveWeek, 12000);   // auto-cancel if left armed
+}
+function disarmSaveWeek(){
+  clearTimeout(_wcTimer);
+  wcAction('<button class="wcbtn" onclick="armSaveWeek()">Save &amp; Close This Week</button>');
+}
 function saveWeekAction(){
-  if(!APPS_URL){ alert("Editing isn’t connected yet — deploy the Apps Script and add its URL."); return; }
-  if(!confirm("Save this week and start a new one?\n\nThis locks the current numbers as a completed week and opens a fresh column for next week.")) return;
-  epStatus("Saving week…");
+  clearTimeout(_wcTimer);
+  if(!APPS_URL){ wcAction('<span class="wcstatus">Editing isn’t connected yet.</span>'); return; }
+  wcAction('<span class="wcstatus">Saving the week…</span>');
   jsonp(APPS_URL+"?fn=saveweek")
-    .then(r=>{ if(r&&r.ok){ epStatus("New week started ("+r.newWeek+") — reloading…"); setTimeout(()=>location.reload(),1200); }
-               else epStatus("Couldn’t save week: "+((r&&r.error)||"?")); })
-    .catch(()=>epStatus("Save Week failed — check connection"));
+    .then(r=>{ if(r&&r.ok){ wcAction('<span class="wcstatus">✓ New week started ('+r.newWeek+') — reloading…</span>'); setTimeout(()=>location.reload(),1500); }
+               else { wcAction('<span class="wcstatus">Couldn’t save: '+((r&&r.error)||"?")+'</span>'); setTimeout(disarmSaveWeek,2800); } })
+    .catch(()=>{ wcAction('<span class="wcstatus">Save failed — check connection</span>'); setTimeout(disarmSaveWeek,2800); });
 }
 function openEdit(){ buildEditPanel(); document.getElementById("editmask").classList.add("open"); }
 function closeEdit(){ document.getElementById("editmask").classList.remove("open"); }
