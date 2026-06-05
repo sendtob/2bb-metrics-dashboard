@@ -22,6 +22,9 @@
   .navlink{display:inline-block;color:#fff;text-decoration:none;font-weight:700;font-size:12px;
     border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 11px;transition:background .15s}
   .navlink:hover{background:rgba(255,255,255,.14)}
+  .editlink{background:var(--gold);color:#15233f;border-color:var(--gold);margin-right:6px}
+  .editlink:hover{background:#f1cc63}
+  .sheetlink{color:var(--gold);text-decoration:none;border-bottom:1px solid currentColor}
   .wrap{max-width:1320px;margin:0 auto;padding:22px 28px 60px}
   .status{font-size:12px;font-weight:600;padding:9px 14px;border-radius:9px;margin:0 0 16px;background:#eef0f3;color:#6b7280}
   .status a{font-weight:700;text-decoration:none;border-bottom:1px solid currentColor}
@@ -85,8 +88,9 @@
     <h1>Weekly Metrics Dashboard</h1>
   </div>
   <div class="meta">
+    <a class="navlink editlink" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">✏️ Update the Sheet ↗</a>
     <a class="navlink" href="ecomm.html">Ecomm Metrics &rarr;</a><br>
-    Week of <b id="wkdate">May 29</b><br>Live — reads from your Google Sheet
+    Week of <b id="wkdate">May 29</b><br>Live — reads from your <a class="sheetlink" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">Google Sheet ↗</a>
   </div>
 </header>
 <div class="wrap">
@@ -224,7 +228,7 @@ function render(){
 function setStatus(live){
   const b=document.getElementById("status");
   if(live){ b.style.background="#e8f6ec"; b.style.color="#15803d";
-    b.innerHTML='<b>● Live</b> — reading from your Google Sheet. Edit the sheet and refresh to update. &nbsp;·&nbsp; <a href="example.html">view example ↗</a>'; }
+    b.innerHTML='<b>● Live</b> — reading from your <a href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener" style="color:inherit">Google Sheet ↗</a>. Edit it and refresh to update. &nbsp;·&nbsp; <a href="example.html">view example ↗</a>'; }
   else { b.style.background="#fef3c7"; b.style.color="#92400e";
     b.innerHTML='<b>● Showing example data</b> — the live sheet isn’t shared yet. In the sheet: <b>Share → Anyone with the link → Viewer</b>, then refresh. &nbsp;·&nbsp; <a href="example.html">example ↗</a>'; }
 }
