@@ -12,7 +12,7 @@
  *   4. Copy the "/exec" Web app URL and send it back to wire into the dashboard.
  *
  * Endpoints (JSONP GET, called by the dashboard):
- *   ?fn=save&code=<metricCode>&value=<number>   → writes the value into the CURRENT (rightmost) week column
+ *   ?fn=save&code=<metricCode>&value=<number>&label=<label>  → writes value into the CURRENT week column (auto-creates the row if the metric is new)
  *   ?fn=saveweek                                 → locks the week & opens a fresh week column (carries values forward)
  *
  * NOTE: deployed "Anyone" = open (no passcode), per request. Anyone with the URL can write.
@@ -23,7 +23,7 @@ function doGet(e) {
   var out;
   try {
     var fn = e.parameter.fn;
-    if (fn === 'save')          out = saveValue_(e.parameter.code, e.parameter.value);
+    if (fn === 'save')          out = saveValue_(e.parameter.code, e.parameter.value, e.parameter.label);
     else if (fn === 'saveweek') out = saveWeek_();
     else if (fn === 'ping')     out = { ok: true, pong: true };
     else                        out = { ok: false, error: 'unknown fn' };
@@ -53,11 +53,17 @@ function rowForCode_(sh, code) {
   return -1;
 }
 
-function saveValue_(code, value) {
+function saveValue_(code, value, label) {
   if (!code) return { ok: false, error: 'no code' };
   var sh = sheet_();
   var r = rowForCode_(sh, code);
-  if (r < 0) return { ok: false, error: 'code not found: ' + code };
+  if (r < 0) {
+    // metric doesn't exist yet — auto-create a row so new dashboard metrics just work
+    if (!label) return { ok: false, error: 'code not found: ' + code };
+    r = sh.getLastRow() + 1;
+    sh.getRange(r, 1).setValue(label);
+    sh.getRange(r, 2).setValue(code);
+  }
   var c = activeCol_(sh);
   var v;
   if (value === '' || value == null) { v = ''; }

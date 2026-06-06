@@ -34,7 +34,7 @@ function formatGoalsSheet() {
     {k:'COMMERCIAL', c:'#16A34A'}
   ];
   // rows the dashboard auto-fills from e-comm (team should NOT enter these)
-  var AUTO = {c_nm:1, c_nm_vs:1, c_mear:1, c_ret:1, c_sales:1};
+  var AUTO = {c_nm:1, c_nm_vs:1, c_ret:1, c_sales:1};  // c_mear is now MRR (manual entry)
 
   // ---- base reset (clean slate) ----
   var all = sh.getRange(1, 1, lastRow, lastCol);
