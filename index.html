@@ -100,6 +100,9 @@
   .eprow label{flex:1;font-size:12.5px;color:#374151;line-height:1.25}
   .eprow input{width:86px;text-align:right;font-size:14px;font-weight:700;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-variant-numeric:tabular-nums}
   .eprow input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+  .eprow.epkey{background:#fff8e8;border-left:3px solid var(--gold);padding-left:9px;border-bottom-color:#efe1bd;margin-top:2px}
+  .eprow.epkey label{font-weight:800;color:#15233f;font-size:13px}
+  .epstar{color:var(--gold);font-size:12px}
   .epfoot{border-top:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;gap:12px;background:#fbfcfe}
   .savewk{background:var(--green);color:#fff;border:none;border-radius:9px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer;flex:none}
   .savewk:hover{filter:brightness(1.07)}
@@ -303,7 +306,7 @@ function setStatus(live){
     b.innerHTML='<b>● Showing example data</b> — the live sheet isn’t shared yet. In the sheet: <b>Share → Anyone with the link → Viewer</b>, then refresh. &nbsp;·&nbsp; <a href="example.html">example ↗</a>'; }
 }
 // The "Beat last year" goal is sourced from e-comm (see ecomm-data.js), not the team sheet.
-const ECOMM_IDS=new Set(["c_nm","c_nm_vs","c_ret","c_sales"]);
+const ECOMM_IDS=new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales"]);
 function findGoal(id){ for(const n of NS) for(const g of n.goals) if(g.id===id) return g; return null; }
 function applyEcomm(){
   const E=window.ECOMM_HIST; if(!E) return;
@@ -318,7 +321,7 @@ function applyEcomm(){
   }
   g.subs.forEach(sb=>{
     if(sb.id==="c_sales"){ sb.series=E.salesK(E.thisYear); sb.fmt="usdk1"; }
-    // c_mear is now MRR — a manual entry read from the sheet (not derived from e-comm)
+    // c_mear (MRR) is auto, but has no e-comm source yet — shows "–" until wired to a subscription source
   });
 }
 // Fallback only if kpi_history.json is unavailable: read the single current week
@@ -414,7 +417,7 @@ window.__gv=function(resp){
 };
 // ===== Live editing — writes back to the sheet via the deployed Apps Script web app =====
 const APPS_URL = "https://script.google.com/macros/s/AKfycbxFYl7yMenuUkVCV9nSDSIvfP0-UnPN-R1NOYVrQM0kRzk8Z2WYtb9JTZBK-aQYwJGu3A/exec";   // deployed Apps Script web app
-const NOEDIT = new Set(["c_nm","c_nm_vs","c_ret","c_sales"]);  // auto from e-comm — not edited (MRR/c_mear is manual)
+const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales"]);  // auto from e-comm — not edited (incl. MRR)
 function jsonp(url){
   return new Promise((resolve,reject)=>{
     const cb="__cb"+Math.random().toString(36).slice(2);
@@ -441,8 +444,8 @@ function buildEditPanel(){
     const multi=groups.length>1;   // only show per-goal sub-headers when a star has more than one goal
     groups.forEach(({g,mets})=>{
       if(multi) html+=`<div class="epgoal" style="border-color:${g.accent||'#94a3b8'}">${g.tag?g.tag+" · ":""}${g.name}</div>`;
-      mets.forEach(m=>{ const cur=(m.series&&m.series.length)?m.series[m.series.length-1]:"";
-        html+=`<div class="eprow"><label>${m.label}</label><input type="number" inputmode="numeric" data-code="${m.id}" value="${(cur===''||cur==null)?'':cur}"></div>`; });
+      mets.forEach(m=>{ const cur=(m.series&&m.series.length)?m.series[m.series.length-1]:""; const isKey=m.id===g.key.id;
+        html+=`<div class="eprow${isKey?' epkey':''}"><label>${isKey?'<span class="epstar">★</span> ':''}${m.label}</label><input type="number" inputmode="numeric" data-code="${m.id}" value="${(cur===''||cur==null)?'':cur}"></div>`; });
     });
   });
   const body=document.getElementById("epbody");
