@@ -245,8 +245,8 @@ function isoDate(s){
   let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);   if(m) return m[1]+"-"+m[2]+"-"+m[3];
   m=/Date\((\d+),(\d+),(\d+)/.exec(s);        if(m) return m[1]+"-"+String(+m[2]+1).padStart(2,"0")+"-"+String(+m[3]).padStart(2,"0");
   const d=new Date(s);                        if(!isNaN(d)) return d.toISOString().slice(0,10);
-  return s;
-}
+  return "";   // unparseable -> drop the row (callers filter on period_end); a raw
+}              // string here would sort after ISO dates and display as the "newest" week
 // kpi_history.json -> [{period_end(iso), <kpi>:num}, ...]
 function historyRows(){
   return fetch("kpi_history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(h=>{

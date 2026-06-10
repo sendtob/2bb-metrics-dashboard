@@ -1,0 +1,3 @@
+# Local dev/editor state — not part of the published Pages site
+.claude/
+.DS_Store

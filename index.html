@@ -521,6 +521,7 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeEdit(); });
 
 applyEcomm(); setStatus(false); render();
 loadMarginYoY().then(used=> used ? null : loadKpiHistory().then(u2=> u2?null:syncCurrentFromEcomm()))
+  .catch(()=>null)                       // a failed loader must not block the re-render below
   .then(()=>{ applyEcomm(); render(); });
 function loadSheet(after){
   const s=document.createElement("script");
