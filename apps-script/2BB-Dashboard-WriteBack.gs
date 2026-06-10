@@ -14,6 +14,11 @@
  * Endpoints (JSONP GET, called by the dashboard):
  *   ?fn=save&code=<metricCode>&value=<number>&label=<label>  → writes value into the CURRENT week column (auto-creates the row if the metric is new)
  *   ?fn=saveweek                                 → locks the week & opens a fresh week column (carries values forward)
+ *   ?fn=additem&code=<metricCode>&item=<text>&by=<name>      → appends one item to the "Items" tab (the per-metric list behind the counts — prospects, products, …). Auto-creates the tab.
+ *
+ * RE-DEPLOY after editing (the /exec URL must keep working):
+ *   Deploy ▸ Manage deployments ▸ ✏️ (edit) ▸ Version: "New version" ▸ Deploy.
+ *   Do NOT make a "New deployment" — that mints a different URL.
  *
  * NOTE: deployed "Anyone" = open (no passcode), per request. Anyone with the URL can write.
  * Ask me to add a shared passcode later and it's a 2-line change here + on the dashboard.
@@ -25,6 +30,7 @@ function doGet(e) {
     var fn = e.parameter.fn;
     if (fn === 'save')          out = saveValue_(e.parameter.code, e.parameter.value, e.parameter.label);
     else if (fn === 'saveweek') out = saveWeek_();
+    else if (fn === 'additem')  out = addItem_(e.parameter.code, e.parameter.item, e.parameter.by);
     else if (fn === 'ping')     out = { ok: true, pong: true };
     else                        out = { ok: false, error: 'unknown fn' };
   } catch (err) {
@@ -58,11 +64,22 @@ function saveValue_(code, value, label) {
   var sh = sheet_();
   var r = rowForCode_(sh, code);
   if (r < 0) {
-    // metric doesn't exist yet — auto-create a row so new dashboard metrics just work
+    // metric doesn't exist yet — auto-create a row so new dashboard metrics just
+    // work. Under a lock: two concurrent auto-creates both saw the same lastRow
+    // and overwrote each other's new row.
     if (!label) return { ok: false, error: 'code not found: ' + code };
-    r = sh.getLastRow() + 1;
-    sh.getRange(r, 1).setValue(label);
-    sh.getRange(r, 2).setValue(code);
+    var lock = LockService.getScriptLock();
+    lock.waitLock(5000);
+    try {
+      r = rowForCode_(sh, code);            // re-check — the other writer may have created it
+      if (r < 0) {
+        r = sh.getLastRow() + 1;
+        sh.getRange(r, 1).setValue(label);
+        sh.getRange(r, 2).setValue(code);
+      }
+    } finally {
+      lock.releaseLock();
+    }
   }
   var c = activeCol_(sh);
   var v;
@@ -70,6 +87,43 @@ function saveValue_(code, value, label) {
   else { v = Number(value); if (isNaN(v)) return { ok: false, error: 'not a number' }; }
   sh.getRange(r, c).setValue(v);
   return { ok: true, code: code, value: v, col: c, week: String(sh.getRange(1, c).getValue()) };
+}
+
+// ---------------------------------------------------------------------------
+// Item lists — the actual things behind the counts (prospects, products, …).
+// One row per item in the "Items" tab so the team can see what's already been
+// counted (no double counting) and fix entries directly in the Sheet.
+// ---------------------------------------------------------------------------
+
+var ITEMS_SHEET = 'Items';
+
+function itemsSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(ITEMS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(ITEMS_SHEET);
+    sh.appendRow(['added_at', 'code', 'item', 'by']);
+    sh.setFrozenRows(1);
+    sh.setColumnWidth(3, 340);
+  }
+  return sh;
+}
+
+function addItem_(code, item, by) {
+  if (!code) return { ok: false, error: 'no code' };
+  item = String(item == null ? '' : item).trim();
+  if (!item) return { ok: false, error: 'empty item' };
+  if (item.length > 200) item = item.slice(0, 200);
+  // Lock covers the create-tab-on-first-write race; appends themselves are safe.
+  var lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    var sh = itemsSheet_();
+    sh.appendRow([new Date(), String(code), item, String(by || '').slice(0, 60)]);
+    return { ok: true, code: String(code), item: item };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function saveWeek_() {

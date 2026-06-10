@@ -103,6 +103,26 @@
   .eprow.epkey{background:#fff8e8;border-left:3px solid var(--gold);padding-left:9px;border-bottom-color:#efe1bd;margin-top:2px}
   .eprow.epkey label{font-weight:800;color:#15233f;font-size:13px}
   .epstar{color:var(--gold);font-size:12px}
+  /* per-metric item lists (the things behind the counts) */
+  .eplist{flex:none;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:12px;padding:5px 7px;cursor:pointer;color:#475569;line-height:1}
+  .eplist:hover{border-color:var(--gold)}
+  .eplist .lc{font-weight:800;font-size:11px;margin-left:3px;color:#15233f}
+  .epitems{background:#f8fafc;border:1px solid var(--line);border-radius:9px;margin:2px 0 8px;padding:9px 11px;font-size:12px}
+  .epitems .eiadd{display:flex;gap:7px;margin-bottom:6px}
+  .epitems .eiadd input{flex:1;font-size:12.5px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;text-align:left;font-weight:400;width:auto}
+  .epitems .eiadd button{border:0;background:var(--navy);color:#fff;font-weight:700;font-size:12px;border-radius:7px;padding:6px 11px;cursor:pointer}
+  .epitems .eidup{display:none;background:#fff8e1;color:#92400e;border:1px solid #fde68a;border-radius:6px;padding:5px 8px;margin-bottom:6px;font-size:11.5px}
+  .epitems .eichips{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
+  .epitems .eichips .chip{background:#fff;border:1px solid var(--line);border-radius:12px;padding:2px 9px;font-size:11px;color:#475569}
+  .epitems .eichips .use{border:1px solid var(--gold);background:#fff8e8;color:#92400e;border-radius:12px;padding:2px 9px;font-size:11px;font-weight:700;cursor:pointer}
+  .epitems ul{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto}
+  .epitems li{display:flex;justify-content:space-between;gap:8px;padding:3.5px 2px;border-bottom:1px dashed var(--line)}
+  .epitems li:last-child{border-bottom:0}
+  .epitems li .it{color:#1f2937}
+  .epitems li .when{color:#94a3b8;font-size:11px;flex:none;font-variant-numeric:tabular-nums}
+  .epitems .eistatus{font-size:11px;color:#64748b;margin-top:5px;min-height:14px}
+  .epitems .eifoot{margin-top:4px;font-size:11px}
+  .epitems .eifoot a{color:#2563eb;text-decoration:none}
   .epfoot{border-top:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;gap:12px;background:#fbfcfe}
   .savewk{background:var(--green);color:#fff;border:none;border-radius:9px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer;flex:none}
   .savewk:hover{filter:brightness(1.07)}
@@ -445,12 +465,17 @@ function buildEditPanel(){
     groups.forEach(({g,mets})=>{
       if(multi) html+=`<div class="epgoal" style="border-color:${g.accent||'#94a3b8'}">${g.tag?g.tag+" · ":""}${g.name}</div>`;
       mets.forEach(m=>{ const cur=(m.series&&m.series.length)?m.series[m.series.length-1]:""; const isKey=m.id===g.key.id;
-        html+=`<div class="eprow${isKey?' epkey':''}"><label>${isKey?'<span class="epstar">★</span> ':''}${m.label}</label><input type="number" inputmode="numeric" data-code="${m.id}" value="${(cur===''||cur==null)?'':cur}"></div>`; });
+        html+=`<div class="eprow${isKey?' epkey':''}"><label>${isKey?'<span class="epstar">★</span> ':''}${m.label}</label>`+
+              `<button class="eplist" data-list="${m.id}" title="The list behind this number — check it before counting">📋<span class="lc" id="lc_${m.id}"></span></button>`+
+              `<input type="number" inputmode="numeric" data-code="${m.id}" value="${(cur===''||cur==null)?'':cur}"></div>`+
+              `<div class="epitems" id="ei_${m.id}" style="display:none"></div>`; });
     });
   });
   const body=document.getElementById("epbody");
   body.innerHTML=html;
   body.querySelectorAll("input[data-code]").forEach(inp=> inp.addEventListener("change",()=>saveField(inp)));
+  body.querySelectorAll("button[data-list]").forEach(b=> b.addEventListener("click",()=>toggleItems(b.getAttribute("data-list"))));
+  loadItems().then(()=>{ updateListBadges(); refreshOpenItemDrawers(); });
   const wd=document.getElementById("wkdate");
   document.getElementById("epweek").textContent="Week of "+(wd&&wd.textContent?wd.textContent:"now")+" — numbers save as you type.";
 }
@@ -493,6 +518,132 @@ function optimistic(code,val){
   }));
   applyEcomm(); render();
 }
+// ---------------------------------------------------------------------------
+// Per-metric item lists — the actual things behind the counts (prospects,
+// products, campaign ideas…). Stored one-row-per-item in the goals Sheet's
+// "Items" tab (auto-created by the Apps Script) so the team can check what's
+// already been counted before bumping a number — no double counting — and fix
+// or remove entries directly in the Sheet. Reads use the same gviz JSONP
+// channel as the metrics; adds go through the Apps Script (fn=additem) with
+// the usual no-cors send + read-back-to-confirm.
+// ---------------------------------------------------------------------------
+let ITEMS = {};   // code -> [{when:Date|null, item, by}], newest first
+
+function gvDate(v){   // gviz cell value -> Date ("Date(2026,5,10,14,3,0)" or parseable string)
+  if(v==null) return null;
+  const m=/Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?/.exec(String(v));
+  if(m) return new Date(+m[1],+m[2],+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));
+  const d=new Date(v); return isNaN(d)?null:d;
+}
+function loadItems(){
+  return new Promise(resolve=>{
+    let done=false; const finish=()=>{ if(!done){ done=true; resolve(); } };
+    window.__gvItems=function(resp){
+      try{
+        ITEMS={};
+        if(resp && resp.status!=="error" && resp.table){   // status "error" = no Items tab yet
+          const cols=resp.table.cols.map(c=>String(c.label||c.id||"").toLowerCase()), idx={};
+          cols.forEach((c,i)=>idx[c]=i);
+          (resp.table.rows||[]).forEach(r=>{
+            const c=r.c||[], cell=k=>(idx[k]!=null&&c[idx[k]])?c[idx[k]].v:null;
+            const code=String(cell("code")||"").trim(), item=String(cell("item")||"").trim();
+            if(!code||!item) return;
+            (ITEMS[code]=ITEMS[code]||[]).push({when:gvDate(cell("added_at")), item, by:String(cell("by")||"").trim()});
+          });
+          Object.values(ITEMS).forEach(a=>a.sort((x,y)=>(y.when||0)-(x.when||0)));
+        }
+      }catch(e){ ITEMS={}; }
+      finish();
+    };
+    const s=document.createElement("script");
+    s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gvItems&sheet=Items&headers=1&_="+Date.now();
+    s.onerror=function(){ finish(); };
+    document.head.appendChild(s);
+    setTimeout(finish, 6000);
+  });
+}
+// The team's "this week" starts at the active week column's date (e.g. "May 29");
+// fall back to the most recent Monday if the label can't be parsed.
+function weekStart(){
+  const t=(document.getElementById("wkdate")||{}).textContent||"";
+  const m=/^\s*([A-Za-z]{3,9})\s+(\d{1,2})\s*$/.exec(t);
+  if(m){
+    const mo=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"].indexOf(m[1].slice(0,3).toLowerCase());
+    if(mo>=0){ const now=new Date(); let d=new Date(now.getFullYear(),mo,+m[2]); if(d>now) d=new Date(now.getFullYear()-1,mo,+m[2]); return d; }
+  }
+  const now=new Date();
+  return new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
+}
+function fmtWhen(d){ if(!d) return ""; const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return MO[d.getMonth()]+" "+d.getDate(); }
+function escHtml(s){ return String(s).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
+function isRunningTotal(code){ return /running total/i.test(labelFor(code)); }
+function updateListBadges(){
+  document.querySelectorAll("button[data-list]").forEach(b=>{
+    const n=(ITEMS[b.getAttribute("data-list")]||[]).length;
+    const lc=document.getElementById("lc_"+b.getAttribute("data-list")); if(lc) lc.textContent=n?String(n):"";
+  });
+}
+function refreshOpenItemDrawers(){
+  document.querySelectorAll(".epitems").forEach(d=>{ if(d.style.display!=="none"&&d.innerHTML) renderItems(d.id.slice(3)); });
+}
+function toggleItems(code){
+  const d=document.getElementById("ei_"+code); if(!d) return;
+  if(d.style.display==="none"){ renderItems(code); d.style.display="block"; const i=d.querySelector(".eiadd input"); if(i) i.focus(); }
+  else d.style.display="none";
+}
+function setEiStatus(code,msg){ const d=document.getElementById("ei_"+code), s=d&&d.querySelector(".eistatus"); if(s) s.textContent=msg||""; }
+function renderItems(code){
+  const d=document.getElementById("ei_"+code); if(!d) return;
+  const items=ITEMS[code]||[], ws=weekStart();
+  const thisWeek=items.filter(x=>x.when&&x.when>=ws).length, total=items.length;
+  const running=isRunningTotal(code), suggest=running?total:thisWeek;
+  let html=`<div class="eiadd"><input type="text" maxlength="200" placeholder="Add one item — a name, product, idea…"><button>Add</button></div>`+
+           `<div class="eidup"></div>`+
+           `<div class="eichips"><span class="chip">${total} on the list</span><span class="chip">${thisWeek} added this week</span>`+
+           (total?`<button class="use">Use ${running?"total":"this week"}: ${suggest}</button>`:"")+`</div>`;
+  html+= total
+    ? "<ul>"+items.map(x=>`<li><span class="it">${escHtml(x.item)}${x.by?` <span style="color:#94a3b8">· ${escHtml(x.by)}</span>`:""}</span><span class="when">${fmtWhen(x.when)}</span></li>`).join("")+"</ul>"
+    : `<div style="color:#94a3b8;padding:2px 0 4px">Nothing tracked yet — add the first item so next week you can see what's already been counted.</div>`;
+  html+=`<div class="eistatus"></div>`+
+        `<div class="eifoot"><a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit" target="_blank" rel="noopener">Fix or remove entries in the Sheet’s “Items” tab ↗</a></div>`;
+  d.innerHTML=html;
+  const inp=d.querySelector(".eiadd input"), dup=d.querySelector(".eidup");
+  inp.addEventListener("input",()=>{   // the anti-double-count check, live as you type
+    const q=inp.value.trim().toLowerCase();
+    if(q.length<3){ dup.style.display="none"; return; }
+    const near=items.filter(x=>x.item.toLowerCase().includes(q)||q.includes(x.item.toLowerCase())).slice(0,3);
+    if(near.length){ dup.style.display="block"; dup.innerHTML="⚠ Already on the list? "+near.map(x=>`<b>${escHtml(x.item)}</b>${x.when?` (${fmtWhen(x.when)})`:""}`).join(" · "); }
+    else dup.style.display="none";
+  });
+  const submit=()=>addListItem(code, inp);
+  d.querySelector(".eiadd button").addEventListener("click",submit);
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); submit(); } });
+  const use=d.querySelector(".use");
+  if(use) use.addEventListener("click",()=>{
+    const ni=document.querySelector(`#epbody input[data-code="${code}"]`);
+    if(ni){ ni.value=suggest; saveField(ni); }
+  });
+}
+function addListItem(code, inp){
+  const text=inp.value.trim(); if(!text) return;
+  if(!APPS_URL){ setEiStatus(code,"Not connected — deploy the script first."); return; }
+  (ITEMS[code]=ITEMS[code]||[]).unshift({when:new Date(), item:text, by:""});   // optimistic
+  renderItems(code); updateListBadges();
+  setEiStatus(code,"Saving “"+text+"”…");
+  fetch(APPS_URL+"?fn=additem&code="+encodeURIComponent(code)+"&item="+encodeURIComponent(text)+"&_="+Date.now(),
+        {method:"GET", mode:"no-cors"})
+    .then(()=>new Promise(r=>setTimeout(r,2000)))   // give the Sheet a beat, then confirm for real
+    .then(loadItems)
+    .then(()=>{
+      const saved=(ITEMS[code]||[]).some(x=>x.item===text);
+      if(!saved) (ITEMS[code]=ITEMS[code]||[]).unshift({when:new Date(), item:text, by:""});  // keep it visible + warn
+      renderItems(code); updateListBadges();
+      setEiStatus(code, saved ? "Saved ✓ “"+text+"”"
+                              : "⚠ “"+text+"” didn’t appear in the Sheet — has the updated Apps Script been re-deployed?");
+    })
+    .catch(()=>setEiStatus(code,"Save failed — check your connection and try again"));
+}
+
 // Save Week lives at the bottom of the page and takes TWO deliberate clicks.
 let _wcTimer=null;
 function wcAction(html){ const e=document.getElementById("wcaction"); if(e) e.innerHTML=html; }
