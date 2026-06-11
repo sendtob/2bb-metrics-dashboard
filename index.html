@@ -200,6 +200,7 @@
     <div class="epfoot">
       <button class="epsave" onclick="saveAll()">💾 Save</button>
       <span class="epstatus" id="epstatus">Type your numbers, then click Save.</span>
+      <a onclick="changePass()" style="margin-left:auto;font-size:11px;color:#94a3b8;cursor:pointer;text-decoration:underline" title="Re-enter the team passcode on this device">passcode</a>
     </div>
   </div>
 </div>
@@ -437,6 +438,13 @@ window.__gv=function(resp){
 };
 // ===== Live editing — writes back to the sheet via the deployed Apps Script web app =====
 const APPS_URL = "https://script.google.com/macros/s/AKfycbxFYl7yMenuUkVCV9nSDSIvfP0-UnPN-R1NOYVrQM0kRzk8Z2WYtb9JTZBK-aQYwJGu3A/exec";   // deployed Apps Script web app
+// Writes need the shared team passcode (checked server-side in the Apps
+// Script; it is NOT in this public page). Each browser asks once and
+// remembers it here. Reading the dashboard needs no passcode.
+const PASS_KEY="tbb_write_pass";
+function getPass(){ try{ return localStorage.getItem(PASS_KEY)||""; }catch(e){ return ""; } }
+function setPass(v){ try{ v?localStorage.setItem(PASS_KEY,v):localStorage.removeItem(PASS_KEY); }catch(e){} }
+function changePass(){ setPass(""); buildEditPanel(); }
 const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales"]);  // auto from e-comm — not edited (incl. MRR)
 function jsonp(url){
   return new Promise((resolve,reject)=>{
@@ -453,8 +461,23 @@ function jsonp(url){
 function epStatus(m){ const e=document.getElementById("epstatus"); if(e) e.textContent=m||""; }
 function buildEditPanel(){
   const warn=document.getElementById("epwarn");
-  warn.style.display = APPS_URL ? "none" : "block";
-  if(!APPS_URL) warn.innerHTML="Editing isn’t connected yet — deploy the Apps Script and paste its URL into the dashboard. You can preview the fields below.";
+  if(!APPS_URL){
+    warn.style.display="block";
+    warn.innerHTML="Editing isn’t connected yet — deploy the Apps Script and paste its URL into the dashboard. You can preview the fields below.";
+  } else if(!getPass()){
+    warn.style.display="block";
+    warn.innerHTML='🔑 <b>One-time setup:</b> enter the team passcode to turn on saving (ask Brad). '+
+      '<input id="eppass" type="password" autocomplete="off" style="width:130px;font-size:12px;padding:4px 7px;border:1px solid #d6c79a;border-radius:6px"> '+
+      '<button id="eppassgo" style="border:0;background:#15233f;color:#fff;font-weight:700;font-size:11.5px;border-radius:6px;padding:5px 10px;cursor:pointer">Unlock</button>';
+    setTimeout(()=>{
+      const i=document.getElementById("eppass"), b=document.getElementById("eppassgo");
+      const go=()=>{ if(i.value.trim()){ setPass(i.value.trim()); buildEditPanel(); epStatus("Passcode saved on this device — your edits will save now."); } };
+      if(b) b.addEventListener("click",go);
+      if(i) i.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); go(); } });
+    },0);
+  } else {
+    warn.style.display="none";
+  }
   let html="";
   NS.forEach(n=>{
     // goals in this north star that have at least one editable metric
@@ -488,26 +511,42 @@ function labelFor(code){
   return code;
 }
 function sendSave(code,value){
-  return fetch(APPS_URL+"?fn=save&code="+encodeURIComponent(code)+"&value="+encodeURIComponent(value)+"&label="+encodeURIComponent(labelFor(code))+"&_="+Date.now(),
+  return fetch(APPS_URL+"?fn=save&code="+encodeURIComponent(code)+"&value="+encodeURIComponent(value)+"&label="+encodeURIComponent(labelFor(code))+"&pass="+encodeURIComponent(getPass())+"&_="+Date.now(),
                {method:"GET", mode:"no-cors"});
 }
 function saveField(inp){
   const code=inp.getAttribute("data-code"), val=String(inp.value).trim();
   optimistic(code,val);
   if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
+  if(!getPass()){ epStatus("Enter the team passcode above to turn on saving."); return; }
   epStatus("Saving…");
   sendSave(code,val).then(()=>epStatus("Saved ✓  ·  click Save to confirm all"))
     .catch(()=>epStatus("Save failed — check your connection"));
 }
 function saveAll(){
   if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
+  if(!getPass()){ epStatus("Enter the team passcode above to turn on saving."); return; }
   const inps=[].slice.call(document.querySelectorAll("#epbody input[data-code]"));
   if(!inps.length) return;
+  const sent={}; inps.forEach(inp=>{ sent[inp.getAttribute("data-code")]=String(inp.value).trim(); });
   epStatus("Saving "+inps.length+" metrics…");
   Promise.all(inps.map(inp=> sendSave(inp.getAttribute("data-code"), String(inp.value).trim())
       .then(()=>optimistic(inp.getAttribute("data-code"), String(inp.value).trim()))))
     .then(()=>{ epStatus("Saved — re-reading the sheet to confirm…");
-                loadSheet(()=>{ buildEditPanel(); epStatus("✓ All "+inps.length+" metrics saved & confirmed in the sheet"); }); })
+                loadSheet(()=>{ buildEditPanel();
+                  // the rebuilt inputs now hold the SHEET's values — compare to
+                  // what we sent so a rejected write (e.g. wrong passcode) can't
+                  // masquerade as a confirmed save
+                  let misses=0;
+                  document.querySelectorAll("#epbody input[data-code]").forEach(inp=>{
+                    const code=inp.getAttribute("data-code");
+                    if(!(code in sent)) return;
+                    const want=sent[code]===""?0:Number(sent[code]), got=inp.value===""?0:Number(inp.value);
+                    if(!(isNaN(want)&&isNaN(got)) && want!==got) misses++;
+                  });
+                  epStatus(misses
+                    ? "⚠ "+misses+" value(s) didn’t stick in the sheet — wrong passcode? Use the “passcode” link below, then Save again."
+                    : "✓ All "+inps.length+" metrics saved & confirmed in the sheet"); }); })
     .catch(()=>epStatus("Some saves failed — check your connection and click Save again"));
 }
 function optimistic(code,val){
@@ -627,10 +666,11 @@ function renderItems(code){
 function addListItem(code, inp){
   const text=inp.value.trim(); if(!text) return;
   if(!APPS_URL){ setEiStatus(code,"Not connected — deploy the script first."); return; }
+  if(!getPass()){ setEiStatus(code,"Enter the team passcode (top of this panel) to turn on saving."); return; }
   (ITEMS[code]=ITEMS[code]||[]).unshift({when:new Date(), item:text, by:""});   // optimistic
   renderItems(code); updateListBadges();
   setEiStatus(code,"Saving “"+text+"”…");
-  fetch(APPS_URL+"?fn=additem&code="+encodeURIComponent(code)+"&item="+encodeURIComponent(text)+"&_="+Date.now(),
+  fetch(APPS_URL+"?fn=additem&code="+encodeURIComponent(code)+"&item="+encodeURIComponent(text)+"&pass="+encodeURIComponent(getPass())+"&_="+Date.now(),
         {method:"GET", mode:"no-cors"})
     .then(()=>new Promise(r=>setTimeout(r,2000)))   // give the Sheet a beat, then confirm for real
     .then(loadItems)
@@ -639,7 +679,7 @@ function addListItem(code, inp){
       if(!saved) (ITEMS[code]=ITEMS[code]||[]).unshift({when:new Date(), item:text, by:""});  // keep it visible + warn
       renderItems(code); updateListBadges();
       setEiStatus(code, saved ? "Saved ✓ “"+text+"”"
-                              : "⚠ “"+text+"” didn’t appear in the Sheet — has the updated Apps Script been re-deployed?");
+                              : "⚠ “"+text+"” didn’t appear in the Sheet — wrong passcode? Fix it via the “passcode” link in the panel footer, then add again.");
     })
     .catch(()=>setEiStatus(code,"Save failed — check your connection and try again"));
 }
@@ -661,8 +701,9 @@ function disarmSaveWeek(){
 function saveWeekAction(){
   clearTimeout(_wcTimer);
   if(!APPS_URL){ wcAction('<span class="wcstatus">Editing isn’t connected yet.</span>'); return; }
+  if(!getPass()){ wcAction('<span class="wcstatus">Enter the team passcode first — open ✏️ Update metrics.</span>'); setTimeout(disarmSaveWeek,3500); return; }
   wcAction('<span class="wcstatus">Saving the week…</span>');
-  fetch(APPS_URL+"?fn=saveweek&_="+Date.now(), {method:"GET", mode:"no-cors"})
+  fetch(APPS_URL+"?fn=saveweek&pass="+encodeURIComponent(getPass())+"&_="+Date.now(), {method:"GET", mode:"no-cors"})
     .then(()=>{ wcAction('<span class="wcstatus">✓ Week saved — reloading…</span>'); setTimeout(()=>location.reload(),2200); })
     .catch(()=>{ wcAction('<span class="wcstatus">Save failed — check connection</span>'); setTimeout(disarmSaveWeek,2800); });
 }

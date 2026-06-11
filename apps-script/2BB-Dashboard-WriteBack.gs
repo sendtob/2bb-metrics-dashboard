@@ -20,18 +20,24 @@
  *   Deploy ▸ Manage deployments ▸ ✏️ (edit) ▸ Version: "New version" ▸ Deploy.
  *   Do NOT make a "New deployment" — that mints a different URL.
  *
- * NOTE: deployed "Anyone" = open (no passcode), per request. Anyone with the URL can write.
- * Ask me to add a shared passcode later and it's a 2-line change here + on the dashboard.
+ * WRITE PASSCODE (added 2026-06-10): every write requires &pass=<team passcode>.
+ * The passcode is NOT in this file (the repo is public) — it lives in
+ * Project Settings ▸ Script properties ▸ WRITE_PASS. Fail-closed: if the
+ * property is missing, all writes are rejected. To rotate it, change the
+ * property (no re-deploy needed) and give the team the new passcode — the
+ * dashboard asks for it once per browser and remembers it.
+ * Reads are unaffected (the dashboards read the sheet via gviz, not this app).
  */
 function doGet(e) {
   var cb = (e && e.parameter && e.parameter.callback) ? e.parameter.callback : 'callback';
   var out;
   try {
     var fn = e.parameter.fn;
-    if (fn === 'save')          out = saveValue_(e.parameter.code, e.parameter.value, e.parameter.label);
+    if (fn === 'ping')          out = { ok: true, pong: true };   // connectivity check stays open
+    else if (!passOk_(e))       out = { ok: false, error: 'bad or missing passcode' };
+    else if (fn === 'save')     out = saveValue_(e.parameter.code, e.parameter.value, e.parameter.label);
     else if (fn === 'saveweek') out = saveWeek_();
     else if (fn === 'additem')  out = addItem_(e.parameter.code, e.parameter.item, e.parameter.by);
-    else if (fn === 'ping')     out = { ok: true, pong: true };
     else                        out = { ok: false, error: 'unknown fn' };
   } catch (err) {
     out = { ok: false, error: String(err) };
@@ -39,6 +45,16 @@ function doGet(e) {
   return ContentService
     .createTextOutput(cb + '(' + JSON.stringify(out) + ')')
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
+
+// Writes require the shared team passcode. It lives in Script properties
+// (WRITE_PASS), never in this repo. Missing property = reject everything
+// (fail closed) with a distinct error so misconfiguration is debuggable.
+function passOk_(e) {
+  var want = PropertiesService.getScriptProperties().getProperty('WRITE_PASS');
+  if (!want) throw new Error('WRITE_PASS not configured in Script properties');
+  var got = (e && e.parameter && e.parameter.pass) || '';
+  return got === want;
 }
 
 function sheet_() { return SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]; }
