@@ -1,8 +1,53 @@
 [
 {
+"period_end": "2026-04-12",
+"source": "margin_yoy",
+"net_revenue": 18949.46,
+"ad_spend": 8462.96,
+"mer": 2.24
+},
+{
+"period_end": "2026-04-19",
+"source": "margin_yoy",
+"net_revenue": 18326.92,
+"ad_spend": 7387.23,
+"mer": 2.48
+},
+{
+"period_end": "2026-04-26",
+"source": "margin_yoy",
+"net_revenue": 20114.32,
+"ad_spend": 6996.03,
+"mer": 2.88
+},
+{
+"period_end": "2026-05-03",
+"source": "margin_yoy",
+"net_revenue": 24045.15,
+"ad_spend": 7679.32,
+"mer": 3.13
+},
+{
+"period_end": "2026-05-10",
+"source": "margin_yoy",
+"net_revenue": 23199.53,
+"ad_spend": 7558.14,
+"mer": 3.07
+},
+{
+"period_end": "2026-05-17",
+"source": "margin_yoy",
+"net_revenue": 23024.29,
+"ad_spend": 7655.98,
+"mer": 3.01
+},
+{
 "period_end": "2026-05-24",
-"generated_at": "2026-06-05T17:21:42.778243+00:00",
+"source": "pipeline",
 "net_revenue": 18952.73,
+"ad_spend": 7703.59,
+"mer": 2.460246456522219,
+"generated_at": "2026-06-05T17:21:42.778243+00:00",
 "orders": 167.0,
 "aov": 113.49,
 "new_customers": 296.0,
@@ -17,34 +62,73 @@
 "email_click_rate": 0.0026,
 "email_revenue": 2617.47,
 "sms_revenue": 120.93,
-"ad_spend": 7703.59,
 "roas": 2.41,
-"mer": 2.460246456522219,
-"cac": 26.025641891891894,
-"source": "pipeline"
+"cac": 26.025641891891894
 },
 {
 "period_end": "2026-05-31",
-"source": "pipeline",
-"net_revenue": 15508.61,
+"source": "ecomm_snapshot",
+"net_revenue": 15509.0,
+"ad_spend": 7831.0,
+"mer": 1.98,
 "orders": 141.0,
-"aov": 109.99,
+"aov": 110.0,
 "new_customers": 248.0,
 "sessions": 9865.0,
-"conversion_rate": 0.01429295489102889,
-"meta_spend": 5624.11,
+"conversion_rate": 0.0143,
+"meta_spend": 5624.0,
 "meta_conversions": 51.0,
-"meta_cpa": 110.27666666666666,
+"meta_cpa": 110.0,
 "meta_roas": 0.9,
 "email_campaigns": 5.0,
 "email_open_rate": 0.5215,
 "email_click_rate": 0.0019,
-"email_revenue": 2608.44,
-"sms_revenue": 172.98,
-"ad_spend": 7831.34,
+"email_revenue": 2608.0,
+"sms_revenue": 173.0,
 "roas": 1.96,
-"mer": 1.9803264830795242,
-"cac": 31.577983870967742,
+"cac": 32.0,
 "generated_at": "2026-06-01T14:14:51.581217+00:00"
+},
+{
+"period_end": "2026-06-07",
+"source": "margin_yoy",
+"net_revenue": 14758.16,
+"ad_spend": 7828.97,
+"mer": 1.89
+},
+{
+"period_end": "2026-06-14",
+"source": "margin_yoy",
+"net_revenue": 9956.43,
+"ad_spend": 6851.58,
+"mer": 1.45
+},
+{
+"period_end": "2026-06-21",
+"source": "margin_yoy",
+"net_revenue": 19010.17,
+"ad_spend": 6772.44,
+"mer": 2.81
+},
+{
+"period_end": "2026-06-28",
+"source": "margin_yoy",
+"net_revenue": 12628.97,
+"ad_spend": 6842.72,
+"mer": 1.85
+},
+{
+"period_end": "2026-07-05",
+"source": "margin_yoy",
+"net_revenue": 11408.36,
+"ad_spend": 6640.21,
+"mer": 1.72
+},
+{
+"period_end": "2026-07-12",
+"source": "margin_yoy",
+"net_revenue": 17378.84,
+"ad_spend": 6708.04,
+"mer": 2.59
 }
 ]
