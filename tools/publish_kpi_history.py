@@ -24,6 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, ".."))            # the dashboard repo root
 OUT  = os.path.join(REPO, "kpi_history.json")
 ECOMM = os.path.join(REPO, "ecomm.html")
+MARGIN = os.path.join(REPO, "margin_yoy.json")
 
 # Where the WBR pipeline writes its scorecard history (both known clones).
 PIPELINE_GLOBS = [
@@ -98,10 +99,48 @@ def from_pipeline():
     return rows
 
 
+def from_margin_yoy():
+    """Revenue/spend spine from margin_yoy.json (machine-built weekly by
+    backfill_margin_yoy.py, which pulls Shopify + Northbeam). This keeps
+    kpi_history GROWING one real week every run from the margin pipeline that
+    already works — even when the WBR pipeline's kpi_history.jsonl is absent
+    (e.g. the local extractor stalls). It fills only the machine-known keys
+    (net_revenue, ad_spend, mer); the richer per-week KPIs still come from the
+    ecomm snapshot / pipeline, which WIN because this source is merged first
+    (lowest priority). No estimated data — every value is straight from
+    margin_yoy.json."""
+    if not os.path.exists(MARGIN):
+        return []
+    try:
+        d = json.load(open(MARGIN))
+    except (json.JSONDecodeError, OSError):
+        return []
+    weeks = d.get("weeks") or []
+    ty = d.get("thisYear") or {}
+    rev = ty.get("net_revenue") or []
+    spend = ty.get("ad_spend") or []
+    gen = d.get("generated_for") or ""
+    year = gen[:4] if re.match(r"^\d{4}", gen) else str(datetime.date.today().year)
+    rows = []
+    for i, wk in enumerate(weeks):
+        if i >= len(rev) or i >= len(spend):
+            break
+        pe = iso(f"{wk}, {year}")            # "Jul 12" + year -> ISO
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", pe):
+            continue
+        row = {"period_end": pe, "source": "margin_yoy",
+               "net_revenue": rev[i], "ad_spend": spend[i]}
+        if spend[i]:
+            row["mer"] = round(rev[i] / spend[i], 2)
+        rows.append(row)
+    return rows
+
+
 def main():
     by_week = {}
-    # low -> high priority; later updates overwrite shared keys for the same week
-    for r in load_existing() + from_ecomm_snapshot() + from_pipeline():
+    # low -> high priority; later updates overwrite shared keys for the same week.
+    # margin_yoy is FIRST (lowest) so the snapshot/pipeline win where they exist.
+    for r in from_margin_yoy() + load_existing() + from_ecomm_snapshot() + from_pipeline():
         wk = iso(r.get("period_end"))
         if not wk:
             continue
