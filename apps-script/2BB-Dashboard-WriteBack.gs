@@ -80,8 +80,16 @@ function sheet_() { return SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
 // Same anchor the e-comm feed uses (period_end), so the goal tree and the
 // commercial numbers finally sit on one clock instead of two.
 // ---------------------------------------------------------------------------
-function tz_() { return SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone() || 'America/New_York'; }
-function iso_(d) { return Utilities.formatDate(d, tz_(), 'yyyy-MM-dd'); }
+// Format from the date's own components — NOT Utilities.formatDate. The dates
+// here are built with new Date(y, m, d), i.e. midnight in the SCRIPT runtime's
+// zone, while formatDate renders in the SPREADSHEET's zone. When those differ
+// (runtime UTC, sheet America/New_York) midnight Sunday formats as Saturday,
+// and every week column lands a day early. Caught in testing 2026-07-30, when
+// the current week came back as 2026-08-01 instead of 2026-08-02.
+function iso_(d) {
+  var p = function (n) { return (n < 10 ? '0' : '') + n; };
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
 
 // The Sunday that ends the week containing d (Sun itself counts as its own end).
 function weekEnd_(d) {

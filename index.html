@@ -702,6 +702,15 @@ window.__gv=function(resp){
     // drop unparseable ones rather than guessing.
     let order=heads.map((h,i)=>({h,i})).filter(x=>x.h).sort((a,b)=>a.h.date-b.h.date);
 
+    // Collapse any columns that normalise to the SAME week, keeping the
+    // rightmost (most recently written). Two headers a day apart — say a
+    // Saturday and the Sunday that ends the same week — are one week, not two,
+    // and must not draw as two points. Cheap insurance against a sheet that has
+    // been written by more than one version of the Apps Script.
+    const byWeek=new Map();
+    order.forEach(x=>byWeek.set(x.h.iso,x));
+    order=Array.from(byWeek.values()).sort((a,b)=>a.h.date-b.h.date);
+
     // Drop leading pre-history: columns where EVERY metric is null or 0, before
     // the first column that has any real entry. These are the carried-forward
     // zeros from before the team started using the sheet.
