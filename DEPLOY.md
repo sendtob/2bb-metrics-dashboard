@@ -95,11 +95,10 @@ wired.
 3. **Owners for the new Impact metrics** — Thrive Blind (B) and Funding (C) are
    assigned to Kevin by default and have no data. They'll show "No data yet" until
    someone starts entering. That's deliberate: better an honest gap than a zero.
-4. **Verify last year's ad spend.** 10 of the last 14 weeks are flagged: last
-   year's Northbeam spend is under 40% of this year's for the same week, collapsing
-   to $287 the week of Jul 26. If that's a tracking-coverage gap rather than a real
-   spending decision, the "Behind last year" verdict is overstated. The last-year
-   line is dimmed and annotated until this is checked.
+4. **Why isn't the paid spend working?** Now verified rather than open: last
+   year's near-zero ad spend is real (Northbeam matches Meta's API to the cent).
+   Over 14 weeks, last year did **$286K of sales on $44K of ads**; this year is
+   **$223K on $100K**. That is the commercial question the dashboard is pointing at.
 
 ---
 

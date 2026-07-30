@@ -30,7 +30,7 @@ window.ECOMM_HIST = {
   labels: [],   // pretty labels, for tooltips
   dates:  [],   // Date objects — the sparkline's real time axis
   thisYear: { net_sales: [], gross_revenue: [], ad_spend: [] },
-  lastYear: { net_sales: [], gross_revenue: [], ad_spend: [], ad_spend_suspect: [] }
+  lastYear: { net_sales: [], gross_revenue: [], ad_spend: [], ad_spend_ratio: [] }
 };
 (function(E){
   var num = function(v){ return (v == null || isNaN(v)) ? null : +v; };

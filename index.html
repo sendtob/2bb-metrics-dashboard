@@ -474,7 +474,7 @@ function metricBlock(g){
   const ec=(g.src==="ecomm"&&window.ECOMM_HIST);
   const wl=ec?window.ECOMM_HIST.labels:WEEKS.map(w=>w.label);
   const wd=ec?window.ECOMM_HIST.dates:WEEKS.map(w=>w.date);
-  const ksvg=g.key.vs?spark2(g.key.series,g.key.vs,{color:g.accent,dots:true,labels:wl,vfmt:g.fmt,dates:wd,bDim:!!g.vsSuspect})
+  const ksvg=g.key.vs?spark2(g.key.series,g.key.vs,{color:g.accent,dots:true,labels:wl,vfmt:g.fmt,dates:wd})
                      :spark(s,{color:g.accent,w:150,h:42,dots:true,labels:wl,vfmt:g.fmt,dates:wd});
   const subs=g.subs.map(sb=>{const f=sb.fmt||g.fmt;const sl=sb.series;
     const fb=ec?"":freshBadge(sb.id,{mini:true});
@@ -483,7 +483,7 @@ function metricBlock(g){
   const badge=ec?` <a class="srcbadge" href="ecomm.html" title="Pulled straight from the weekly e-comm feed (Shopify + Northbeam). Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
   const fresh=ec?"":` ${freshBadge(g.key.id)}`;
   const cap=g.key.vs
-    ?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.vsSuspect?' · <span style="color:#b91c1c">last-year spend data looks incomplete</span>':""}</div>`
+    ?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.vsNote?` · <span style="color:#b45309">${g.vsNote}</span>`:""}</div>`
     :(ec?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">from the weekly e-comm feed</div>`:"");
   const help=g.key.help?`<div class="khelp">${escHtml(g.key.help)}</div>`:"";
   return `<div class="keyblock"><div>
@@ -542,14 +542,17 @@ function applyEcomm(){
   g.key.series=E.marginK(E.thisYear);
   if(E.lastYear && E.lastYear.net_sales && E.lastYear.net_sales.length){
     g.key.vs=E.marginK(E.lastYear); g.key.vsId="c_nm_vs";
-    // Last year's Northbeam spend collapses to a few hundred dollars a week from
-    // mid-May 2025 while this year runs $6.6-7.9K. Margin subtracts spend, so if
-    // that's a tracking gap rather than a real decision it flatters last year by
-    // ~$5-6K/week. Dim the line and say so rather than presenting it as settled.
-    g.vsSuspect = Array.isArray(E.lastYear.ad_spend_suspect)
-      && E.lastYear.ad_spend_suspect.filter(Boolean).length >= Math.ceil(E.lastYear.ad_spend_suspect.length/2);
+    // Last year ran on far less ad spend — verified against Meta's own API on
+    // 2026-07-30, where Northbeam matches to the cent. It is a real spending
+    // pause, not a tracking gap, so the comparison stands and the note states
+    // the fact rather than casting doubt on it.
+    const t=(E.thisYear.ad_spend||[]).filter(v=>v!=null).reduce((a,b)=>a+b,0);
+    const l=(E.lastYear.ad_spend||[]).filter(v=>v!=null).reduce((a,b)=>a+b,0);
+    g.vsNote = (t&&l&&l/t<0.75)
+      ? `last year did this on <b>${Math.round(l/t*100)}%</b> of the ad spend`
+      : "";
   } else {
-    delete g.key.vs; delete g.key.vsId; g.vsSuspect=false;
+    delete g.key.vs; delete g.key.vsId; g.vsNote="";
   }
   g.subs.forEach(sb=>{
     if(sb.id==="c_mear"){  sb.series=E.mearX(E.thisYear);  sb.fmt="x2"; }
@@ -608,7 +611,7 @@ function loadMarginYoY(){
     E.lastYear = {net_sales:keep.map(i=>rev(ly,i)),
                   gross_revenue:keep.map(i=>num(ly,"gross_revenue",i)),
                   ad_spend:keep.map(i=>num(ly,"ad_spend",i)),
-                  ad_spend_suspect:keep.map(i=>!!(ly.ad_spend_suspect||[])[i])};
+                  ad_spend_ratio:keep.map(i=>(ly.ad_spend_ratio_vs_this_year||[])[i])};
     E._realWeeks=keep.length; E._yoy=true;
     return true;
   }).catch(()=>false);

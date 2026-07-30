@@ -188,13 +188,17 @@ def margin_k(side):
 
 ty_ad, ly_ad = series("thisYear", "ad_spend"), series("lastYear", "ad_spend")
 
-# Data-quality flag: last year's Northbeam spend collapses to a few hundred
-# dollars a week from mid-May 2025 while this year runs $6.6-7.9K. That reads
-# like a tracking-coverage gap, not a spending decision — and because margin
-# subtracts spend, it makes last year look far better than it was. Flag the
-# weeks rather than silently plotting them.
-ly_spend_suspect = [
-    (t is not None and l is not None and t > 0 and (l / t) < 0.4)
+# Last year's spend really was near zero for most of this window, and that is
+# NOT a data gap. Verified 2026-07-30 against Meta's own API, which matches
+# Northbeam's facebook figure to the cent:
+#     w/e 2025-04-27  Northbeam fb 5,276.25  |  Meta 5,276.25
+#     w/e 2025-07-27  Northbeam fb     0.30  |  Meta     0.30
+# So 2BB genuinely paused Meta spend from around mid-May 2025 through the
+# summer. The year-over-year comparison is real, and it is unflattering:
+# last year did MORE revenue on LESS ad spend. Do not explain it away.
+# The ratio is published so the chart can say so plainly.
+ly_spend_ratio = [
+    (None if (t is None or l is None or not t) else round(l / t, 3))
     for t, l in zip(ty_ad, ly_ad)
 ]
 
@@ -222,7 +226,8 @@ payload = {
         "ad_spend":      ly_ad,
         "net_revenue":   series("lastYear", "gross_revenue"),   # back-compat alias
         "margin_k":      margin_k("lastYear"),
-        "ad_spend_suspect": ly_spend_suspect,
+        "ad_spend_ratio_vs_this_year": ly_spend_ratio,
+        "ad_spend_verified": "Cross-checked against Meta Ads API 2026-07-30; Northbeam matches to the cent. The near-zero 2025 spend is real, not a tracking gap.",
     },
     "generated_for": LATEST_SUNDAY.strftime("%Y-%m-%d"),
     "generated_at": datetime.utcnow().isoformat() + "Z",
@@ -231,6 +236,8 @@ payload = {
 
 with open(OUT, "w") as f:
     json.dump(payload, f, indent=0)
+_ty = sum(v for v in ty_ad if v) or 0
+_ly = sum(v for v in ly_ad if v) or 0
 print("WROTE", OUT, "for week ending", LATEST_SUNDAY.strftime("%Y-%m-%d"),
-      "|", sum(1 for x in ly_spend_suspect if x), "week(s) flagged for suspect last-year spend",
+      "| ad spend this year %.0f vs last year %.0f (%.0f%%)" % (_ty, _ly, (_ly / _ty * 100) if _ty else 0),
       flush=True)

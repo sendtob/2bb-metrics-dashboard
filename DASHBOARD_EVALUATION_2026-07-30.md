@@ -219,7 +219,23 @@ My recommendation: **keep Shopify as the source of truth for revenue** (it's the
 
 **Net margin is modelled, not measured.** `margin = revenue × 0.9 − ad spend` — shipping is a hardcoded 10% assumption (`shipPct`) and **COGS is not in it at all**. The label says "money left after ads & shipping," which is literally accurate, but the headline goal "Beat last year" is being judged on a number that ignores cost of goods. Krysta asked about this too ("Is COGS included?"). It should either include COGS or be renamed to "contribution after ads & shipping."
 
-**The last-year comparison looks unreliable.** Last-year ad spend in `margin_yoy.json` collapses from ~$10.1K (late Apr 2025) to $287–$1,700/week from mid-May 2025 onward, while this year runs a steady $6.6–7.9K. A 5× cliff that lands mid-May and never recovers reads like a data-coverage change in Northbeam, not a spending decision. Because margin subtracts ad spend, this inflates last year's margin by roughly $5–6K/week — so the flagship goal currently reports "Behind last year · $9.4k vs $25.9k" when a like-for-like spend basis would put last year nearer $19.5k. The revenue decline is real; **the size of the margin gap is probably an artifact.** Worth verifying in Northbeam directly before this number is shown at another meeting.
+**~~The last-year comparison looks unreliable.~~ CORRECTED 2026-07-30 — it is reliable, and worse than it looks.**
+
+My first read was that last year's ad spend (collapsing from ~$10.1K in late Apr 2025 to $287–$1,700/week from mid-May onward) looked like a Northbeam tracking gap, and that it flattered last year's margin. **That was wrong.** Checked against Meta's own Ads API, which matches Northbeam's facebook figure to the cent:
+
+| Week ending | Northbeam `fb` | Meta Ads API |
+|---|---|---|
+| 2025-04-27 | $5,276.25 | $5,276.25 |
+| 2025-07-27 | $0.30 | $0.30 |
+
+2BB genuinely paused Meta spend from around mid-May 2025 through the summer. The data is sound and the comparison stands. Over the trailing 14 weeks:
+
+|  | Net sales | Ad spend | Contribution |
+|---|---|---|---|
+| This year | $223,235 | $100,403 | $100.5K |
+| Last year | $285,738 | $44,310 | $212.8K |
+
+**Last year did 28% more revenue on 56% less ad spend.** That is the actual headline, and my "probably an artifact" note would have given the team a reason to wave it away. The dashboard now states the fact — "last year did this on 44% of the ad spend" — instead of casting doubt on the data.
 
 ---
 
@@ -236,7 +252,7 @@ My recommendation: **keep Shopify as the source of truth for revenue** (it's the
 6. ✅ Freshness chips everywhere (green <7d / amber 7–14 / red older / grey never), fed by the `Log` tab.
 7. ✅ Running-total corrections render as a grey ✎, never a red ▼. Sparklines plot on a real date axis; the WoW label says "vs 21 days earlier" when that's the truth.
 8. ✅ Revenue relabelled and split: **Net sales** (memo-comparable) and **Gross order value incl. shipping & tax**, with contribution now computed from net sales. Footer states plainly that COGS is excluded.
-9. ✅ Last-year spend anomaly flagged in the data (`ad_spend_suspect`, 10 of 14 weeks) and surfaced as a dimmed line + "last-year spend data looks incomplete".
+9. ✅ Last-year ad spend **verified against Meta's API** (matches Northbeam to the cent) — the near-zero 2025 spend is real. The chart now says "last year did this on 44% of the ad spend" rather than questioning the data.
 
 **Done — makes it mean something**
 10. ✅ Impact rebuilt as three chains — A: awareness that turns into action (new key metric: people who took a mission action); B: Programs delivered / Thrive Blind (people served, enrolled, sessions, partners, outcomes); C: Funding the mission (committed program dollars, grants submitted/won, recurring donors, corporate partners). Thank-you messages moved out of Impact into a "Community" star.
@@ -244,7 +260,6 @@ My recommendation: **keep Shopify as the source of truth for revenue** (it's the
 12. ✅ Fabricated fallback series deleted — every series now starts empty, so a failed load shows nothing rather than plausible-looking numbers nobody entered. (The old file shipped a hardcoded 440 thank-you messages as its offline fallback.)
 
 **Still needs a human**
-- Verify last year's ad-spend data in Northbeam before trusting the YoY margin verdict.
 - Itemize the 7 scorecard-passing products in the Items tab before Katie goes part-time **Aug 13**.
 - Program definitions for Impact B with Kevin — the metrics exist and are empty by design.
 
