@@ -26,6 +26,7 @@
   .editlink:hover{background:#f1cc63}
   .sheetlink{color:var(--gold);text-decoration:none;border-bottom:1px solid currentColor}
   .wrap{max-width:1320px;margin:0 auto;padding:22px 28px 60px}
+  @media(max-width:560px){ .wrap{padding:16px 14px 50px} header{padding:18px 16px} footer{padding:0 14px 40px} .weekclose{padding:0 14px} }
   .status{font-size:12px;font-weight:600;padding:9px 14px;border-radius:9px;margin:0 0 16px;background:#eef0f3;color:#6b7280}
   .status a{font-weight:700;text-decoration:none;border-bottom:1px solid currentColor}
   .legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted);margin:6px 4px 20px}
@@ -46,12 +47,12 @@
   .banner .bdesc{font-size:11.5px;opacity:.82;font-style:italic}
   .card,.group{background:var(--card);border-radius:14px;box-shadow:0 1px 4px rgba(20,40,80,.08);
     border:1px solid var(--line);overflow:hidden}
-  .singles{display:grid;grid-template-columns:repeat(auto-fit,minmax(370px,1fr));gap:18px;margin-bottom:18px}
+  .singles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(370px,100%),1fr));gap:18px;margin-bottom:18px}
   .cbody{padding:15px 18px 14px}
   .gname{font-size:16px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px}
   .gname .sq{width:11px;height:11px;border-radius:3px;display:inline-block}
   .group{margin-bottom:18px}
-  .gbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+  .gbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))}
   @media(max-width:760px){.gbody{grid-template-columns:1fr}}
   .panel{padding:15px 20px 15px}
   .gbody .panel+.panel{border-left:1px solid var(--line)}
@@ -143,6 +144,38 @@
   .wcyes:hover{filter:brightness(1.08)}
   .wccancel{background:#eef0f3;color:#374151;border:none;border-radius:9px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer}
   .wcstatus{font-size:12.5px;color:var(--muted);font-weight:600}
+  /* ---- freshness, week note, scorecard links, per-person entry ---- */
+  .weeknote{font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--line);
+    border-radius:9px;padding:8px 13px;margin:0 4px 18px;line-height:1.5}
+  .weeknote b{color:#374151}
+  .fresh{display:inline-block;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:20px;
+    white-space:nowrap;vertical-align:middle;letter-spacing:.01em}
+  .sub .fresh{flex:none;min-width:34px;text-align:center}
+  .kfresh{margin-top:3px}
+  .khelp{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.4;max-width:330px}
+  .scmark{font-size:9px;font-weight:800;color:#4338ca;background:#eef2ff;border:1px solid #c7d2fe;
+    border-radius:20px;padding:1px 7px;text-decoration:none;white-space:nowrap;vertical-align:middle}
+  .scmark:hover{background:#e0e7ff}
+  .scmissing{color:#92400e;background:#fff8e1;border-color:#fde68a;cursor:help}
+  .epme{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#f8fafc;border:1px solid var(--line);
+    border-radius:9px;padding:8px 11px;margin:8px 0 4px;font-size:12px;color:#475569}
+  .epme label{font-weight:700;color:#334155}
+  .epme input{flex:1;min-width:110px;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:7px}
+  .epfilter{font-size:11.5px;color:#64748b}
+  .epfilter a{color:#2563eb;text-decoration:none;font-weight:700}
+  .eprowmeta{display:block;margin-top:3px}
+  .epown{font-size:9.5px;font-weight:700;color:#475569;background:#eef2f7;border-radius:20px;padding:1px 6px;text-transform:capitalize}
+  .epok{flex:none;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:12px;font-weight:800;
+    padding:5px 8px;cursor:pointer;color:#15803d;line-height:1}
+  .epok:hover{border-color:var(--green);background:#e8f6ec}
+  .epok:disabled{opacity:.5;cursor:default}
+  @media(max-width:560px){
+    .epbody{padding:6px 12px 14px}
+    .eprow{flex-wrap:wrap;gap:7px}
+    .eprow label{flex:1 1 100%;min-width:0}
+    .eprow input{flex:1 1 auto;width:auto;min-width:0;text-align:right}
+    .epme input{flex:1 1 100%}
+  }
 </style>
 </head>
 <body>
@@ -154,18 +187,20 @@
   <div class="meta">
     <a class="navlink editlink" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">✏️ Update the Sheet ↗</a>
     <a class="navlink" href="ecomm.html">Ecomm Metrics &rarr;</a><br>
-    Week of <b id="wkdate">May 29</b><br>Live — reads from your <a class="sheetlink" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">Google Sheet ↗</a>
+    Week <b id="wkdate">…</b><br>Live — reads from your <a class="sheetlink" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">Google Sheet ↗</a>
   </div>
 </header>
 <div class="wrap">
   <div class="status" id="status">Connecting to live data…</div>
   <div class="legend">
     <span><span class="star">★</span> = the main number for this goal</span>
-    <span><span class="dot" style="background:var(--blue)"></span>blue line = the last 14 weeks</span>
+    <span><span class="dot" style="background:var(--blue)"></span>lines are drawn on a real date axis — gaps mean nobody entered</span>
     <span><span class="dot" style="background:var(--green)"></span>beating last year</span>
     <span><span class="dot" style="background:var(--red)"></span>behind</span>
+    <span title="Green under 7 days, amber 7-14, red older, grey never">the grey/green chip = when it was last updated or confirmed</span>
     <span>the steps under each ★ move first</span>
   </div>
+  <div class="weeknote" id="weeknote">Waiting for the sheet…</div>
   <div class="kpis" id="kpis"></div>
   <div class="singles" id="singles"></div>
   <div id="groups"></div>
@@ -174,17 +209,16 @@
 <div class="weekclose">
   <div class="wcbox">
     <div>
-      <div class="wctitle">📅 End of the week?</div>
-      <div class="wcsub">Locks the current week's numbers as final and opens a fresh week column. This is deliberate and one-way — only do it once everyone's numbers are in for the week.</div>
-    </div>
-    <div class="wcaction" id="wcaction">
-      <button class="wcbtn" onclick="armSaveWeek()">Save &amp; Close This Week</button>
+      <div class="wctitle">📅 The week closes itself</div>
+      <div class="wcsub">There's no button to press any more. Every save lands in the column for the week it's actually made in, and a new week opens automatically each Monday. If you check a number and it genuinely hasn't moved, hit <b>✓</b> next to it in ✏️ Update metrics — that records that you looked, which is what stops a stale number from passing for a stable one.</div>
     </div>
   </div>
 </div>
-<footer><div style="margin-bottom:10px;line-height:1.5"><b>✱ Scorecard</b> — a screening test that pulls in: (1) a successful comparable product in the market (function, material details, looks); (2) brand details built into the product; (3) the product’s story.</div>
+<footer>
+  <div style="margin-bottom:10px;line-height:1.5"><b>✱ Scorecard</b> — products and campaigns are screened before they go, and campaigns are scored again afterwards. The ✱ on those rows links to the scorecard itself.</div>
+  <div style="margin-bottom:10px;line-height:1.5"><b>Commercial numbers.</b> <b>Net sales</b> is line items after discounts, excluding shipping and tax — the same figure as the weekly memo. <b>Gross order value</b> is what the customer paid, including shipping and tax. Contribution is net sales less modelled shipping and ad spend; <b>it does not include COGS</b>, so it isn't profit.</div>
   Live data from Google Sheet <b>2BB Dashboard Data</b>. Edit the sheet and refresh to update. ·
-  Two Blind Brothers — Goal Tree, May 2026.
+  Two Blind Brothers — Goal Tree, rebuilt July 2026.
 </footer>
 
 <button class="fab" id="fab" onclick="openEdit()">✏️ Update metrics</button>
@@ -208,9 +242,124 @@
 <script src="ecomm-data.js"></script>
 <script>
 const SHEET_ID="1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w";
-let WEEKS=["Feb 27","Mar 6","Mar 13","Mar 20","Mar 27","Apr 3","Apr 10","Apr 17","Apr 24","May 1","May 8","May 15","May 22","May 29"];
+// Week columns, oldest first. Filled from the sheet's header row at load time.
+// Each entry is {iso, date, label}. Since 2026-07-30 the sheet stores real
+// week-ending Sundays (yyyy-mm-dd); legacy "Jun 25" text labels are still
+// parsed so an un-migrated sheet keeps working.
+let WEEKS=[];
 
-const NS=[{"star": "Major Donors", "desc": "The big gift that funds the mission.", "goals": [{"id": "don", "tag": "GOAL 1", "accent": "#4F46E5", "name": "Land a $100,000 gift", "win": "$100K gift", "fmt": "int", "key": {"id": "d_ask", "label": "Asks made this week", "series": [0, 0, 0, 0, 0, 1, 0, 1, 2, 1, 2, 2, 3, 2]}, "subs": [{"id": "d_pros", "label": "Prospects identified (running total)", "series": [2, 4, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 40]}, {"id": "d_reach", "label": "First reaches made (running total)", "series": [0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24]}, {"id": "d_follow", "label": "Follow-up conversations held (running total)", "series": [0, 0, 1, 2, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21]}], "floor": "Every ask goes to someone we’ve confirmed can give $100K and cares — tied to a specific priced project."}]}, {"star": "Major Partners", "desc": "A marquee brand in our corner.", "goals": [{"id": "par", "tag": "GOAL 2", "accent": "#0EA5A4", "name": "Land a major brand collaboration", "win": "1 deal signed", "fmt": "int", "key": {"id": "p_meet", "label": "Decision-maker meetings this week", "series": [0, 0, 0, 1, 0, 1, 1, 0, 2, 1, 1, 2, 1, 2]}, "subs": [{"id": "p_pros", "label": "Prospects identified (running total)", "series": [3, 5, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]}, {"id": "p_conn", "label": "Initial connection made (running total)", "series": [0, 1, 2, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18]}, {"id": "p_follow", "label": "Follow-up conversations held (running total)", "series": [0, 0, 1, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13]}], "floor": "Only chase real overlaps — a genuine reason to work together, not big-name logos for their own sake."}]}, {"star": "Operating Leverage", "desc": "More output from the team we have.", "goals": [{"id": "lev", "tag": "GOAL 3", "accent": "#7C3AED", "name": "Build 100 AI agents we actually use", "win": "100 agents", "fmt": "int", "key": {"id": "g3_inu", "label": "AI agents actually in use for more than one month", "series": [1, 2, 3, 5, 6, 8, 11, 14, 17, 20, 24, 28, 33, 38]}, "subs": [{"id": "g3_task", "label": "AI agent ideas generated", "series": [5, 9, 14, 18, 22, 27, 31, 36, 40, 45, 50, 54, 59, 63]}, {"id": "g3_blt", "label": "AI agents in development", "series": [2, 4, 6, 9, 12, 15, 19, 23, 27, 32, 37, 42, 48, 54]}, {"id": "g3_solo", "label": "AI agents running", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4]}], "floor": "An agent only counts if it does real work people accept and use — no demos padding the count."}]}, {"star": "Major Impact", "desc": "The whole reason the rest exists.", "goals": [{"id": "brd", "tag": "A", "accent": "#DB2777", "name": "Breadth — top-tier media inbound inquiry", "win": "A top-tier inbound", "fmt": "int", "key": {"id": "b_key", "label": "Top-tier media inbound inquiries", "series": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1]}, "subs": [{"id": "b_ideas", "label": "Mainstream campaign ideas generated (running total)", "series": [2, 3, 5, 6, 8, 10, 11, 13, 14, 16, 18, 19, 21, 23]}, {"id": "b_launch", "label": "Mainstream campaign ideas launched (running total)", "series": [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8]}, {"id": "b_1m", "label": "Mainstream campaigns with 1M+ impressions (running total)", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]}, {"id": "b_social", "label": "Organic social posts with 10K+ impressions (running total)", "series": [1, 2, 4, 5, 7, 9, 11, 13, 15, 18, 21, 24, 28, 32]}], "floor": "Real mainstream reach, not vanity — a campaign or post counts only when it actually lands."}, {"id": "dep", "tag": "B", "accent": "#D97706", "name": "Depth — 1,000 heartfelt thank-you messages", "win": "1,000 messages", "fmt": "int", "key": {"id": "dp_key", "label": "Heartfelt thank-you messages received (running total)", "series": [0, 3, 7, 13, 22, 35, 52, 75, 105, 145, 195, 260, 340, 440]}, "subs": [{"id": "dp_helped", "label": "People helped in a significant way (running total)", "series": [0, 3, 7, 12, 18, 25, 34, 45, 58, 73, 90, 110, 135, 165]}], "floor": "Messages are genuine and unprompted — we don’t solicit thank-yous."}]}, {"star": "Commercial Success", "desc": "Protect and grow the engine that pays for it all.", "goals": [{"id": "com", "tag": "A", "accent": "#16a34a", "name": "Beat last year, every month", "win": "Beat last year", "fmt": "usdk", "key": {"id": "c_nm", "label": "Net margin — money left after ads & shipping", "series": []}, "subs": [{"id": "c_mear", "label": "MER — revenue ÷ total ad spend", "series": [], "fmt": "x2"}, {"id": "c_sales", "label": "Sales / revenue ($ thousands)", "series": [], "fmt": "usdk"}], "floor": "Don’t hit the number by cutting ads or quality so far that sales or new customers drop."}, {"id": "prod", "tag": "B", "accent": "#EA580C", "name": "Build winning products", "win": "Top-25% products", "fmt": "int", "key": {"id": "wp_key", "label": "Winning products (top 25% of their category)", "series": [0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4]}, "subs": [{"id": "wp_ideas", "label": "New product ideas generated", "series": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"id": "wp_score", "label": "New product ideas passing the scorecard ✱", "series": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]}, {"id": "wp_dev", "label": "New products in development", "series": [2, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 8]}, {"id": "wp_launch", "label": "New products launched", "series": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "floor": "A win is earned by the market — a product ranking in the top 25% of its category. The scorecard ✱ is the screen to get there."}, {"id": "camp", "tag": "C", "accent": "#0891B2", "name": "Build winning campaigns", "win": "Campaigns that hold", "fmt": "int", "key": {"id": "wc_key", "label": "Winning campaigns — 250K+ impressions at neutral margin (after ads & product cost)", "series": [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3]}, "subs": [{"id": "wc_ideas", "label": "New campaign ideas generated", "series": [2, 3, 5, 6, 8, 9, 11, 12, 14, 15, 17, 18, 20, 22]}, {"id": "wc_score", "label": "New campaign ideas passing the scorecard ✱", "series": [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7]}, {"id": "wc_dev", "label": "New campaigns in development", "series": [1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6]}, {"id": "wc_launch", "label": "New campaigns launched", "series": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]}], "floor": "A winning campaign holds 250K+ impressions at neutral-or-better margin after ad and product cost."}]}];
+// Scorecards that gate product + campaign decisions. The ✱ on a metric links here.
+const SCORECARDS={
+  campaign:{url:"https://docs.google.com/document/d/1sAyoevDT2SuAMU12Z0VQ11u7vfrrxDpCsMqV7vj0DUs/edit",
+            name:"Campaign Scorecard & Validation Checklist",
+            note:"Validation checklist, then a 0–2 score on five criteria. 8–10 = proceed, 6–7 = iterate, 0–5 = drop. Scored again after launch."},
+  // TODO(Brad): paste the URL of Katie's Product Scorecard + validation doc here.
+  // It isn't shared with the account that generated this page, so it can't be
+  // filled in automatically. Until it is, the ✱ shows "link not set".
+  product:{url:"",
+           name:"Product Scorecard & Validation",
+           note:"Screens a product on: a proven comparable in market (function, materials, look); brand details built into the product; and the product's story."}
+};
+
+// The goal tree. Series arrays start EMPTY and are filled from the Google Sheet —
+// there is deliberately no hardcoded fallback data, so a failed load shows nothing
+// rather than plausible-looking numbers nobody entered.
+//   own  = default owner, used by the ?who= entry view until the sheet's Meta tab
+//          overrides it. kind:"run" marks a running total (never decreases; a drop
+//          is rendered as a correction, not a trend).
+const NS=[
+ {star:"Major Donors", desc:"The big gift that funds the mission.", goals:[
+  {id:"don", tag:"GOAL 1", accent:"#4F46E5", name:"Land a $100,000 gift", win:"$100K gift", fmt:"int",
+   key:{id:"d_ask", label:"Asks made this week", series:[], own:"brad"},
+   subs:[{id:"d_pros",   label:"Prospects identified (running total)",       series:[], own:"brad", kind:"run"},
+         {id:"d_reach",  label:"First reaches made (running total)",          series:[], own:"brad", kind:"run"},
+         {id:"d_follow", label:"Follow-up conversations held (running total)",series:[], own:"brad", kind:"run"}],
+   floor:"Every ask goes to someone we’ve confirmed can give $100K and cares — tied to a specific priced project."}]},
+
+ {star:"Major Partners", desc:"A marquee brand in our corner.", goals:[
+  {id:"par", tag:"GOAL 2", accent:"#0EA5A4", name:"Land a major brand collaboration", win:"1 deal signed", fmt:"int",
+   key:{id:"p_meet", label:"Decision-maker meetings this week", series:[], own:"brad"},
+   subs:[{id:"p_pros",   label:"Prospects identified (running total)",       series:[], own:"brad", kind:"run"},
+         {id:"p_conn",   label:"Initial connection made (running total)",     series:[], own:"brad", kind:"run"},
+         {id:"p_follow", label:"Follow-up conversations held (running total)",series:[], own:"brad", kind:"run"}],
+   floor:"Only chase real overlaps — a genuine reason to work together, not big-name logos for their own sake."}]},
+
+ {star:"Operating Leverage", desc:"More output from the team we have.", goals:[
+  {id:"lev", tag:"GOAL 3", accent:"#7C3AED", name:"Build 100 AI agents we actually use", win:"100 agents", fmt:"int",
+   key:{id:"g3_inu", label:"AI agents actually in use for more than one month", series:[], own:"brad"},
+   subs:[{id:"g3_task", label:"AI agent ideas generated (running total)", series:[], own:"brad", kind:"run"},
+         {id:"g3_blt",  label:"AI agents in development (running total)",  series:[], own:"brad", kind:"run"},
+         {id:"g3_solo", label:"AI agents running on their own",            series:[], own:"brad"}],
+   floor:"An agent only counts if it does real work people accept and use — no demos padding the count."}]},
+
+ // ── MAJOR IMPACT ────────────────────────────────────────────────────────────
+ // Rebuilt 2026-07-30. Previously this section was six awareness-activity counts
+ // plus "people helped = 1" — a PR scorecard wearing an impact label, with no
+ // Thrive Blind, no beneficiaries and no fundraising anywhere on the page.
+ // Now three chains, matching the Programs & Development pillar of the org
+ // strategy: reach that converts (A), programs actually delivered (B), and the
+ // money that pays for them (C).
+ {star:"Major Impact", desc:"The whole reason the rest exists.", goals:[
+  {id:"brd", tag:"A", accent:"#DB2777", name:"Awareness that turns into action", win:"A top-tier inbound", fmt:"int",
+   key:{id:"b_action", label:"People who took a mission action this week", series:[], own:"krysta",
+        help:"Subscribed, signed up to volunteer, enquired about a program, or gave — reach that produced something."},
+   subs:[{id:"b_key",    label:"Top-tier media inbound inquiries",                         series:[], own:"krysta"},
+         {id:"b_ideas",  label:"Mainstream campaign ideas generated (running total)",      series:[], own:"krysta", kind:"run"},
+         {id:"b_launch", label:"Mainstream campaign ideas launched (running total)",       series:[], own:"krysta", kind:"run"},
+         {id:"b_1m",     label:"Mainstream campaigns with 1M+ impressions (running total)",series:[], own:"krysta", kind:"run"},
+         {id:"b_social", label:"Organic social posts with 10K+ impressions (running total)",series:[], own:"krysta", kind:"run"}],
+   floor:"Real mainstream reach, not vanity — and reach only counts as impact once somebody does something with it."},
+
+  {id:"prog", tag:"B", accent:"#0369A1", name:"Programs delivered (Thrive Blind)", win:"People served", fmt:"int",
+   key:{id:"tb_served", label:"People served (running total)", series:[], own:"kevin",
+        help:"A person is served when they complete a program interaction we could name and evidence — not a reach estimate."},
+   subs:[{id:"tb_enrol",    label:"People enrolled this week",                                    series:[], own:"kevin"},
+         {id:"tb_sess",     label:"Program sessions delivered this week",                          series:[], own:"kevin"},
+         {id:"tb_partners", label:"Partner organizations live (running total)",                    series:[], own:"kevin", kind:"run"},
+         {id:"tb_out",      label:"Outcomes recorded — skill, placement or device adopted (running total)", series:[], own:"kevin", kind:"run"}],
+   floor:"An outcome is something the person could not do before and can evidence now. Attendance is not an outcome."},
+
+  {id:"fund", tag:"C", accent:"#B45309", name:"Funding the mission", win:"Program dollars committed", fmt:"usd",
+   key:{id:"fnd_dollars", label:"Committed program dollars (running total)", series:[], own:"kevin", fmt:"usd"},
+   subs:[{id:"fnd_gsub", label:"Grants submitted (running total)",              series:[], own:"kevin", kind:"run"},
+         {id:"fnd_gwon", label:"Grants won (running total)",                    series:[], own:"kevin", kind:"run"},
+         {id:"fnd_recur",label:"Monthly recurring donors",                      series:[], own:"kevin"},
+         {id:"fnd_corp", label:"Corporate partners committed (running total)",  series:[], own:"kevin", kind:"run"}],
+   floor:"Committed means signed or granted, not verbally encouraging. This is the constraint on everything in B."}]},
+
+ {star:"Community", desc:"Whether people actually feel it.", goals:[
+  {id:"dep", tag:"GOAL 4", accent:"#D97706", name:"1,000 heartfelt thank-you messages", win:"1,000 messages", fmt:"int",
+   key:{id:"dp_key", label:"Heartfelt thank-you messages received (running total)", series:[], own:"shannen", kind:"run"},
+   subs:[{id:"dp_helped", label:"People helped in a significant way (running total)", series:[], own:"shannen", kind:"run"}],
+   floor:"Messages are genuine and unprompted — we don’t solicit thank-yous."}]},
+
+ {star:"Commercial Success", desc:"Protect and grow the engine that pays for it all.", goals:[
+  {id:"com", tag:"A", accent:"#16a34a", name:"Beat last year, every month", win:"Beat last year", fmt:"usdk1",
+   key:{id:"c_nm", label:"Contribution after ads & shipping", series:[]},
+   subs:[{id:"c_mear", label:"MER — revenue ÷ total ad spend",            series:[], fmt:"x2"},
+         {id:"c_sales",label:"Net sales ($ thousands) — matches the memo", series:[], fmt:"usdk1"},
+         {id:"c_gross",label:"Gross order value incl. shipping & tax ($k)",series:[], fmt:"usdk1"}],
+   floor:"Don’t hit the number by cutting ads or quality so far that sales or new customers drop."},
+
+  {id:"prod", tag:"B", accent:"#EA580C", name:"Build winning products", win:"Top-25% products", fmt:"int",
+   scorecard:"product",
+   key:{id:"wp_key", label:"Winning products (top 25% of their category)", series:[], own:"katie"},
+   subs:[{id:"wp_ideas", label:"New product ideas generated (running total)",           series:[], own:"katie", kind:"run"},
+         {id:"wp_score", label:"New products passing the scorecard ✱ (running total)",  series:[], own:"katie", kind:"run"},
+         {id:"wp_dev",   label:"New products or versions in development",               series:[], own:"katie"},
+         {id:"wp_launch",label:"New products launched (running total)",                 series:[], own:"katie", kind:"run"}],
+   floor:"A win is earned by the market — a product ranking in the top 25% of its category. The scorecard ✱ is the screen to get there."},
+
+  {id:"camp", tag:"C", accent:"#0891B2", name:"Build winning campaigns", win:"Campaigns that hold", fmt:"int",
+   scorecard:"campaign",
+   key:{id:"wc_key", label:"Winning campaigns — 250K+ impressions at neutral margin (after ads & product cost)", series:[], own:"krysta"},
+   subs:[{id:"wc_ideas", label:"New campaign ideas (running total)",                        series:[], own:"krysta", kind:"run"},
+         {id:"wc_score", label:"Campaigns passing the pre-launch scorecard ✱ (running total)",series:[], own:"krysta", kind:"run"},
+         {id:"wc_dev",   label:"New campaigns in development",                               series:[], own:"krysta"},
+         {id:"wc_launch",label:"New campaigns launched (running total)",                     series:[], own:"krysta", kind:"run"},
+         {id:"wc_post",  label:"Campaigns scored after launch ✱ (running total)",            series:[], own:"krysta", kind:"run"}],
+   floor:"A winning campaign holds 250K+ impressions at neutral-or-better margin after ad and product cost. Score it before launch AND after."}]}
+];
 
 function fmt(v,t){
   if(v===""||v==null) return "–";
@@ -222,75 +371,127 @@ function fmt(v,t){
   if(t==="x2") return v.toFixed(2)+"x";
   return Math.round(v).toLocaleString();
 }
-function spark(vals,{w=128,h=34,color="#2E5496",fill=true,dots=false,dotr=1.7,labels=null,vfmt=null}={}){
-  if(!vals||!vals.length) return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"></svg>`;
-  const n=vals.length,mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1;
-  const X=n<2?(_=>w/2):(i=>2+(i/(n-1))*(w-4)), Y=v=>h-3-((v-mn)/rng)*(h-6);
-  const pts=vals.map((v,i)=>[X(i),Y(v)]);
-  const line=pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
-  const area=`M2,${h} L`+line.replace(/ /g," L")+` L${(w-2).toFixed(1)},${h} Z`;
-  const last=pts[n-1];
-  const marks=dots?pts.map((p,i)=>{const t=labels?`<title>${labels[i]}: ${fmt(vals[i],vfmt)}</title>`:"";
-      return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i===n-1?dotr+0.9:dotr}" fill="${color}" opacity="${i===n-1?1:.5}">${t}</circle>`;}).join("")
-    :`<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6" fill="${color}"/>`;
+// Sparklines are plotted on a REAL TIME AXIS. The old version spaced every
+// column evenly, so a 4-day gap and a 27-day gap were drawn identically —
+// which is how a five-month, irregularly-sampled series passed for "the last
+// 14 weeks". Nulls break the line instead of being drawn as zero.
+function xScale(dates,w){
+  if(!dates||!dates.length||!dates[0]) return i=>2+(w-4)/2;
+  const t=dates.map(d=>d?d.getTime():null).filter(v=>v!=null);
+  const lo=Math.min(...t), hi=Math.max(...t), span=(hi-lo)||1;
+  if(t.length<2) return _=>2+(w-4)/2;
+  return i=>{ const d=dates[i]; return d?2+((d.getTime()-lo)/span)*(w-4):2; };
+}
+function segments(vals,X,Y){   // contiguous runs of non-null points
+  const out=[]; let cur=[];
+  vals.forEach((v,i)=>{ if(v==null){ if(cur.length)out.push(cur); cur=[]; return; }
+    cur.push([X(i),Y(v)]); });
+  if(cur.length) out.push(cur); return out;
+}
+function spark(vals,{w=128,h=34,color="#2E5496",fill=true,dots=false,dotr=1.7,labels=null,vfmt=null,dates=null}={}){
+  const real=(vals||[]).filter(v=>v!=null);
+  if(!real.length) return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"></svg>`;
+  const n=vals.length,mn=Math.min(...real),mx=Math.max(...real),rng=(mx-mn)||1;
+  const X=dates?xScale(dates,w):(n<2?(_=>w/2):(i=>2+(i/(n-1))*(w-4)));
+  const Y=v=>h-3-((v-mn)/rng)*(h-6);
+  const segs=segments(vals,X,Y);
+  const polys=segs.map(s=>`<polyline points="${s.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`).join("");
+  const big=segs[segs.length-1];
+  const area=(fill&&big.length>1)?`<path d="M${big[0][0].toFixed(1)},${h} L`+big.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" L")+` L${big[big.length-1][0].toFixed(1)},${h} Z" fill="${color}" opacity=".10"/>`:"";
+  let lastIdx=-1; vals.forEach((v,i)=>{ if(v!=null) lastIdx=i; });
+  const marks=dots?vals.map((v,i)=>{ if(v==null) return "";
+      const t=labels?`<title>${labels[i]}: ${fmt(v,vfmt)}</title>`:"";
+      return `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i===lastIdx?dotr+0.9:dotr}" fill="${color}" opacity="${i===lastIdx?1:.5}">${t}</circle>`;}).join("")
+    :`<circle cx="${X(lastIdx).toFixed(1)}" cy="${Y(vals[lastIdx]).toFixed(1)}" r="2.6" fill="${color}"/>`;
+  return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${area}${polys}${marks}</svg>`;
+}
+function spark2(a,b,{w=128,h=34,c1="#16a34a",c2="#9aa6b8",dots=false,labels=null,vfmt=null,dates=null,bDim=false}={}){
+  const real=(a||[]).concat(b||[]).filter(v=>v!=null);
+  if(!a||!a.length||!real.length) return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"></svg>`;
+  const n=a.length,mn=Math.min(...real),mx=Math.max(...real),rng=(mx-mn)||1;
+  const X=dates?xScale(dates,w):(n<2?(_=>w/2):(i=>2+(i/(n-1))*(w-4)));
+  const Y=v=>h-3-((v-mn)/rng)*(h-6);
+  const poly=(arr,col,extra)=>segments(arr,X,Y).map(s=>`<polyline points="${s.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}" fill="none" stroke="${col}" ${extra}/>`).join("");
+  let lastIdx=-1; a.forEach((v,i)=>{ if(v!=null) lastIdx=i; });
+  const marks=dots?a.map((v,i)=>{ if(v==null) return "";
+      const t=labels?`<title>${labels[i]}: ${fmt(v,vfmt)}</title>`:"";
+      return `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i===lastIdx?2.6:1.6}" fill="${c1}" opacity="${i===lastIdx?1:.5}">${t}</circle>`;}).join("")
+    :`<circle cx="${X(lastIdx).toFixed(1)}" cy="${Y(a[lastIdx]).toFixed(1)}" r="2.8" fill="${c1}"/>`;
   return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-    ${fill?`<path d="${area}" fill="${color}" opacity=".10"/>`:""}
-    <polyline points="${line}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+    ${poly(b,c2,`stroke-width="1.4" stroke-dasharray="3,2" opacity="${bDim?.45:1}"`)}
+    ${poly(a,c1,'stroke-width="2"')}
     ${marks}</svg>`;
 }
-function spark2(a,b,{w=128,h=34,c1="#16a34a",c2="#9aa6b8",dots=false,labels=null,vfmt=null}={}){
-  if(!a||!a.length) return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"></svg>`;
-  const all=a.concat(b),n=a.length,mn=Math.min(...all),mx=Math.max(...all),rng=(mx-mn)||1;
-  const X=n<2?(_=>w/2):(i=>2+(i/(n-1))*(w-4)),Y=v=>h-3-((v-mn)/rng)*(h-6);
-  const L=arr=>arr.map((v,i)=>X(i).toFixed(1)+","+Y(v).toFixed(1)).join(" ");
-  const marks=dots?a.map((v,i)=>{const t=labels?`<title>${labels[i]}: ${fmt(v,vfmt)}</title>`:"";
-      return `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i===n-1?2.6:1.6}" fill="${c1}" opacity="${i===n-1?1:.5}">${t}</circle>`;}).join("")
-    :`<circle cx="${X(n-1).toFixed(1)}" cy="${Y(a[n-1]).toFixed(1)}" r="2.8" fill="${c1}"/>`;
-  return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-    <polyline points="${L(b)}" fill="none" stroke="${c2}" stroke-width="1.4" stroke-dasharray="3,2"/>
-    <polyline points="${L(a)}" fill="none" stroke="${c1}" stroke-width="2"/>
-    ${marks}</svg>`;
-}
+function lastReal(s){ for(let i=(s||[]).length-1;i>=0;i--) if(s[i]!=null) return s[i]; return null; }
 function statusOf(g){
-  const s=g.key.series,last=s[s.length-1];
-  if(g.key.vs){const w=last>g.key.vs[g.key.vs.length-1];
-    return w?["Beating last year","var(--green)","#e8f6ec"]:["Behind last year","var(--red)","#fde8e8"];}
+  const last=lastReal(g.key.series);
+  if(g.key.vs){ const lv=lastReal(g.key.vs);
+    if(last!=null&&lv!=null) return last>lv?["Beating last year","var(--green)","#e8f6ec"]:["Behind last year","var(--red)","#fde8e8"]; }
+  if(last==null) return ["No data yet","#6b7280","#eef0f3"];
   if(last>0) return ["Making progress",g.accent,g.accent+"1a"];
   return ["Not started yet","#6b7280","#eef0f3"];
 }
 function fmtDelta(d,f){
+  if(f==="usd")  return "$"+Math.round(d).toLocaleString();
   if(f==="usdk") return "$"+Math.round(d).toLocaleString()+"k";
   if(f==="usdk1") return "$"+(Math.round(d*10)/10).toFixed(1)+"k";
   if(f==="pct") return Math.round(d*100)+"%";
-  if(f==="x") return d.toFixed(1)+"x";
+  if(f==="x"||f==="x2") return d.toFixed(2)+"x";
   return Math.round(d).toLocaleString();
 }
-function wow(series,f,{mini=false}={}){
-  const n=series.length,d=n<2?0:series[n-1]-series[n-2];
+// Week-over-week movement between the last two weeks that actually have values.
+// A running total that goes DOWN is a correction, not a trend — it gets a grey
+// pencil rather than a red down-arrow, because a cumulative count cannot fall.
+function wow(series,f,{mini=false,code=null}={}){
+  const idx=[]; (series||[]).forEach((v,i)=>{ if(v!=null) idx.push(i); });
+  if(idx.length<2) return mini?`<span class="wowmini" style="color:#cbd5e1" title="not enough data">·</span>`
+                             :`<div class="wow" style="color:#9aa6b8">— <span style="color:var(--muted);font-weight:500">no prior week</span></div>`;
+  const b=idx[idx.length-1],a=idx[idx.length-2],d=series[b]-series[a];
+  const gap=(WEEKS[b]&&WEEKS[a])?Math.round((WEEKS[b].date-WEEKS[a].date)/86400000):7;
+  const span=gap>10?`vs ${gap} days earlier`:"vs last week";
+  const corrected=code&&isRunning(code)&&d<-1e-9;
+  if(corrected){
+    if(mini) return `<span class="wowmini" style="color:#94a3b8" title="running total went down — recorded as a correction, not a decline">✎</span>`;
+    return `<div class="wow" style="color:#94a3b8">✎ ${fmtDelta(Math.abs(d),f)} <span style="color:var(--muted);font-weight:500">correction</span></div>`;
+  }
   const up=d>1e-9,down=d<-1e-9;
   const col=up?"#16a34a":down?"#dc2626":"#9aa6b8",arrow=up?"▲":down?"▼":"—";
-  if(mini) return `<span class="wowmini" style="color:${col}" title="vs last week">${arrow}</span>`;
+  if(mini) return `<span class="wowmini" style="color:${col}" title="${span}">${arrow}</span>`;
   const mag=d!==0?" "+fmtDelta(Math.abs(d),f):"";
-  return `<div class="wow" style="color:${col}">${arrow}${mag} <span style="color:var(--muted);font-weight:500">vs last week</span></div>`;
+  return `<div class="wow" style="color:${col}">${arrow}${mag} <span style="color:var(--muted);font-weight:500">${span}</span></div>`;
+}
+// The ✱ next to a scorecard-gated metric becomes a real link to the scorecard.
+function scorecardMark(g){
+  if(!g.scorecard) return "";
+  const sc=SCORECARDS[g.scorecard]; if(!sc) return "";
+  return sc.url
+    ? ` <a class="scmark" href="${sc.url}" target="_blank" rel="noopener" title="${escHtml(sc.name)} — ${escHtml(sc.note)}">✱ scorecard ↗</a>`
+    : ` <span class="scmark scmissing" title="${escHtml(sc.name)} exists but its link hasn't been set — paste the URL into SCORECARDS in index.html">✱ link not set</span>`;
 }
 function metricBlock(g){
-  const s=g.key.series,last=s[s.length-1];
+  const s=g.key.series,last=lastReal(s);
   const [stxt,scol,sbg]=statusOf(g);
-  const wl=(g.src==="ecomm"&&window.ECOMM_HIST)?window.ECOMM_HIST.weeks:WEEKS;
-  const ksvg=g.key.vs?spark2(g.key.series,g.key.vs,{color:g.accent,dots:true,labels:wl,vfmt:g.fmt})
-                     :spark(s,{color:g.accent,w:150,h:42,dots:true,labels:wl,vfmt:g.fmt});
+  const ec=(g.src==="ecomm"&&window.ECOMM_HIST);
+  const wl=ec?window.ECOMM_HIST.labels:WEEKS.map(w=>w.label);
+  const wd=ec?window.ECOMM_HIST.dates:WEEKS.map(w=>w.date);
+  const ksvg=g.key.vs?spark2(g.key.series,g.key.vs,{color:g.accent,dots:true,labels:wl,vfmt:g.fmt,dates:wd,bDim:!!g.vsSuspect})
+                     :spark(s,{color:g.accent,w:150,h:42,dots:true,labels:wl,vfmt:g.fmt,dates:wd});
   const subs=g.subs.map(sb=>{const f=sb.fmt||g.fmt;const sl=sb.series;
-    return `<div class="sub"><span class="sl">${sb.label}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f})}
-      <span class="sv">${fmt(sl[sl.length-1],f)}</span>${wow(sl,f,{mini:true})}</div>`;}).join("");
-  const badge=g.src==="ecomm"?` <a class="srcbadge" href="ecomm.html" title="Pulled from the E-Comm Metrics page — the current week is live; prior weeks and last year are the filled-in baseline. Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
+    const fb=ec?"":freshBadge(sb.id,{mini:true});
+    return `<div class="sub"><span class="sl">${sb.label}${sb.id==="wp_score"||sb.id==="wc_score"||sb.id==="wc_post"?scorecardMark(g):""}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f,dates:wd})}
+      <span class="sv">${fmt(lastReal(sl),f)}</span>${wow(sl,f,{mini:true,code:sb.id})}${fb}</div>`;}).join("");
+  const badge=ec?` <a class="srcbadge" href="ecomm.html" title="Pulled straight from the weekly e-comm feed (Shopify + Northbeam). Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
+  const fresh=ec?"":` ${freshBadge(g.key.id)}`;
   const cap=g.key.vs
-    ?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.src==="ecomm"?" · live from WBR e-comm history":""}</div>`
-    :(g.src==="ecomm"?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">real net margin from the WBR history · last-year comparison pending real data</div>`:"");
+    ?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.vsSuspect?' · <span style="color:#b91c1c">last-year spend data looks incomplete</span>':""}</div>`
+    :(ec?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">from the weekly e-comm feed</div>`:"");
+  const help=g.key.help?`<div class="khelp">${escHtml(g.key.help)}</div>`:"";
   return `<div class="keyblock"><div>
-      <div class="kl"><span class="star">★</span>${g.key.label}${badge}</div>
+      <div class="kl"><span class="star">★</span>${g.key.label}${badge}${fresh}</div>
       <div class="kv" style="color:${g.accent}">${fmt(last,g.fmt)}</div>
-      ${wow(s,g.fmt)}
+      ${wow(s,g.fmt,{code:g.key.id})}
       <span class="pill" style="color:${scol};background:${sbg}">${stxt}${g.key.vs?"":" · target "+g.win}</span>
+      ${help}
     </div><div style="text-align:right">${ksvg}${cap}</div></div>
     <div class="subs">${subs}</div>
     <div class="floor"><b>Floor:</b> ${g.floor}</div>`;
@@ -299,11 +500,15 @@ function bannerHTML(n){return `<div class="banner"><span class="bstar">★</span
 
 function render(){
   document.getElementById("kpis").innerHTML=NS.flatMap(n=>n.goals.map(g=>{
-    const s=g.key.series,last=s[s.length-1];const ab=(g.tag==="A"||g.tag==="B")?" · "+g.tag:"";
+    const s=g.key.series,last=lastReal(s);
+    const ab=/^[A-C]$/.test(g.tag||"")?" · "+g.tag:"";
+    const ec=(g.src==="ecomm"&&window.ECOMM_HIST);
+    const dates=ec?window.ECOMM_HIST.dates:WEEKS.map(w=>w.date);
     return `<div class="kpi"><div class="kstripe" style="background:${g.accent}"></div>
       <div class="lab">${n.star.toUpperCase()}${ab} · <span class="star">★</span></div>
-      <div class="row"><div class="num" style="color:${g.accent}">${fmt(last,g.fmt)}</div>${spark(s,{w:72,h:26,color:g.accent})}</div>
-      <div class="tgt">${g.key.label} · target: ${g.win}</div></div>`;
+      <div class="row"><div class="num" style="color:${g.accent}">${fmt(last,g.fmt)}</div>${spark(s,{w:72,h:26,color:g.accent,dates})}</div>
+      <div class="tgt">${g.key.label} · target: ${g.win}</div>
+      ${ec?"":`<div class="kfresh">${freshBadge(g.key.id)}</div>`}</div>`;
   })).join("");
   document.getElementById("singles").innerHTML=NS.filter(n=>n.goals.length===1).map(n=>{
     const g=n.goals[0];
@@ -326,23 +531,30 @@ function setStatus(live){
   else { b.style.background="#fef3c7"; b.style.color="#92400e";
     b.innerHTML='<b>● Showing example data</b> — the live sheet isn’t shared yet. In the sheet: <b>Share → Anyone with the link → Viewer</b>, then refresh. &nbsp;·&nbsp; <a href="example.html">example ↗</a>'; }
 }
-// The "Beat last year" goal is sourced from e-comm (see ecomm-data.js), not the team sheet.
-const ECOMM_IDS=new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales"]);
+// The "Beat last year" goal is sourced from the e-comm feed, not the team sheet.
+const ECOMM_IDS=new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales","c_gross"]);
 function findGoal(id){ for(const n of NS) for(const g of n.goals) if(g.id===id) return g; return null; }
 function applyEcomm(){
   const E=window.ECOMM_HIST; if(!E) return;
   const g=findGoal("com"); if(!g) return;
   g.src="ecomm"; g.fmt="usdk1";
-  g.subs = g.subs.filter(sb=> sb.id!=="c_ret");   // returning-customers isn't in the WBR feed
-  g.key.series=E.marginK(E.thisYear);             // real net margin (this year)
-  if(E.lastYear && E.lastYear.net_revenue && E.lastYear.net_revenue.length){
-    g.key.vs=E.marginK(E.lastYear); g.key.vsId="c_nm_vs";   // REAL last-year line (margin_yoy.json)
+  g.subs = g.subs.filter(sb=> sb.id!=="c_ret");   // returning-customers isn't in the feed
+  g.key.series=E.marginK(E.thisYear);
+  if(E.lastYear && E.lastYear.net_sales && E.lastYear.net_sales.length){
+    g.key.vs=E.marginK(E.lastYear); g.key.vsId="c_nm_vs";
+    // Last year's Northbeam spend collapses to a few hundred dollars a week from
+    // mid-May 2025 while this year runs $6.6-7.9K. Margin subtracts spend, so if
+    // that's a tracking gap rather than a real decision it flatters last year by
+    // ~$5-6K/week. Dim the line and say so rather than presenting it as settled.
+    g.vsSuspect = Array.isArray(E.lastYear.ad_spend_suspect)
+      && E.lastYear.ad_spend_suspect.filter(Boolean).length >= Math.ceil(E.lastYear.ad_spend_suspect.length/2);
   } else {
-    delete g.key.vs; delete g.key.vsId;           // no last-year data — no fabricated baseline
+    delete g.key.vs; delete g.key.vsId; g.vsSuspect=false;
   }
   g.subs.forEach(sb=>{
-    if(sb.id==="c_mear"){ sb.series=E.mearX(E.thisYear); sb.fmt="x2"; }   // MER = revenue ÷ ad spend (this year)
+    if(sb.id==="c_mear"){  sb.series=E.mearX(E.thisYear);  sb.fmt="x2"; }
     if(sb.id==="c_sales"){ sb.series=E.salesK(E.thisYear); sb.fmt="usdk1"; }
+    if(sb.id==="c_gross"){ sb.series=E.grossK(E.thisYear); sb.fmt="usdk1"; }
   });
 }
 // Fallback only if kpi_history.json is unavailable: read the single current week
@@ -354,8 +566,12 @@ function syncCurrentFromEcomm(){
     const rev=pick(/net_revenue:\s*([\d.]+)/), ad=pick(/ad_spend:\s*([\d.]+)/), pe=pick(/period_end:\s*"([^"]+)"/);
     if(rev==null||ad==null) return false;
     const E=window.ECOMM_HIST;
-    E.thisYear.net_revenue=[Number(rev)]; E.thisYear.ad_spend=[Number(ad)];
-    E.weeks=[ pe?pe.replace(/,?\s*20\d\d\s*$/,""):"" ]; E._realWeeks=1;
+    // Last-resort snapshot: only a gross figure is available here, so it fills
+    // both slots and the memo-comparable net-sales row simply won't be exact.
+    E.thisYear.net_sales=[Number(rev)]; E.thisYear.gross_revenue=[Number(rev)];
+    E.thisYear.ad_spend=[Number(ad)];
+    E.weeks=[pe||""]; E.labels=[ pe?pe.replace(/,?\s*20\d\d\s*$/,""):"" ]; E.dates=[null];
+    E._realWeeks=1;
     return true;
   }).catch(()=>false);
 }
@@ -364,23 +580,35 @@ function prettyShort(s){
   if(!m) return String(s||"");
   return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m[2]-1]+" "+(+m[3]);
 }
-// Preferred source: margin_yoy.json — REAL this-year AND last-year weekly net margin
-// (Shopify revenue + Northbeam ad spend), from tools/backfill_margin_yoy.py.
-// Keeps only weeks where both years are complete, so the comparison is clean.
+// Preferred source: margin_yoy.json (tools/backfill_margin_yoy.py). Carries BOTH
+// revenue definitions — net_sales (excludes shipping + tax; matches the weekly
+// memo) and gross_revenue (includes them; what this dashboard used to show as
+// "Sales / revenue") — plus frozen history so closed weeks stop restating.
 function loadMarginYoY(){
   return fetch("margin_yoy.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{
     if(!d||!window.ECOMM_HIST||!Array.isArray(d.weeks)||!d.weeks.length) return false;
     const E=window.ECOMM_HIST, ty=d.thisYear||{}, ly=d.lastYear||{};
     const num=(o,k,i)=>{ const v=(o[k]||[])[i]; return (v==null||isNaN(v))?null:+v; };
+    // net_sales is the basis; fall back to the legacy net_revenue key so an old
+    // margin_yoy.json still renders during a partial deploy.
+    const rev=(o,i)=>{ const v=num(o,"net_sales",i); return v!=null?v:num(o,"net_revenue",i); };
     const keep=[];
     for(let i=0;i<d.weeks.length;i++){
-      if([num(ty,"net_revenue",i),num(ty,"ad_spend",i),num(ly,"net_revenue",i),num(ly,"ad_spend",i)].every(v=>v!=null)) keep.push(i);
+      if([rev(ty,i),num(ty,"ad_spend",i),rev(ly,i),num(ly,"ad_spend",i)].every(v=>v!=null)) keep.push(i);
     }
     if(!keep.length) return false;
     if(typeof d.shipPct==="number") E.shipPct=d.shipPct;
-    E.weeks    = keep.map(i=>d.weeks[i]);
-    E.thisYear = {net_revenue:keep.map(i=>+ty.net_revenue[i]), ad_spend:keep.map(i=>+ty.ad_spend[i])};
-    E.lastYear = {net_revenue:keep.map(i=>+ly.net_revenue[i]), ad_spend:keep.map(i=>+ly.ad_spend[i])};
+    const iso=i=>String(d.weeks[i]||"");
+    E.weeks  = keep.map(iso);
+    E.labels = keep.map(i=>(d.labels&&d.labels[i])?d.labels[i]:prettyShort(iso(i)));
+    E.dates  = keep.map(i=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso(i)); return m?new Date(+m[1],+m[2]-1,+m[3]):null; });
+    E.thisYear = {net_sales:keep.map(i=>rev(ty,i)),
+                  gross_revenue:keep.map(i=>num(ty,"gross_revenue",i)),
+                  ad_spend:keep.map(i=>num(ty,"ad_spend",i))};
+    E.lastYear = {net_sales:keep.map(i=>rev(ly,i)),
+                  gross_revenue:keep.map(i=>num(ly,"gross_revenue",i)),
+                  ad_spend:keep.map(i=>num(ly,"ad_spend",i)),
+                  ad_spend_suspect:keep.map(i=>!!(ly.ad_spend_suspect||[])[i])};
     E._realWeeks=keep.length; E._yoy=true;
     return true;
   }).catch(()=>false);
@@ -394,10 +622,14 @@ function loadKpiHistory(){
     const E=window.ECOMM_HIST;
     const rows=h.filter(r=> r.net_revenue!=null && r.ad_spend!=null);
     if(!rows.length) return false;
-    E.weeks                = rows.map(r=>prettyShort(r.period_end));
-    E.thisYear.net_revenue = rows.map(r=>Number(r.net_revenue));
-    E.thisYear.ad_spend    = rows.map(r=>Number(r.ad_spend));
-    E._realWeeks           = rows.length;
+    // kpi_history only carries the gross figure, so it fills both slots.
+    E.weeks  = rows.map(r=>String(r.period_end||""));
+    E.labels = rows.map(r=>prettyShort(r.period_end));
+    E.dates  = rows.map(r=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(r.period_end||"")); return m?new Date(+m[1],+m[2]-1,+m[3]):null; });
+    E.thisYear.net_sales     = rows.map(r=>Number(r.net_revenue));
+    E.thisYear.gross_revenue = rows.map(r=>Number(r.net_revenue));
+    E.thisYear.ad_spend      = rows.map(r=>Number(r.ad_spend));
+    E._realWeeks             = rows.length;
     return true;
   }).catch(()=>false);
 }
@@ -411,31 +643,165 @@ function applyLive(map){
   }));
   return hit;
 }
+// ---------------------------------------------------------------------------
+// Week headers -> real dates.
+// The sheet stores week-ending Sundays as yyyy-mm-dd (gviz hands those back as
+// "Date(2026,6,26)"). Legacy free-text labels ("Jun 25") are still parsed, with
+// the year inferred by walking left->right and only rolling forward when the
+// month goes backwards — deterministic, and it can't silently reorder columns
+// the way the old max-month wrap heuristic could every January.
+// ---------------------------------------------------------------------------
+const MI={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function weekEndOf(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()+((7-x.getDay())%7)); return x; }
+function labelOf(d){ return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]+" "+d.getDate(); }
+// Only a real gviz Date(...) cell counts as a date here. gvDate() falls back to
+// `new Date(str)`, and V8 parses a bare "July 20" as the year 2001 — which
+// quietly turned the newest column into a 25-year-old week.
+function gvDateStrict(v){
+  const m=/^\s*Date\((\d+),(\d+),(\d+)/.exec(String(v==null?"":v));
+  return m?new Date(+m[1],+m[2],+m[3]):null;
+}
+function parseWeekHeaders(raw){
+  const out=raw.map(s=>{
+    if(s instanceof Date) return {date:weekEndOf(s)};
+    const g=gvDateStrict(s); if(g) return {date:weekEndOf(g)};
+    const t=String(s==null?"":s).trim();
+    let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+    if(m) return {date:weekEndOf(new Date(+m[1],+m[2]-1,+m[3]))};
+    m=/^([A-Za-z]{3,9})\.?\s+(\d{1,2})$/.exec(t);
+    if(m){ const mo=MI[m[1].slice(0,3).toLowerCase()]; if(mo!=null) return {mo, day:+m[2]}; }
+    return {date:null};
+  });
+  let year=new Date().getFullYear(), prevMo=-1;
+  out.forEach(p=>{ if(p.date){ prevMo=p.date.getMonth(); return; }
+    if(p.mo==null) return;
+    if(p.mo<prevMo) year++;
+    prevMo=p.mo; p.date=weekEndOf(new Date(year,p.mo,p.day)); });
+  // If inference pushed anything past this week, shift the inferred ones back a year.
+  const now=weekEndOf(new Date()), mx=out.reduce((a,p)=>(p.date&&(!a||p.date>a))?p.date:a,null);
+  if(mx&&mx>now) out.forEach(p=>{ if(p.date&&p.mo!=null) p.date=new Date(p.date.getFullYear()-1,p.date.getMonth(),p.date.getDate()); });
+  return out.map(p=>p.date?{date:p.date, iso:isoOf(p.date), label:labelOf(p.date)}:null);
+}
+function isoOf(d){ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+function daysAgo(d){ return d?Math.floor((Date.now()-d.getTime())/86400000):null; }
+
 window.__gv=function(resp){
   try{
     const t=resp.table,map={};
-    if(t.cols&&t.cols.length>2){ WEEKS=t.cols.slice(2).map(c=>String(c.label||c.id||"")); }
+    const heads=parseWeekHeaders((t.cols||[]).slice(2).map(c=>c.label||c.id||""));
+    // Blank cells stay NULL. Previously every empty cell became 0, so a week
+    // nobody touched was indistinguishable from a measured zero — which is how
+    // 13 columns of untouched history ended up drawn as a flat line at zero.
     t.rows.forEach(r=>{ if(!r.c||!r.c[1]||r.c[1].v==null||r.c[1].v==="") return;
-      map[String(r.c[1].v)]=r.c.slice(2).map(c=>(c&&c.v!=null)?Number(c.v):0); });
-    // Sort weeks chronologically so the sheet's COLUMN ORDER doesn't matter — the team
-    // can keep the current week in any column (e.g. first, right next to the names).
-    if(WEEKS.length>1){
-      const MI={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-      const parsed=WEEKS.map(l=>{const m=String(l).match(/([a-z]{3})[a-z]*\.?\s*(\d{1,2})/i);return m?{mo:MI[m[1].toLowerCase()]||0,d:+m[2]}:null;});
-      if(parsed.every(p=>p&&p.mo)){
-        const mos=parsed.map(p=>p.mo), wrap=Math.max(...mos)>=10&&Math.min(...mos)<=3;
-        const key=parsed.map(p=>(wrap&&p.mo<=6?p.mo+12:p.mo)*100+p.d);
-        const order=WEEKS.map((_,i)=>i).sort((a,b)=>key[a]-key[b]);
-        WEEKS=order.map(i=>WEEKS[i]);
-        Object.keys(map).forEach(id=>{ map[id]=order.map(i=>map[id][i]); });
-      }
-    }
-    var wd=document.getElementById("wkdate"); if(wd&&WEEKS.length) wd.textContent=WEEKS[WEEKS.length-1];
+      map[String(r.c[1].v)]=r.c.slice(2).map(c=>(c&&c.v!=null&&c.v!=="")?Number(c.v):null); });
+
+    // Order columns by date (so column order in the sheet doesn't matter), and
+    // drop unparseable ones rather than guessing.
+    let order=heads.map((h,i)=>({h,i})).filter(x=>x.h).sort((a,b)=>a.h.date-b.h.date);
+
+    // Drop leading pre-history: columns where EVERY metric is null or 0, before
+    // the first column that has any real entry. These are the carried-forward
+    // zeros from before the team started using the sheet.
+    const hasData=order.map(({i})=>Object.keys(map).some(k=>{const v=map[k][i]; return v!=null&&v!==0;}));
+    let first=hasData.indexOf(true); if(first<0) first=0;
+    const dropped=first;
+    order=order.slice(first);
+
+    WEEKS=order.map(x=>x.h);
+    Object.keys(map).forEach(id=>{ map[id]=order.map(x=>map[id][x.i]); });
+    window.__droppedWeeks=dropped;
+
+    const wd=document.getElementById("wkdate");
+    if(wd&&WEEKS.length){ const w=WEEKS[WEEKS.length-1]; wd.textContent="ending "+w.label; }
     const hit=applyLive(map);
     applyEcomm();
     setStatus(hit>0); render();
   }catch(e){ setStatus(false); }
 };
+
+// ---------------------------------------------------------------------------
+// Freshness. Reads the Log tab the Apps Script writes on every save/confirm,
+// so the page can say "updated 3d ago by Katie" or "nobody has touched this in
+// 5 weeks". Without this there is no way to tell a stable number from an
+// abandoned one — which was the single biggest gap in the old dashboard.
+// ---------------------------------------------------------------------------
+let FRESH={};   // code -> {when:Date, who, action}
+function loadFresh(){
+  return new Promise(resolve=>{
+    let done=false; const finish=()=>{ if(!done){done=true;resolve();} };
+    window.__gvLog=function(resp){
+      try{
+        FRESH={};
+        if(resp && resp.status!=="error" && resp.table){
+          const cols=resp.table.cols.map(c=>String(c.label||c.id||"").toLowerCase()), idx={};
+          cols.forEach((c,i)=>idx[c]=i);
+          (resp.table.rows||[]).forEach(r=>{
+            const c=r.c||[], cell=k=>(idx[k]!=null&&c[idx[k]])?c[idx[k]].v:null;
+            const code=String(cell("code")||"").trim(); if(!code) return;
+            const when=gvDate(cell("when")); if(!when) return;
+            const prev=FRESH[code];
+            if(!prev||when>prev.when) FRESH[code]={when, who:String(cell("who")||"").trim(), action:String(cell("action")||"").trim()};
+          });
+        }
+      }catch(e){ FRESH={}; }
+      finish();
+    };
+    const s=document.createElement("script");
+    s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gvLog&sheet=Log&headers=1&_="+Date.now();
+    s.onerror=finish; document.head.appendChild(s);
+    setTimeout(finish,6000);
+  });
+}
+// Per-metric owner overrides from the sheet's Meta tab (code|owner|kind|link).
+let META={};
+function loadMeta(){
+  return new Promise(resolve=>{
+    let done=false; const finish=()=>{ if(!done){done=true;resolve();} };
+    window.__gvMeta=function(resp){
+      try{
+        META={};
+        if(resp && resp.status!=="error" && resp.table){
+          const cols=resp.table.cols.map(c=>String(c.label||c.id||"").toLowerCase()), idx={};
+          cols.forEach((c,i)=>idx[c]=i);
+          (resp.table.rows||[]).forEach(r=>{
+            const c=r.c||[], cell=k=>(idx[k]!=null&&c[idx[k]])?c[idx[k]].v:null;
+            const code=String(cell("code")||"").trim(); if(!code) return;
+            META[code]={owner:String(cell("owner")||"").trim().toLowerCase(),
+                        kind:String(cell("kind")||"").trim().toLowerCase(),
+                        link:String(cell("link")||"").trim()};
+          });
+        }
+      }catch(e){ META={}; }
+      finish();
+    };
+    const s=document.createElement("script");
+    s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gvMeta&sheet=Meta&headers=1&_="+Date.now();
+    s.onerror=finish; document.head.appendChild(s);
+    setTimeout(finish,6000);
+  });
+}
+function metricDef(code){
+  for(const n of NS) for(const g of n.goals) for(const m of [g.key].concat(g.subs)) if(m&&m.id===code) return m;
+  return null;
+}
+function ownerOf(code){ const m=META[code]; if(m&&m.owner) return m.owner; const d=metricDef(code); return d&&d.own?d.own:""; }
+function isRunning(code){
+  const m=META[code]; if(m&&m.kind) return m.kind.indexOf("run")===0;
+  const d=metricDef(code); if(d&&d.kind) return d.kind==="run";
+  return /running total/i.test(labelFor(code));
+}
+// Freshness badge: green <7d, amber 7-14d, red older, grey never.
+function freshBadge(code,{mini=false}={}){
+  const f=FRESH[code], d=f?daysAgo(f.when):null;
+  let col,bg,txt;
+  if(!f){ col="#94a3b8"; bg="#f1f5f9"; txt=mini?"?":"never confirmed"; }
+  else{
+    const ago=d<=0?"today":d===1?"1d":d+"d";
+    txt=mini?ago:(f.action==="confirm"?"confirmed ":"updated ")+ago+" ago"+(f.who?" · "+escHtml(f.who):"");
+    if(d<7){ col="#15803d"; bg="#e8f6ec"; } else if(d<=14){ col="#92400e"; bg="#fef3c7"; } else { col="#b91c1c"; bg="#fde8e8"; }
+  }
+  return `<span class="fresh" style="color:${col};background:${bg}" title="${f?("last write: "+f.action+(f.who?" by "+escHtml(f.who):"")):"no save or confirm has ever been logged for this metric"}">${txt}</span>`;
+}
 // ===== Live editing — writes back to the sheet via the deployed Apps Script web app =====
 const APPS_URL = "https://script.google.com/macros/s/AKfycbxFYl7yMenuUkVCV9nSDSIvfP0-UnPN-R1NOYVrQM0kRzk8Z2WYtb9JTZBK-aQYwJGu3A/exec";   // deployed Apps Script web app
 // Writes need the shared team passcode (checked server-side in the Apps
@@ -445,7 +811,17 @@ const PASS_KEY="tbb_write_pass";
 function getPass(){ try{ return localStorage.getItem(PASS_KEY)||""; }catch(e){ return ""; } }
 function setPass(v){ try{ v?localStorage.setItem(PASS_KEY,v):localStorage.removeItem(PASS_KEY); }catch(e){} }
 function changePass(){ setPass(""); buildEditPanel(); }
-const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales"]);  // auto from e-comm — not edited (incl. MRR)
+const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales","c_gross"]);  // auto from the e-comm feed — not typed in
+// Who's entering, remembered per browser and sent with every write (the Log tab
+// is what powers "updated 3d ago by Katie").
+const WHO_KEY="tbb_who";
+function getWho(){ try{ return localStorage.getItem(WHO_KEY)||""; }catch(e){ return ""; } }
+function setWho(v){ try{ v?localStorage.setItem(WHO_KEY,v):localStorage.removeItem(WHO_KEY); }catch(e){} }
+// ?who=katie gives one person a link that shows only their metrics, instead of
+// everyone scrolling past 30 rows to find their six.
+const ONLY_MINE=(function(){
+  try{ return (new URLSearchParams(location.search).get("who")||"").trim().toLowerCase(); }catch(e){ return ""; }
+})();
 function jsonp(url){
   return new Promise((resolve,reject)=>{
     const cb="__cb"+Math.random().toString(36).slice(2);
@@ -478,29 +854,68 @@ function buildEditPanel(){
   } else {
     warn.style.display="none";
   }
-  let html="";
+  // Who's entering. Stored per browser and sent with every write so the Log tab
+  // can answer "who last touched this" — which is what the freshness badges read.
+  const me=getWho();
+  let html=`<div class="epme"><label for="epwho">You are</label>`+
+           `<input id="epwho" type="text" placeholder="your first name" value="${escHtml(me)}" autocomplete="given-name">`+
+           (ONLY_MINE?`<span class="epfilter">showing <b>${escHtml(ONLY_MINE)}</b>’s metrics · <a href="${location.pathname}">show all</a></span>`
+                     :(me?`<span class="epfilter"><a href="?who=${encodeURIComponent(me.toLowerCase())}">just show mine ↗</a></span>`:``))+
+           `</div>`;
+  let shown=0;
   NS.forEach(n=>{
-    // goals in this north star that have at least one editable metric
-    const groups=n.goals.map(g=>({g, mets:[g.key].concat(g.subs).filter(m=>m&&m.id&&!NOEDIT.has(m.id))})).filter(x=>x.mets.length);
+    const groups=n.goals.map(g=>({g, mets:[g.key].concat(g.subs)
+        .filter(m=>m&&m.id&&!NOEDIT.has(m.id))
+        .filter(m=>!ONLY_MINE||ownerOf(m.id)===ONLY_MINE)})).filter(x=>x.mets.length);
     if(!groups.length) return;
     html+=`<div class="epsec">${n.star.toUpperCase()}</div>`;
-    const multi=groups.length>1;   // only show per-goal sub-headers when a star has more than one goal
+    const multi=groups.length>1;
     groups.forEach(({g,mets})=>{
       if(multi) html+=`<div class="epgoal" style="border-color:${g.accent||'#94a3b8'}">${g.tag?g.tag+" · ":""}${g.name}</div>`;
-      mets.forEach(m=>{ const cur=(m.series&&m.series.length)?m.series[m.series.length-1]:""; const isKey=m.id===g.key.id;
-        html+=`<div class="eprow${isKey?' epkey':''}"><label>${isKey?'<span class="epstar">★</span> ':''}${m.label}</label>`+
+      mets.forEach(m=>{ shown++;
+        const cur=lastReal(m.series); const isKey=m.id===g.key.id;
+        const own=ownerOf(m.id);
+        html+=`<div class="eprow${isKey?' epkey':''}"><label>${isKey?'<span class="epstar">★</span> ':''}${m.label}`+
+              `<span class="eprowmeta">${freshBadge(m.id)}${(!ONLY_MINE&&own)?` <span class="epown">${escHtml(own)}</span>`:""}</span></label>`+
               `<button class="eplist" data-list="${m.id}" title="The list behind this number — check it before counting">📋<span class="lc" id="lc_${m.id}"></span></button>`+
-              `<input type="number" inputmode="numeric" data-code="${m.id}" value="${(cur===''||cur==null)?'':cur}"></div>`+
+              `<button class="epok" data-confirm="${m.id}" title="Checked it — genuinely unchanged this week. Records that you looked, without changing the number.">✓</button>`+
+              `<input type="number" inputmode="numeric" data-code="${m.id}" value="${(cur==null)?'':cur}"></div>`+
               `<div class="epitems" id="ei_${m.id}" style="display:none"></div>`; });
     });
   });
+  if(!shown) html+=`<div style="padding:18px 4px;color:#64748b;font-size:13px">No metrics are assigned to <b>${escHtml(ONLY_MINE||"you")}</b> yet. Set owners in the sheet's <b>Meta</b> tab (code | owner | kind | link), or <a href="${location.pathname}">show all metrics</a>.</div>`;
   const body=document.getElementById("epbody");
   body.innerHTML=html;
+  const who=document.getElementById("epwho");
+  if(who) who.addEventListener("change",()=>{ setWho(who.value.trim()); epStatus("Saved as "+(who.value.trim()||"anonymous")+"."); });
   body.querySelectorAll("input[data-code]").forEach(inp=> inp.addEventListener("change",()=>saveField(inp)));
   body.querySelectorAll("button[data-list]").forEach(b=> b.addEventListener("click",()=>toggleItems(b.getAttribute("data-list"))));
+  body.querySelectorAll("button[data-confirm]").forEach(b=> b.addEventListener("click",()=>confirmMetric(b.getAttribute("data-confirm"),b)));
   loadItems().then(()=>{ updateListBadges(); refreshOpenItemDrawers(); });
-  const wd=document.getElementById("wkdate");
-  document.getElementById("epweek").textContent="Week of "+(wd&&wd.textContent?wd.textContent:"now")+" — numbers save as you type.";
+  const w=WEEKS.length?WEEKS[WEEKS.length-1]:null;
+  document.getElementById("epweek").textContent=
+    (w?"Week ending "+w.label:"This week")+" — numbers save as you type. ✓ = checked it, no change.";
+}
+// "I looked and it genuinely didn't move." Without this, a carried-forward number
+// and a verified-unchanged number are identical — which is most of this dashboard.
+function confirmMetric(code,btn){
+  if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
+  if(!getPass()){ epStatus("Enter the team passcode above to turn on saving."); return; }
+  if(btn){ btn.textContent="…"; btn.disabled=true; }
+  const before=FRESH[code]?FRESH[code].when.getTime():0;
+  fetch(APPS_URL+"?fn=confirm&code="+encodeURIComponent(code)+"&who="+encodeURIComponent(getWho())+"&pass="+encodeURIComponent(getPass())+"&_="+Date.now(),
+        {method:"GET", mode:"no-cors"})
+    .then(()=>new Promise(r=>setTimeout(r,1800)))
+    .then(loadFresh)
+    .then(()=>{ if(btn){ btn.textContent="✓"; btn.disabled=false; }
+                // The write is fire-and-forget (no-cors), so verify it actually
+                // landed rather than claiming success on a request we can't read.
+                const after=FRESH[code]?FRESH[code].when.getTime():0;
+                epStatus(after>before
+                  ? "✓ Confirmed unchanged: "+labelFor(code)
+                  : "⚠ Nothing was logged — the Apps Script may still be on the old version (deploy v4 and run ?fn=migrate), or the passcode is wrong.");
+                render(); buildEditPanel(); })
+    .catch(()=>{ if(btn){ btn.textContent="✓"; btn.disabled=false; } epStatus("Confirm failed — check your connection."); });
 }
 // Writes use a fire-and-forget request (mode:no-cors). Apps Script runs the write
 // when the URL is hit; reading the response back in-browser (JSONP) is the flaky part
@@ -511,7 +926,7 @@ function labelFor(code){
   return code;
 }
 function sendSave(code,value){
-  return fetch(APPS_URL+"?fn=save&code="+encodeURIComponent(code)+"&value="+encodeURIComponent(value)+"&label="+encodeURIComponent(labelFor(code))+"&pass="+encodeURIComponent(getPass())+"&_="+Date.now(),
+  return fetch(APPS_URL+"?fn=save&code="+encodeURIComponent(code)+"&value="+encodeURIComponent(value)+"&label="+encodeURIComponent(labelFor(code))+"&who="+encodeURIComponent(getWho())+"&pass="+encodeURIComponent(getPass())+"&_="+Date.now(),
                {method:"GET", mode:"no-cors"});
 }
 function saveField(inp){
@@ -550,7 +965,7 @@ function saveAll(){
     .catch(()=>epStatus("Some saves failed — check your connection and click Save again"));
 }
 function optimistic(code,val){
-  const v=(val===""?0:Number(val));
+  const v=(val===""?null:Number(val));   // empty means "no value", not zero
   NS.forEach(n=>n.goals.forEach(g=>{
     if(g.key.id===code && g.key.series.length) g.key.series[g.key.series.length-1]=v;
     g.subs.forEach(s=>{ if(s.id===code && s.series.length) s.series[s.series.length-1]=v; });
@@ -601,21 +1016,16 @@ function loadItems(){
     setTimeout(finish, 6000);
   });
 }
-// The team's "this week" starts at the active week column's date (e.g. "May 29");
-// fall back to the most recent Monday if the label can't be parsed.
+// Monday of the CURRENT week, straight from the clock. (It used to be reverse-
+// engineered from the header label, which meant that when the sheet's active
+// column was three weeks stale, "added this week" counted three weeks of items.)
 function weekStart(){
-  const t=(document.getElementById("wkdate")||{}).textContent||"";
-  const m=/^\s*([A-Za-z]{3,9})\s+(\d{1,2})\s*$/.exec(t);
-  if(m){
-    const mo=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"].indexOf(m[1].slice(0,3).toLowerCase());
-    if(mo>=0){ const now=new Date(); let d=new Date(now.getFullYear(),mo,+m[2]); if(d>now) d=new Date(now.getFullYear()-1,mo,+m[2]); return d; }
-  }
   const now=new Date();
   return new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
 }
 function fmtWhen(d){ if(!d) return ""; const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return MO[d.getMonth()]+" "+d.getDate(); }
 function escHtml(s){ return String(s).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
-function isRunningTotal(code){ return /running total/i.test(labelFor(code)); }
+function isRunningTotal(code){ return isRunning(code); }
 function updateListBadges(){
   document.querySelectorAll("button[data-list]").forEach(b=>{
     const n=(ITEMS[b.getAttribute("data-list")]||[]).length;
@@ -684,32 +1094,27 @@ function addListItem(code, inp){
     .catch(()=>setEiStatus(code,"Save failed — check your connection and try again"));
 }
 
-// Save Week lives at the bottom of the page and takes TWO deliberate clicks.
-let _wcTimer=null;
-function wcAction(html){ const e=document.getElementById("wcaction"); if(e) e.innerHTML=html; }
-function armSaveWeek(){
-  clearTimeout(_wcTimer);
-  wcAction('<span class="wcconfirm">Lock this week &amp; start a new one?</span>'+
-    '<button class="wcyes" onclick="saveWeekAction()">Yes, save the week</button>'+
-    '<button class="wccancel" onclick="disarmSaveWeek()">Cancel</button>');
-  _wcTimer=setTimeout(disarmSaveWeek, 12000);   // auto-cancel if left armed
-}
-function disarmSaveWeek(){
-  clearTimeout(_wcTimer);
-  wcAction('<button class="wcbtn" onclick="armSaveWeek()">Save &amp; Close This Week</button>');
-}
-function saveWeekAction(){
-  clearTimeout(_wcTimer);
-  if(!APPS_URL){ wcAction('<span class="wcstatus">Editing isn’t connected yet.</span>'); return; }
-  if(!getPass()){ wcAction('<span class="wcstatus">Enter the team passcode first — open ✏️ Update metrics.</span>'); setTimeout(disarmSaveWeek,3500); return; }
-  wcAction('<span class="wcstatus">Saving the week…</span>');
-  fetch(APPS_URL+"?fn=saveweek&pass="+encodeURIComponent(getPass())+"&_="+Date.now(), {method:"GET", mode:"no-cors"})
-    .then(()=>{ wcAction('<span class="wcstatus">✓ Week saved — reloading…</span>'); setTimeout(()=>location.reload(),2200); })
-    .catch(()=>{ wcAction('<span class="wcstatus">Save failed — check connection</span>'); setTimeout(disarmSaveWeek,2800); });
-}
 function openEdit(){ buildEditPanel(); document.getElementById("editmask").classList.add("open"); }
 function closeEdit(){ document.getElementById("editmask").classList.remove("open"); }
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeEdit(); });
+
+// Footnote under the page: how many pre-history columns were hidden, and how
+// current the week is. Both used to be invisible.
+function renderWeekNote(){
+  const el=document.getElementById("weeknote"); if(!el) return;
+  if(!WEEKS.length){ el.innerHTML="Waiting for the sheet…"; return; }
+  const last=WEEKS[WEEKS.length-1], behind=Math.floor((weekEndOf(new Date())-last.date)/86400000/7);
+  const drop=window.__droppedWeeks||0;
+  const gaps=WEEKS.map((w,i)=>i?Math.round((w.date-WEEKS[i-1].date)/86400000):7).filter(d=>d>10).length;
+  el.innerHTML=
+    `<b>${WEEKS.length}</b> week${WEEKS.length===1?"":"s"} of entries, newest ending <b>${last.label}</b>`+
+    (behind>0?` — <span style="color:#b91c1c">${behind} week${behind===1?"":"s"} behind today</span>`:` — current`)+
+    (gaps?` · ${gaps} gap${gaps===1?"":"s"} of more than a week (drawn as gaps, not straight lines)`:"")+
+    (drop?` · ${drop} empty pre-launch column${drop===1?"":"s"} hidden`:"")+
+    ` · the week now rolls over on its own every Monday.`;
+}
+const _render=render;
+render=function(){ _render(); renderWeekNote(); };
 
 applyEcomm(); setStatus(false); render();
 loadMarginYoY().then(used=> used ? null : loadKpiHistory().then(u2=> u2?null:syncCurrentFromEcomm()))
@@ -722,7 +1127,9 @@ function loadSheet(after){
   s.onerror=function(){ setStatus(false); if(after) after(); };
   document.head.appendChild(s);
 }
-loadSheet();
+// Owners and freshness first, so the very first paint already shows who owns
+// what and how stale it is — no flash of un-annotated numbers.
+Promise.all([loadMeta(),loadFresh()]).then(()=>loadSheet());
 </script>
 </body>
 </html>
