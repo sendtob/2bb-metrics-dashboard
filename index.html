@@ -63,7 +63,12 @@
   .pname{font-size:15px;font-weight:700;color:var(--navy)}
   .keyblock{display:flex;align-items:center;justify-content:space-between;gap:14px;
     margin:13px 0 6px;padding:11px 13px;background:#fbfcfe;border:1px solid var(--line);border-radius:10px}
-  .keyblock .kl{font-size:12px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:5px}
+  /* Not flex: the freshness chip and source badge sit inline with the label and
+     wrap naturally. As a flex row they refused to shrink and squeezed the label
+     into a four-line column. */
+  .keyblock .kl{font-size:12px;color:var(--muted);font-weight:600;line-height:1.45}
+  .keyblock .kl .star{margin-right:3px}
+  .keyblock .kl .fresh,.keyblock .kl .srcbadge{margin-left:5px}
   .keyblock .kv{font-size:29px;font-weight:800;line-height:1;margin-top:3px}
   .pill{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:6px}
   .subs{margin-top:8px}
@@ -169,6 +174,24 @@
     padding:5px 8px;cursor:pointer;color:#15803d;line-height:1}
   .epok:hover{border-color:var(--green);background:#e8f6ec}
   .epok:disabled{opacity:.5;cursor:default}
+  /* ---- pulse bar: replaces the strip that repeated every goal's ★ ---- */
+  .pulse{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;margin-bottom:26px}
+  .pcell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px 11px;
+    box-shadow:0 1px 3px rgba(20,40,80,.07);position:relative;overflow:hidden}
+  .pcell .pnum{font-size:24px;font-weight:800;line-height:1.05;color:var(--navy)}
+  .pcell .plab{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.35}
+  .pcell .pbar{position:absolute;left:0;top:0;height:3px;width:100%;opacity:.85}
+  .pwide{grid-column:span 2}
+  @media(max-width:640px){.pwide{grid-column:1 / -1}}
+  .ptrack{margin-top:8px;height:6px;border-radius:6px;background:#eef2f7;overflow:hidden}
+  .ptrack span{display:block;height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:6px}
+  /* ---- a goal deliberately left blank ---- */
+  .ptbd{background:repeating-linear-gradient(135deg,#fbfcfe,#fbfcfe 10px,#f5f7fb 10px,#f5f7fb 20px)}
+  .tbdbox{margin:13px 0 6px;padding:14px 15px;border:1px dashed #cbd5e1;border-radius:10px;background:#fff}
+  .tbdtitle{font-size:12.5px;font-weight:800;color:#475569;letter-spacing:.02em}
+  .tbdbody{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+  .ptag{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;
+    background:#eef2f7;border-radius:20px;padding:2px 8px;white-space:nowrap}
   @media(max-width:560px){
     .epbody{padding:6px 12px 14px}
     .eprow{flex-wrap:wrap;gap:7px}
@@ -253,12 +276,12 @@ const SCORECARDS={
   campaign:{url:"https://docs.google.com/document/d/1sAyoevDT2SuAMU12Z0VQ11u7vfrrxDpCsMqV7vj0DUs/edit",
             name:"Campaign Scorecard & Validation Checklist",
             note:"Validation checklist, then a 0–2 score on five criteria. 8–10 = proceed, 6–7 = iterate, 0–5 = drop. Scored again after launch."},
-  // TODO(Brad): paste the URL of Katie's Product Scorecard + validation doc here.
-  // It isn't shared with the account that generated this page, so it can't be
-  // filled in automatically. Until it is, the ✱ shows "link not set".
-  product:{url:"",
+  // Katie's final scorecard (emailed as a PDF 2026-07-24) converted to an editable
+  // Doc so it can be linked here. Move it into the team Drive folder next to the
+  // campaign scorecard if you want everyone to reach it.
+  product:{url:"https://docs.google.com/document/d/1vTAifxTHR5YeVPzNZ_lmw5S7fPnDRzmbku8xKDoI2o8/edit",
            name:"Product Scorecard & Validation",
-           note:"Screens a product on: a proven comparable in market (function, materials, look); brand details built into the product; and the product's story."}
+           note:"Validation checklist, then 0–2 on margin, differentiation, accessibility, revenue potential and brand story. 8–10 = proceed, 6–7 = iterate, 0–5 = drop."}
 };
 
 // The goal tree. Series arrays start EMPTY and are filled from the Google Sheet —
@@ -268,96 +291,101 @@ const SCORECARDS={
 //          overrides it. kind:"run" marks a running total (never decreases; a drop
 //          is rendered as a correction, not a trend).
 const NS=[
- {star:"Major Donors", desc:"The big gift that funds the mission.", goals:[
+ {star:"Major Donors", short:"Donors", desc:"The big gift that funds the mission.", goals:[
   {id:"don", tag:"GOAL 1", accent:"#4F46E5", name:"Land a $100,000 gift", win:"$100K gift", fmt:"int",
    key:{id:"d_ask", label:"Asks made this week", series:[], own:"brad"},
-   subs:[{id:"d_pros",   label:"Prospects identified (running total)",       series:[], own:"brad", kind:"run"},
-         {id:"d_reach",  label:"First reaches made (running total)",          series:[], own:"brad", kind:"run"},
-         {id:"d_follow", label:"Follow-up conversations held (running total)",series:[], own:"brad", kind:"run"}],
+   subs:[{id:"d_pros",   label:"Prospects identified",        series:[], own:"brad", kind:"run"},
+         {id:"d_reach",  label:"First reaches made",           series:[], own:"brad", kind:"run"},
+         {id:"d_follow", label:"Follow-up conversations held", series:[], own:"brad", kind:"run"}],
    floor:"Every ask goes to someone we’ve confirmed can give $100K and cares — tied to a specific priced project."}]},
 
- {star:"Major Partners", desc:"A marquee brand in our corner.", goals:[
+ {star:"Major Partners", short:"Partners", desc:"A marquee brand in our corner.", goals:[
   {id:"par", tag:"GOAL 2", accent:"#0EA5A4", name:"Land a major brand collaboration", win:"1 deal signed", fmt:"int",
    key:{id:"p_meet", label:"Decision-maker meetings this week", series:[], own:"brad"},
-   subs:[{id:"p_pros",   label:"Prospects identified (running total)",       series:[], own:"brad", kind:"run"},
-         {id:"p_conn",   label:"Initial connection made (running total)",     series:[], own:"brad", kind:"run"},
-         {id:"p_follow", label:"Follow-up conversations held (running total)",series:[], own:"brad", kind:"run"}],
+   subs:[{id:"p_pros",   label:"Prospects identified",        series:[], own:"brad", kind:"run"},
+         {id:"p_conn",   label:"Initial connection made",      series:[], own:"brad", kind:"run"},
+         {id:"p_follow", label:"Follow-up conversations held", series:[], own:"brad", kind:"run"}],
    floor:"Only chase real overlaps — a genuine reason to work together, not big-name logos for their own sake."}]},
 
- {star:"Operating Leverage", desc:"More output from the team we have.", goals:[
+ {star:"Operating Leverage", short:"Leverage", desc:"More output from the team we have.", goals:[
   {id:"lev", tag:"GOAL 3", accent:"#7C3AED", name:"Build 100 AI agents we actually use", win:"100 agents", fmt:"int",
-   key:{id:"g3_inu", label:"AI agents actually in use for more than one month", series:[], own:"brad"},
-   subs:[{id:"g3_task", label:"AI agent ideas generated (running total)", series:[], own:"brad", kind:"run"},
-         {id:"g3_blt",  label:"AI agents in development (running total)",  series:[], own:"brad", kind:"run"},
-         {id:"g3_solo", label:"AI agents running on their own",            series:[], own:"brad"}],
+   key:{id:"g3_inu", label:"AI agents in use for more than a month", series:[], own:"brad"},
+   subs:[{id:"g3_task", label:"Agent ideas generated", series:[], own:"brad", kind:"run"},
+         {id:"g3_blt",  label:"Agents in development",  series:[], own:"brad", kind:"run"},
+         {id:"g3_solo", label:"Agents running on their own", series:[], own:"brad"}],
    floor:"An agent only counts if it does real work people accept and use — no demos padding the count."}]},
 
  // ── MAJOR IMPACT ────────────────────────────────────────────────────────────
- // Rebuilt 2026-07-30. Previously this section was six awareness-activity counts
- // plus "people helped = 1" — a PR scorecard wearing an impact label, with no
- // Thrive Blind, no beneficiaries and no fundraising anywhere on the page.
- // Now three chains, matching the Programs & Development pillar of the org
- // strategy: reach that converts (A), programs actually delivered (B), and the
- // money that pays for them (C).
- {star:"Major Impact", desc:"The whole reason the rest exists.", goals:[
-  {id:"brd", tag:"A", accent:"#DB2777", name:"Awareness that turns into action", win:"A top-tier inbound", fmt:"int",
-   key:{id:"b_action", label:"People who took a mission action this week", series:[], own:"krysta",
-        help:"Subscribed, signed up to volunteer, enquired about a program, or gave — reach that produced something."},
-   subs:[{id:"b_key",    label:"Top-tier media inbound inquiries",                         series:[], own:"krysta"},
-         {id:"b_ideas",  label:"Mainstream campaign ideas generated (running total)",      series:[], own:"krysta", kind:"run"},
-         {id:"b_launch", label:"Mainstream campaign ideas launched (running total)",       series:[], own:"krysta", kind:"run"},
-         {id:"b_1m",     label:"Mainstream campaigns with 1M+ impressions (running total)",series:[], own:"krysta", kind:"run"},
-         {id:"b_social", label:"Organic social posts with 10K+ impressions (running total)",series:[], own:"krysta", kind:"run"}],
-   floor:"Real mainstream reach, not vanity — and reach only counts as impact once somebody does something with it."},
+ // Restructured 2026-07-31 on Brad's direction. A stays pure awareness (the
+ // action metrics moved out to B). B is engagement, judged on EFFICIENCY —
+ // cost per person who raises their hand — with the raw count as the step under
+ // it. C is Thrive Blind, deliberately left blank for Kevin to define rather
+ // than filled with metrics nobody agreed to. D is the relationship ladder that
+ // used to be mislabelled "funding the mission".
+ {star:"Major Impact", short:"Impact", desc:"The whole reason the rest exists.", goals:[
+  {id:"brd", tag:"A", tagName:"Awareness", accent:"#DB2777", name:"Reach people who’ve never heard of us", win:"A top-tier inbound", fmt:"int",
+   key:{id:"b_key", label:"Top-tier media inbound inquiries", series:[], own:"krysta"},
+   subs:[{id:"b_ideas",  label:"Mainstream campaign ideas generated",   series:[], own:"krysta", kind:"run"},
+         {id:"b_launch", label:"Mainstream campaigns launched",          series:[], own:"krysta", kind:"run"},
+         {id:"b_1m",     label:"Campaigns past 1M impressions",          series:[], own:"krysta", kind:"run"},
+         {id:"b_social", label:"Organic posts past 10K impressions",     series:[], own:"krysta", kind:"run"}],
+   floor:"Real mainstream reach, not vanity — a campaign or post counts only when it actually lands."},
 
-  {id:"prog", tag:"B", accent:"#0369A1", name:"Programs delivered (Thrive Blind)", win:"People served", fmt:"int",
-   key:{id:"tb_served", label:"People served (running total)", series:[], own:"kevin",
-        help:"A person is served when they complete a program interaction we could name and evidence — not a reach estimate."},
-   subs:[{id:"tb_enrol",    label:"People enrolled this week",                                    series:[], own:"kevin"},
-         {id:"tb_sess",     label:"Program sessions delivered this week",                          series:[], own:"kevin"},
-         {id:"tb_partners", label:"Partner organizations live (running total)",                    series:[], own:"kevin", kind:"run"},
-         {id:"tb_out",      label:"Outcomes recorded — skill, placement or device adopted (running total)", series:[], own:"kevin", kind:"run"}],
-   floor:"An outcome is something the person could not do before and can evidence now. Attendance is not an outcome."},
+  {id:"eng", tag:"B", tagName:"Engagement", accent:"#7C3AED", name:"Turn reach into raised hands", win:"Cheaper every week", fmt:"usd",
+   key:{id:"imp_cpe", label:"Cost per person who raised their hand", series:[], own:"krysta", fmt:"usd",
+        help:"Engagement spend ÷ people who raised their hand. Computed from the two steps below — the number of hands matters, but getting cheaper at it is the real test."},
+   subs:[{id:"imp_engaged", label:"People who raised their hand for the mission", series:[], own:"krysta",
+          help:"Subscribed, offered to volunteer, asked about a programme, or gave. Includes Shop Blind participants signalling they want to do something."},
+         {id:"imp_engspend", label:"Engagement spend behind them ($)", series:[], own:"krysta", fmt:"usd"}],
+   floor:"A raised hand is a person taking a real step toward the mission — not an impression, a like, or a scroll."},
 
-  {id:"fund", tag:"C", accent:"#B45309", name:"Funding the mission", win:"Program dollars committed", fmt:"usd",
-   key:{id:"fnd_dollars", label:"Committed program dollars (running total)", series:[], own:"kevin", fmt:"usd"},
-   subs:[{id:"fnd_gsub", label:"Grants submitted (running total)",              series:[], own:"kevin", kind:"run"},
-         {id:"fnd_gwon", label:"Grants won (running total)",                    series:[], own:"kevin", kind:"run"},
-         {id:"fnd_recur",label:"Monthly recurring donors",                      series:[], own:"kevin"},
-         {id:"fnd_corp", label:"Corporate partners committed (running total)",  series:[], own:"kevin", kind:"run"}],
-   floor:"Committed means signed or granted, not verbally encouraging. This is the constraint on everything in B."}]},
+  {id:"prog", tag:"C", tagName:"Thrive Blind", accent:"#0369A1", name:"Programme success — to be defined", win:"TBD", fmt:"int",
+   tbd:"Kevin",
+   key:{id:"tb_key", label:"Thrive Blind north-star metric — TBD", series:[], own:"kevin"},
+   subs:[],
+   floor:"Deliberately empty. Kevin defines what programme success means before we start counting it — a metric nobody agreed to is worse than a blank."},
 
- {star:"Community", desc:"Whether people actually feel it.", goals:[
+  {id:"rel", tag:"D", tagName:"Relationships", accent:"#B45309", name:"Build 100 high-impact relationships", win:"100 relationships", fmt:"int",
+   key:{id:"rel_key", label:"High-impact relationships", series:[], own:"kevin", kind:"run",
+        help:"A relationship counts when someone has made a real commitment — a grant, a partnership, or recurring giving. Intent doesn’t count; commitment does."},
+   subs:[{id:"fnd_gwon", label:"Grants won",                 series:[], own:"kevin", kind:"run"},
+         {id:"fnd_corp", label:"Corporate partners committed",series:[], own:"kevin", kind:"run"},
+         {id:"fnd_recur",label:"Monthly recurring donors",    series:[], own:"kevin"},
+         {id:"fnd_gsub", label:"Grants submitted",            series:[], own:"kevin", kind:"run"}],
+   floor:"Committed means signed or granted, not verbally encouraging."}]},
+
+ {star:"Community", short:"Community", desc:"Whether people actually feel it.", goals:[
   {id:"dep", tag:"GOAL 4", accent:"#D97706", name:"1,000 heartfelt thank-you messages", win:"1,000 messages", fmt:"int",
-   key:{id:"dp_key", label:"Heartfelt thank-you messages received (running total)", series:[], own:"shannen", kind:"run"},
-   subs:[{id:"dp_helped", label:"People helped in a significant way (running total)", series:[], own:"shannen", kind:"run"}],
+   key:{id:"dp_key", label:"Heartfelt messages received", series:[], own:"shannen", kind:"run",
+        help:"Scanned from Gorgias and social by an agent, then judged. A one-line “thanks, love these!” doesn’t count — it has to say something real."},
+   subs:[{id:"dp_helped", label:"People helped in a significant way", series:[], own:"shannen", kind:"run"}],
    floor:"Messages are genuine and unprompted — we don’t solicit thank-yous."}]},
 
- {star:"Commercial Success", desc:"Protect and grow the engine that pays for it all.", goals:[
-  {id:"com", tag:"A", accent:"#16a34a", name:"Beat last year, every month", win:"Beat last year", fmt:"usdk1",
+ {star:"Shop Blind Program Success", short:"Shop Blind", desc:"Protect and grow the engine that pays for it all.", goals:[
+  {id:"com", tag:"A", tagName:"Beat last year", accent:"#16a34a", name:"Beat last year, every month", win:"Beat last year", fmt:"usdk1",
    key:{id:"c_nm", label:"Contribution after ads & shipping", series:[]},
-   subs:[{id:"c_mear", label:"MER — revenue ÷ total ad spend",            series:[], fmt:"x2"},
-         {id:"c_sales",label:"Net sales ($ thousands) — matches the memo", series:[], fmt:"usdk1"},
-         {id:"c_gross",label:"Gross order value incl. shipping & tax ($k)",series:[], fmt:"usdk1"}],
+   subs:[{id:"c_mear", label:"MER — revenue ÷ ad spend",       series:[], fmt:"x2"},
+         {id:"c_sales",label:"Net sales ($k) — matches the memo", series:[], fmt:"usdk1"},
+         {id:"c_gross",label:"Gross order value incl. ship & tax ($k)", series:[], fmt:"usdk1"}],
    floor:"Don’t hit the number by cutting ads or quality so far that sales or new customers drop."},
 
-  {id:"prod", tag:"B", accent:"#EA580C", name:"Build winning products", win:"Top-25% products", fmt:"int",
+  {id:"prod", tag:"B", tagName:"Products", accent:"#EA580C", name:"Build winning products", win:"Top-25% products", fmt:"int",
    scorecard:"product",
-   key:{id:"wp_key", label:"Winning products (top 25% of their category)", series:[], own:"katie"},
-   subs:[{id:"wp_ideas", label:"New product ideas generated (running total)",           series:[], own:"katie", kind:"run"},
-         {id:"wp_score", label:"New products passing the scorecard ✱ (running total)",  series:[], own:"katie", kind:"run"},
-         {id:"wp_dev",   label:"New products or versions in development",               series:[], own:"katie"},
-         {id:"wp_launch",label:"New products launched (running total)",                 series:[], own:"katie", kind:"run"}],
-   floor:"A win is earned by the market — a product ranking in the top 25% of its category. The scorecard ✱ is the screen to get there."},
+   key:{id:"wp_key", label:"Winning products (top 25% of category)", series:[], own:"katie"},
+   subs:[{id:"wp_ideas", label:"New product ideas generated",      series:[], own:"katie", kind:"run"},
+         {id:"wp_score", label:"Products passing the scorecard",   series:[], own:"katie", kind:"run", sc:true},
+         {id:"wp_dev",   label:"Products in development",          series:[], own:"katie"},
+         {id:"wp_launch",label:"Products launched",                series:[], own:"katie", kind:"run"}],
+   floor:"A win is earned by the market — a product ranking in the top 25% of its category. The scorecard is the screen to get there."},
 
-  {id:"camp", tag:"C", accent:"#0891B2", name:"Build winning campaigns", win:"Campaigns that hold", fmt:"int",
+  {id:"camp", tag:"C", tagName:"Campaigns", accent:"#0891B2", name:"Build winning campaigns", win:"Campaigns that hold", fmt:"int",
    scorecard:"campaign",
-   key:{id:"wc_key", label:"Winning campaigns — 250K+ impressions at neutral margin (after ads & product cost)", series:[], own:"krysta"},
-   subs:[{id:"wc_ideas", label:"New campaign ideas (running total)",                        series:[], own:"krysta", kind:"run"},
-         {id:"wc_score", label:"Campaigns passing the pre-launch scorecard ✱ (running total)",series:[], own:"krysta", kind:"run"},
-         {id:"wc_dev",   label:"New campaigns in development",                               series:[], own:"krysta"},
-         {id:"wc_launch",label:"New campaigns launched (running total)",                     series:[], own:"krysta", kind:"run"},
-         {id:"wc_post",  label:"Campaigns scored after launch ✱ (running total)",            series:[], own:"krysta", kind:"run"}],
+   key:{id:"wc_key", label:"Winning campaigns (250K+ impressions at neutral margin)", series:[], own:"krysta"},
+   subs:[{id:"wc_ideas", label:"New campaign ideas",              series:[], own:"krysta", kind:"run"},
+         {id:"wc_score", label:"Passed the pre-launch scorecard", series:[], own:"krysta", kind:"run", sc:true},
+         {id:"wc_dev",   label:"Campaigns in development",        series:[], own:"krysta"},
+         {id:"wc_launch",label:"Campaigns launched",              series:[], own:"krysta", kind:"run"},
+         {id:"wc_post",  label:"Scored after launch",             series:[], own:"krysta", kind:"run", sc:true}],
    floor:"A winning campaign holds 250K+ impressions at neutral-or-better margin after ad and product cost. Score it before launch AND after."}]}
 ];
 
@@ -468,9 +496,26 @@ function scorecardMark(g){
     ? ` <a class="scmark" href="${sc.url}" target="_blank" rel="noopener" title="${escHtml(sc.name)} — ${escHtml(sc.note)}">✱ scorecard ↗</a>`
     : ` <span class="scmark scmissing" title="${escHtml(sc.name)} exists but its link hasn't been set — paste the URL into SCORECARDS in index.html">✱ link not set</span>`;
 }
+// Engagement is judged on efficiency, so the headline is derived from the two
+// steps beneath it rather than typed in — that way the number on the card can
+// never drift from the inputs it claims to summarise.
+function applyDerived(){
+  const g=findGoal("eng"); if(!g) return;
+  const n=(g.subs.find(s=>s.id==="imp_engaged")||{}).series||[];
+  const sp=(g.subs.find(s=>s.id==="imp_engspend")||{}).series||[];
+  const len=Math.max(n.length,sp.length);
+  const out=[];
+  for(let i=0;i<len;i++){
+    const c=n[i], d=sp[i];
+    out.push((c==null||d==null||!c)?null:+(d/c).toFixed(2));
+  }
+  g.key.series=out;
+}
 function metricBlock(g){
   const s=g.key.series,last=lastReal(s);
   const [stxt,scol,sbg]=statusOf(g);
+  if(g.tbd) return `<div class="tbdbox"><div class="tbdtitle">Waiting on ${escHtml(g.tbd)}</div>
+      <div class="tbdbody">${escHtml(g.floor)}</div></div>`;
   const ec=(g.src==="ecomm"&&window.ECOMM_HIST);
   const wl=ec?window.ECOMM_HIST.labels:WEEKS.map(w=>w.label);
   const wd=ec?window.ECOMM_HIST.dates:WEEKS.map(w=>w.date);
@@ -478,7 +523,7 @@ function metricBlock(g){
                      :spark(s,{color:g.accent,w:150,h:42,dots:true,labels:wl,vfmt:g.fmt,dates:wd});
   const subs=g.subs.map(sb=>{const f=sb.fmt||g.fmt;const sl=sb.series;
     const fb=ec?"":freshBadge(sb.id,{mini:true});
-    return `<div class="sub"><span class="sl">${sb.label}${sb.id==="wp_score"||sb.id==="wc_score"||sb.id==="wc_post"?scorecardMark(g):""}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f,dates:wd})}
+    return `<div class="sub"><span class="sl">${sb.label}${sb.sc?scorecardMark(g):""}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f,dates:wd})}
       <span class="sv">${fmt(lastReal(sl),f)}</span>${wow(sl,f,{mini:true,code:sb.id})}${fb}</div>`;}).join("");
   const badge=ec?` <a class="srcbadge" href="ecomm.html" title="Pulled straight from the weekly e-comm feed (Shopify + Northbeam). Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
   const fresh=ec?"":` ${freshBadge(g.key.id)}`;
@@ -498,18 +543,42 @@ function metricBlock(g){
 }
 function bannerHTML(n){return `<div class="banner"><span class="bstar">★</span><span class="bname">${n.star.toUpperCase()}</span><span class="bdesc">${n.desc}</span></div>`;}
 
+// How current is this board? Counts every metric a person is meant to enter
+// (skipping the ones fed automatically from the e-comm feed) and buckets it by
+// how long since anyone last touched or confirmed it.
+function renderPulse(){
+  const el=document.getElementById("kpis"); if(!el) return;
+  let fresh=0,aging=0,stale=0,never=0,total=0,tbd=0;
+  NS.forEach(n=>n.goals.forEach(g=>{
+    if(g.tbd){ tbd++; return; }
+    [g.key].concat(g.subs).forEach(m=>{
+      if(!m||!m.id||NOEDIT.has(m.id)) return;
+      total++;
+      const f=FRESH[m.id];
+      if(!f){ never++; return; }
+      const d=daysAgo(f.when);
+      if(d<7) fresh++; else if(d<=14) aging++; else stale++;
+    });
+  }));
+  const pct=total?Math.round(fresh/total*100):0;
+  const cell=(v,label,col,bg,title)=>
+    `<div class="pcell" title="${title}"><div class="pnum" style="color:${col}">${v}</div><div class="plab">${label}</div><div class="pbar" style="background:${bg}"></div></div>`;
+  el.className="pulse";
+  el.innerHTML=
+    `<div class="pcell pwide"><div class="pnum">${pct}%</div><div class="plab">of what people enter is current this week</div>
+       <div class="ptrack"><span style="width:${pct}%"></span></div></div>`+
+    cell(fresh,"updated this week","#15803d","#16a34a","Touched or confirmed in the last 7 days")+
+    cell(aging,"1–2 weeks old","#92400e","#f59e0b","Last touched 7–14 days ago")+
+    cell(stale,"older than 2 weeks","#b91c1c","#dc2626","Last touched more than 14 days ago")+
+    cell(never,"never confirmed","#64748b","#94a3b8","Nobody has ever saved or confirmed this metric")+
+    (tbd?cell(tbd,"awaiting definition","#334155","#64748b","Goals deliberately left blank until an owner defines them"):"");
+}
+
 function render(){
-  document.getElementById("kpis").innerHTML=NS.flatMap(n=>n.goals.map(g=>{
-    const s=g.key.series,last=lastReal(s);
-    const ab=/^[A-C]$/.test(g.tag||"")?" · "+g.tag:"";
-    const ec=(g.src==="ecomm"&&window.ECOMM_HIST);
-    const dates=ec?window.ECOMM_HIST.dates:WEEKS.map(w=>w.date);
-    return `<div class="kpi"><div class="kstripe" style="background:${g.accent}"></div>
-      <div class="lab">${n.star.toUpperCase()}${ab} · <span class="star">★</span></div>
-      <div class="row"><div class="num" style="color:${g.accent}">${fmt(last,g.fmt)}</div>${spark(s,{w:72,h:26,color:g.accent,dates})}</div>
-      <div class="tgt">${g.key.label} · target: ${g.win}</div>
-      ${ec?"":`<div class="kfresh">${freshBadge(g.key.id)}</div>`}</div>`;
-  })).join("");
+  // The strip used to repeat every goal's ★ — the same ten numbers the cards
+  // below already show. Replaced with the thing the cards CAN'T tell you at a
+  // glance: how much of this board is actually current.
+  renderPulse();
   document.getElementById("singles").innerHTML=NS.filter(n=>n.goals.length===1).map(n=>{
     const g=n.goals[0];
     return `<div class="card">${bannerHTML(n)}<div class="cbody">
@@ -517,8 +586,10 @@ function render(){
       ${metricBlock(g)}</div></div>`;
   }).join("");
   document.getElementById("groups").innerHTML=NS.filter(n=>n.goals.length>=2).map(n=>{
-    const panels=n.goals.map(g=>`<div class="panel">
-       <div class="phead"><span class="badge" style="background:${g.accent}">${g.tag}</span><span class="pname">${g.name}</span></div>
+    const panels=n.goals.map(g=>`<div class="panel${g.tbd?' ptbd':''}">
+       <div class="phead"><span class="badge" style="background:${g.accent}">${g.tag}</span>
+         <span class="pname">${g.name}</span>
+         ${g.tagName?`<span class="ptag">${g.tagName}</span>`:""}</div>
        ${metricBlock(g)}</div>`).join("");
     return `<div class="group">${bannerHTML(n)}<div class="gbody">${panels}</div></div>`;
   }).join("");
@@ -726,7 +797,7 @@ window.__gv=function(resp){
     const wd=document.getElementById("wkdate");
     if(wd&&WEEKS.length){ const w=WEEKS[WEEKS.length-1]; wd.textContent="ending "+w.label; }
     const hit=applyLive(map);
-    applyEcomm();
+    applyEcomm(); applyDerived();
     setStatus(hit>0); render();
   }catch(e){ setStatus(false); }
 };
@@ -823,7 +894,7 @@ const PASS_KEY="tbb_write_pass";
 function getPass(){ try{ return localStorage.getItem(PASS_KEY)||""; }catch(e){ return ""; } }
 function setPass(v){ try{ v?localStorage.setItem(PASS_KEY,v):localStorage.removeItem(PASS_KEY); }catch(e){} }
 function changePass(){ setPass(""); buildEditPanel(); }
-const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales","c_gross"]);  // auto from the e-comm feed — not typed in
+const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales","c_gross","imp_cpe"]);  // auto from the e-comm feed — not typed in
 // Who's entering, remembered per browser and sent with every write (the Log tab
 // is what powers "updated 3d ago by Katie").
 const WHO_KEY="tbb_who";
@@ -876,7 +947,7 @@ function buildEditPanel(){
            `</div>`;
   let shown=0;
   NS.forEach(n=>{
-    const groups=n.goals.map(g=>({g, mets:[g.key].concat(g.subs)
+    const groups=n.goals.filter(g=>!g.tbd).map(g=>({g, mets:[g.key].concat(g.subs)
         .filter(m=>m&&m.id&&!NOEDIT.has(m.id))
         .filter(m=>!ONLY_MINE||ownerOf(m.id)===ONLY_MINE)})).filter(x=>x.mets.length);
     if(!groups.length) return;
@@ -982,7 +1053,7 @@ function optimistic(code,val){
     if(g.key.id===code && g.key.series.length) g.key.series[g.key.series.length-1]=v;
     g.subs.forEach(s=>{ if(s.id===code && s.series.length) s.series[s.series.length-1]=v; });
   }));
-  applyEcomm(); render();
+  applyEcomm(); applyDerived(); render();
 }
 // ---------------------------------------------------------------------------
 // Per-metric item lists — the actual things behind the counts (prospects,
@@ -1128,10 +1199,10 @@ function renderWeekNote(){
 const _render=render;
 render=function(){ _render(); renderWeekNote(); };
 
-applyEcomm(); setStatus(false); render();
+applyEcomm(); applyDerived(); setStatus(false); render();
 loadMarginYoY().then(used=> used ? null : loadKpiHistory().then(u2=> u2?null:syncCurrentFromEcomm()))
   .catch(()=>null)                       // a failed loader must not block the re-render below
-  .then(()=>{ applyEcomm(); render(); });
+  .then(()=>{ applyEcomm(); applyDerived(); render(); });
 function loadSheet(after){
   const s=document.createElement("script");
   s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gv&headers=1&gid=0&_="+Date.now();
