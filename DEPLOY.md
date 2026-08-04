@@ -1,30 +1,35 @@
-## ⚠️ OPEN: redeploy the Apps Script (v6) — 2026-08-04
+## ✅ v6 deployed 2026-08-04, 10:28 AM — and WHICH ACCOUNT matters
 
-**Everything else from 2026-08-04 is already live.** This one step isn't, and it
-needs a human because the Apps Script **Manage deployments** dialog returned
-"Something went wrong — please reload the page" on both attempts, before any
-version could be selected.
+Version 6 is live on the same `/exec` URL (deployment ID unchanged, ending
+`…aQYwJGu3A`). Verified: `?fn=ping` returns `version: 6`, and `fn=confirm` on
+`b_social` resolved `week: 2026-08-09` with value `14` without creating a
+duplicate column.
 
-State right now, verified:
-- `Code.gs` in the editor **is** v6 and **is** saved to Drive (the paste worked).
-- The `/exec` URL still serves the **old build** — `?fn=ping` returns
-  `version: 4`. Saving from the dashboard works normally; nothing is broken.
-- So the fix is *written* but not *serving*.
+**Read this before any future redeploy — it cost three failed attempts.**
 
-To finish (30 seconds, no code changes needed):
+The Apps Script project is owned by **bradford@twoblindbrothers.com**, not
+`sendtobrad@gmail.com`. The personal account can open the editor and *save*
+`Code.gs` perfectly well, so everything looks fine — but **Manage deployments**
+fails for it. The visible error is a red "Something went wrong, please reload
+the page", which reads like Google flakiness and invites pointless retrying. The
+real message is underneath that box, and it is **"You do not have permission to
+perform this action."**
 
-1. Goals Sheet ▸ **Extensions ▸ Apps Script**.
-2. **Deploy ▸ Manage deployments ▸ ✏️ (edit) ▸ Version: "New version" ▸ Deploy.**
-   Not "New deployment" — that mints a different URL and saving would break.
-3. Confirm the version dropdown reads **New version** before clicking Deploy. One
-   past attempt had silently selected Version 2, which would have rolled back.
-4. Verify: `…/exec?fn=ping` should return `version: 6`.
+So: deploy from the 2BB account. Either switch accounts, or go straight to
 
-**What v6 fixes:** on 2026-08-04 three saves landed within one second, raced the
+```
+https://script.google.com/u/1/home/projects/<scriptId>/edit
+```
+
+`/u/1` is the 2BB account in this Chrome profile (`/u/0` personal, `/u/2`
+drakefoundry). Under `/u/1` the dialog opens first try.
+
+**What v6 fixed:** on 2026-08-04 three saves landed within one second, raced the
 week-column code, and created a *second* column headed `2026-08-09`. Writes went
 to the first, the dashboard displayed the second — so a `14` entered at 6:45 sat
-invisible behind a stale `12` from 6:44. The duplicate column has been deleted
-and the board is correct today; v6 stops it happening again.
+invisible behind a stale `12` from 6:44. The duplicate column was deleted; v6
+writes to the LAST column for the week and flushes the new header inside the
+lock, so it can't recur.
 
 ---
 
