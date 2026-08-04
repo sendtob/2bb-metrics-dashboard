@@ -49,7 +49,9 @@ function doGet(e) {
   var out;
   try {
     var fn = e.parameter.fn;
-    if (fn === 'ping')           out = { ok: true, pong: true, version: 4 };
+    // Bump this whenever you redeploy — it is a hand-maintained literal, NOT the
+    // deployment version, and it is the only way to tell which build is live.
+    if (fn === 'ping')           out = { ok: true, pong: true, version: 6 };
     else if (!passOk_(e))        out = { ok: false, error: 'bad or missing passcode' };
     else if (fn === 'save')      out = saveValue_(e.parameter.code, e.parameter.value, e.parameter.label, e.parameter.who);
     else if (fn === 'confirm')   out = confirmValue_(e.parameter.code, e.parameter.who);
@@ -115,20 +117,39 @@ function headerIsos_(sh) {
 // Column for THIS week, creating it at the right edge if missing.
 // Count metrics start blank; running totals carry forward (silently — a carried
 // value writes no log entry, so the dashboard still shows it as unconfirmed).
+//
+// If the same week somehow has more than one column, take the LAST one. On
+// 2026-08-04 three saves a second apart raced this function and a second
+// 2026-08-09 column got created; writes then went to the first column while the
+// dashboard (which collapses duplicate weeks keeping the rightmost) displayed
+// the second, so an entered 14 sat invisible behind a stale 12. Reading the same
+// end of the sheet the dashboard reads means a duplicate is at worst untidy
+// instead of silently swallowing someone's number.
+function lastColFor_(hdrs, want) {
+  var found = -1;
+  for (var i = 0; i < hdrs.length; i++) if (hdrs[i].iso === want) found = hdrs[i].col;
+  return found;
+}
 function currentWeekCol_(sh) {
-  var want = currentWeekIso_(), hdrs = headerIsos_(sh), i;
-  for (i = 0; i < hdrs.length; i++) if (hdrs[i].iso === want) return hdrs[i].col;
+  var want = currentWeekIso_(), hdrs = headerIsos_(sh), c0;
+  c0 = lastColFor_(hdrs, want);
+  if (c0 > 0) return c0;
 
   var lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
     hdrs = headerIsos_(sh);                         // re-check under the lock
-    for (i = 0; i < hdrs.length; i++) if (hdrs[i].iso === want) return hdrs[i].col;
+    c0 = lastColFor_(hdrs, want);
+    if (c0 > 0) return c0;
 
     var prev = sh.getLastColumn() < FIRST_WEEK_COL ? (FIRST_WEEK_COL - 1) : sh.getLastColumn();
     var nc = prev + 1;
     sh.insertColumnAfter(prev);
     sh.getRange(1, nc).setValue(want).setNumberFormat('yyyy-mm-dd');
+    // Push the header out before releasing the lock. Holding the lock isn't
+    // enough on its own — a second execution that gets the lock next still reads
+    // a cached sheet, and that is how a duplicate week column gets created.
+    SpreadsheetApp.flush();
 
     var lastRow = sh.getLastRow();
     if (lastRow >= 2 && prev >= FIRST_WEEK_COL) {

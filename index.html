@@ -909,14 +909,22 @@ function changePass(){ setPass(""); buildEditPanel(); }
 const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales","c_gross","imp_cpe"]);  // auto from the e-comm feed — not typed in
 // Who's entering, remembered per browser and sent with every write (the Log tab
 // is what powers "updated 3d ago by Katie").
+// A personal ?who=katie link now also SAYS who you are, not just what you see.
+// Before this, everyone who followed their link saved anonymously — the first
+// four entries ever logged have a blank author — because filtering the view and
+// naming the author were two separate switches and only one of them was flipped.
+// A typed name still wins: it's stored, and the stored value is checked first.
 const WHO_KEY="tbb_who";
-function getWho(){ try{ return localStorage.getItem(WHO_KEY)||""; }catch(e){ return ""; } }
+function getWho(){ try{ return localStorage.getItem(WHO_KEY)||ONLY_MINE||""; }catch(e){ return ONLY_MINE||""; } }
 function setWho(v){ try{ v?localStorage.setItem(WHO_KEY,v):localStorage.removeItem(WHO_KEY); }catch(e){} }
 // ?who=katie gives one person a link that shows only their metrics, instead of
 // everyone scrolling past 30 rows to find their six.
 const ONLY_MINE=(function(){
   try{ return (new URLSearchParams(location.search).get("who")||"").trim().toLowerCase(); }catch(e){ return ""; }
 })();
+// Remember it, so following your link once keeps your name on your saves even
+// after you click "show all" and the param goes away.
+if(ONLY_MINE){ try{ if(!localStorage.getItem(WHO_KEY)) setWho(ONLY_MINE); }catch(e){} }
 function jsonp(url){
   return new Promise((resolve,reject)=>{
     const cb="__cb"+Math.random().toString(36).slice(2);
