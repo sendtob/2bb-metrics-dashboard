@@ -1,3 +1,33 @@
+## ⚠️ OPEN: redeploy the Apps Script (v6) — 2026-08-04
+
+**Everything else from 2026-08-04 is already live.** This one step isn't, and it
+needs a human because the Apps Script **Manage deployments** dialog returned
+"Something went wrong — please reload the page" on both attempts, before any
+version could be selected.
+
+State right now, verified:
+- `Code.gs` in the editor **is** v6 and **is** saved to Drive (the paste worked).
+- The `/exec` URL still serves the **old build** — `?fn=ping` returns
+  `version: 4`. Saving from the dashboard works normally; nothing is broken.
+- So the fix is *written* but not *serving*.
+
+To finish (30 seconds, no code changes needed):
+
+1. Goals Sheet ▸ **Extensions ▸ Apps Script**.
+2. **Deploy ▸ Manage deployments ▸ ✏️ (edit) ▸ Version: "New version" ▸ Deploy.**
+   Not "New deployment" — that mints a different URL and saving would break.
+3. Confirm the version dropdown reads **New version** before clicking Deploy. One
+   past attempt had silently selected Version 2, which would have rolled back.
+4. Verify: `…/exec?fn=ping` should return `version: 6`.
+
+**What v6 fixes:** on 2026-08-04 three saves landed within one second, raced the
+week-column code, and created a *second* column headed `2026-08-09`. Writes went
+to the first, the dashboard displayed the second — so a `14` entered at 6:45 sat
+invisible behind a stale `12` from 6:44. The duplicate column has been deleted
+and the board is correct today; v6 stops it happening again.
+
+---
+
 # Deploying the 2026-07-30 dashboard rebuild
 
 Three steps, about ten minutes. The dashboard already works without them — it just

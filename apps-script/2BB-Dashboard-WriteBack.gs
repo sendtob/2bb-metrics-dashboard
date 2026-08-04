@@ -1,5 +1,12 @@
 /**
- * Two Blind Brothers — Goal dashboard write-back service.  v4 (2026-07-30)
+ * Two Blind Brothers — Goal dashboard write-back service.  v6 (2026-08-04)
+ *
+ * WHAT CHANGED IN v6:
+ *   Duplicate week columns can no longer swallow an entry. Writes now target the
+ *   LAST column for the week (the same one the dashboard displays), and the new
+ *   header is flushed before the lock is released so a second execution can't
+ *   create a rival column. See currentWeekCol_ for the incident this came from.
+ *   fn=ping reports 6.
  *
  * WHAT CHANGED IN v4 — read this before deploying:
  *   1. WEEK COLUMNS ARE NOW DATES. Headers are stored as real week-ending
@@ -58,7 +65,7 @@ function doGet(e) {
     else if (fn === 'additem')   out = addItem_(e.parameter.code, e.parameter.item, e.parameter.by);
     else if (fn === 'migrate')   out = migrate_();
     else if (fn === 'saveweek')  out = { ok: true, deprecated: true,
-                                         note: 'Weeks roll over automatically now — nothing to close.' };
+                                         note: 'Weeks roll over automatically now - nothing to close.' };
     else                         out = { ok: false, error: 'unknown fn' };
   } catch (err) {
     out = { ok: false, error: String(err) };
