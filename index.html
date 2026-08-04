@@ -75,6 +75,11 @@
   .sub{display:flex;align-items:center;gap:10px;padding:6px 2px;border-top:1px dashed var(--line);font-size:12.5px}
   .sub:first-child{border-top:none}
   .sub .sl{flex:1;color:#374151}
+  /* A step that feeds the sub-goal above it (grants submitted -> grants secured). */
+  .sub.sub2{border-top-style:dotted}
+  .sub.sub2 .sl{padding-left:16px;color:#64748b;font-size:12px;position:relative}
+  .sub.sub2 .sl::before{content:"└";position:absolute;left:4px;color:#cbd5e1;font-size:11px}
+  .sub.sub2 .sv{font-weight:600;color:#475569}
   .sub .sv{font-weight:700;min-width:54px;text-align:right;font-variant-numeric:tabular-nums}
   .sub .wowmini{font-size:12px;font-weight:800;width:15px;text-align:center;flex:none}
   .wow{font-size:11.5px;font-weight:700;margin-top:3px}
@@ -108,6 +113,8 @@
   .eprow input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
   .eprow.epkey{background:#fff8e8;border-left:3px solid var(--gold);padding-left:9px;border-bottom-color:#efe1bd;margin-top:2px}
   .eprow.epkey label{font-weight:800;color:#15233f;font-size:13px}
+  .eprow.ep2 label{padding-left:15px;color:#64748b;position:relative}
+  .eprow.ep2 label::before{content:"└";position:absolute;left:2px;color:#cbd5e1}
   .epstar{color:var(--gold);font-size:12px}
   /* per-metric item lists (the things behind the counts) */
   .eplist{flex:none;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:12px;padding:5px 7px;cursor:pointer;color:#475569;line-height:1}
@@ -290,23 +297,11 @@ const SCORECARDS={
 //   own  = default owner, used by the ?who= entry view until the sheet's Meta tab
 //          overrides it. kind:"run" marks a running total (never decreases; a drop
 //          is rendered as a correction, not a trend).
+// Major Donors and Major Partners used to be north stars of their own. Both were
+// folded into Major Impact D (Major Relationships) on 2026-08-04 — the same
+// ladder, counted once. Their metric CODES are reused there, so the history in
+// the sheet carries over untouched.
 const NS=[
- {star:"Major Donors", short:"Donors", desc:"The big gift that funds the mission.", goals:[
-  {id:"don", tag:"GOAL 1", accent:"#4F46E5", name:"Land a $100,000 gift", win:"$100K gift", fmt:"int",
-   key:{id:"d_ask", label:"Asks made this week", series:[], own:"brad"},
-   subs:[{id:"d_pros",   label:"Prospects identified",        series:[], own:"brad", kind:"run"},
-         {id:"d_reach",  label:"First reaches made",           series:[], own:"brad", kind:"run"},
-         {id:"d_follow", label:"Follow-up conversations held", series:[], own:"brad", kind:"run"}],
-   floor:"Every ask goes to someone we’ve confirmed can give $100K and cares — tied to a specific priced project."}]},
-
- {star:"Major Partners", short:"Partners", desc:"A marquee brand in our corner.", goals:[
-  {id:"par", tag:"GOAL 2", accent:"#0EA5A4", name:"Land a major brand collaboration", win:"1 deal signed", fmt:"int",
-   key:{id:"p_meet", label:"Decision-maker meetings this week", series:[], own:"brad"},
-   subs:[{id:"p_pros",   label:"Prospects identified",        series:[], own:"brad", kind:"run"},
-         {id:"p_conn",   label:"Initial connection made",      series:[], own:"brad", kind:"run"},
-         {id:"p_follow", label:"Follow-up conversations held", series:[], own:"brad", kind:"run"}],
-   floor:"Only chase real overlaps — a genuine reason to work together, not big-name logos for their own sake."}]},
-
  {star:"Operating Leverage", short:"Leverage", desc:"More output from the team we have.", goals:[
   {id:"lev", tag:"GOAL 3", accent:"#7C3AED", name:"Build 100 AI agents we actually use", win:"100 agents", fmt:"int",
    key:{id:"g3_inu", label:"AI agents in use for more than a month", series:[], own:"brad"},
@@ -316,12 +311,13 @@ const NS=[
    floor:"An agent only counts if it does real work people accept and use — no demos padding the count."}]},
 
  // ── MAJOR IMPACT ────────────────────────────────────────────────────────────
- // Restructured 2026-07-31 on Brad's direction. A stays pure awareness (the
- // action metrics moved out to B). B is engagement, judged on EFFICIENCY —
- // cost per person who raises their hand — with the raw count as the step under
- // it. C is Thrive Blind, deliberately left blank for Kevin to define rather
- // than filled with metrics nobody agreed to. D is the relationship ladder that
- // used to be mislabelled "funding the mission".
+ // Restructured 2026-07-31, revised 2026-08-04 on Brad's direction. A stays pure
+ // awareness (the action metrics moved out to B). B is Engaged — the headline is
+ // now the COUNT of people engaged toward 10,000, with cost-per-engaged demoted
+ // to a step beneath it. C is Thrive Blind, deliberately left blank for Kevin to
+ // define rather than filled with metrics nobody agreed to. D is Major
+ // Relationships — grants, corporate and major donors on one ladder, having
+ // absorbed the old Major Donors and Major Partners north stars.
  {star:"Major Impact", short:"Impact", desc:"The whole reason the rest exists.", goals:[
   {id:"brd", tag:"A", tagName:"Awareness", accent:"#DB2777", name:"Reach people who’ve never heard of us", win:"A top-tier inbound", fmt:"int",
    key:{id:"b_key", label:"Top-tier media inbound inquiries", series:[], own:"krysta"},
@@ -331,13 +327,14 @@ const NS=[
          {id:"b_social", label:"Organic posts past 10K impressions",     series:[], own:"krysta", kind:"run"}],
    floor:"Real mainstream reach, not vanity — a campaign or post counts only when it actually lands."},
 
-  {id:"eng", tag:"B", tagName:"Engagement", accent:"#7C3AED", name:"Turn reach into raised hands", win:"Cheaper every week", fmt:"usd",
-   key:{id:"imp_cpe", label:"Cost per person who raised their hand", series:[], own:"krysta", fmt:"usd",
-        help:"Engagement spend ÷ people who raised their hand. Computed from the two steps below — the number of hands matters, but getting cheaper at it is the real test."},
-   subs:[{id:"imp_engaged", label:"People who raised their hand for the mission", series:[], own:"krysta",
-          help:"Subscribed, offered to volunteer, asked about a programme, or gave. Includes Shop Blind participants signalling they want to do something."},
-         {id:"imp_engspend", label:"Engagement spend behind them ($)", series:[], own:"krysta", fmt:"usd"}],
-   floor:"A raised hand is a person taking a real step toward the mission — not an impression, a like, or a scroll."},
+  {id:"eng", tag:"B", tagName:"Engaged", accent:"#7C3AED", name:"Engage 10,000 people", win:"10,000 engaged", fmt:"int",
+   key:{id:"imp_engaged", label:"People engaged", series:[], own:"krysta", kind:"run",
+        help:"Engaged means one of three things: they’ve said they’re willing to volunteer; they report a dramatic shift in attitude or understanding; or they’ve given monthly for more than a year. Running total toward 10,000."},
+   subs:[{id:"imp_cpe", label:"Cost per person engaged", series:[], own:"krysta", fmt:"usd",
+          help:"Engagement spend ÷ the people newly engaged that week. Derived, not typed."},
+         {id:"imp_engspend", label:"Engagement spend behind them ($)", series:[], own:"krysta", fmt:"usd"},
+         {id:"fnd_recur", label:"Monthly recurring donors", series:[], own:"kevin", kind:"run"}],
+   floor:"Engaged is a person taking a real step — volunteering, changing how they see blindness, or giving every month for a year. Not an impression, a like, or a scroll."},
 
   {id:"prog", tag:"C", tagName:"Thrive Blind", accent:"#0369A1", name:"Programme success — to be defined", win:"TBD", fmt:"int",
    tbd:"Kevin",
@@ -345,14 +342,23 @@ const NS=[
    subs:[],
    floor:"Deliberately empty. Kevin defines what programme success means before we start counting it — a metric nobody agreed to is worse than a blank."},
 
-  {id:"rel", tag:"D", tagName:"Relationships", accent:"#B45309", name:"Build 100 high-impact relationships", win:"100 relationships", fmt:"int",
+  // Three ladders — grants, corporate, major donors — each with the step that
+  // feeds it beneath it (t2). p_conn/p_pros/d_reach/d_pros are the old Major
+  // Partners and Major Donors codes, kept so their history comes with them.
+  {id:"rel", tag:"D", tagName:"Major Relationships", accent:"#B45309", name:"Build 100 high-impact relationships", win:"100 relationships", fmt:"int",
    key:{id:"rel_key", label:"High-impact relationships", series:[], own:"kevin", kind:"run",
-        help:"A relationship counts when someone has made a real commitment — a grant, a partnership, or recurring giving. Intent doesn’t count; commitment does."},
-   subs:[{id:"fnd_gwon", label:"Grants won",                 series:[], own:"kevin", kind:"run"},
-         {id:"fnd_corp", label:"Corporate partners committed",series:[], own:"kevin", kind:"run"},
-         {id:"fnd_recur",label:"Monthly recurring donors",    series:[], own:"kevin"},
-         {id:"fnd_gsub", label:"Grants submitted",            series:[], own:"kevin", kind:"run"}],
-   floor:"Committed means signed or granted, not verbally encouraging."}]},
+        help:"A relationship counts when someone has made a real commitment — a grant, a corporate partnership, or a major gift. Intent doesn’t count; commitment does."},
+   subs:[{id:"fnd_gwon", label:"Grants secured",                        series:[], own:"kevin", kind:"run"},
+         {id:"fnd_gsub", label:"Grants submitted",                      series:[], own:"kevin", kind:"run", t2:true},
+
+         {id:"fnd_corp", label:"Corporate partners committed",          series:[], own:"brad",  kind:"run"},
+         {id:"p_pros",   label:"Corporate prospects identified",        series:[], own:"brad",  kind:"run", t2:true},
+         {id:"p_conn",   label:"Corporate conversations initiated",     series:[], own:"brad",  kind:"run", t2:true},
+
+         {id:"d_sec",    label:"Major donors secured",                  series:[], own:"brad",  kind:"run"},
+         {id:"d_pros",   label:"Major donor prospects identified",      series:[], own:"brad",  kind:"run", t2:true},
+         {id:"d_reach",  label:"Major donor conversations initiated",   series:[], own:"brad",  kind:"run", t2:true}],
+   floor:"Committed means signed, granted or given — not verbally encouraging."}]},
 
  {star:"Community", short:"Community", desc:"Whether people actually feel it.", goals:[
   {id:"dep", tag:"GOAL 4", accent:"#D97706", name:"1,000 heartfelt thank-you messages", win:"1,000 messages", fmt:"int",
@@ -496,20 +502,26 @@ function scorecardMark(g){
     ? ` <a class="scmark" href="${sc.url}" target="_blank" rel="noopener" title="${escHtml(sc.name)} — ${escHtml(sc.note)}">✱ scorecard ↗</a>`
     : ` <span class="scmark scmissing" title="${escHtml(sc.name)} exists but its link hasn't been set — paste the URL into SCORECARDS in index.html">✱ link not set</span>`;
 }
-// Engagement is judged on efficiency, so the headline is derived from the two
-// steps beneath it rather than typed in — that way the number on the card can
-// never drift from the inputs it claims to summarise.
+// Cost per person engaged is derived, never typed — that way it can't drift from
+// the two numbers it claims to summarise. "People engaged" is a RUNNING TOTAL
+// toward 10,000, so the week's cost is that week's spend ÷ the people added that
+// week (the delta), not ÷ the cumulative count. The first week with a value has
+// no prior to subtract from, so it is left blank rather than divided by itself.
 function applyDerived(){
   const g=findGoal("eng"); if(!g) return;
-  const n=(g.subs.find(s=>s.id==="imp_engaged")||{}).series||[];
+  const cpe=g.subs.find(s=>s.id==="imp_cpe"); if(!cpe) return;
+  const n=g.key.series||[];
   const sp=(g.subs.find(s=>s.id==="imp_engspend")||{}).series||[];
   const len=Math.max(n.length,sp.length);
   const out=[];
+  let prev=null;
   for(let i=0;i<len;i++){
-    const c=n[i], d=sp[i];
-    out.push((c==null||d==null||!c)?null:+(d/c).toFixed(2));
+    const tot=n[i], d=sp[i];
+    const added=(tot==null||prev==null)?null:tot-prev;
+    out.push((added==null||d==null||added<=0)?null:+(d/added).toFixed(2));
+    if(tot!=null) prev=tot;
   }
-  g.key.series=out;
+  cpe.series=out;
 }
 function metricBlock(g){
   const s=g.key.series,last=lastReal(s);
@@ -523,7 +535,7 @@ function metricBlock(g){
                      :spark(s,{color:g.accent,w:150,h:42,dots:true,labels:wl,vfmt:g.fmt,dates:wd});
   const subs=g.subs.map(sb=>{const f=sb.fmt||g.fmt;const sl=sb.series;
     const fb=ec?"":freshBadge(sb.id,{mini:true});
-    return `<div class="sub"><span class="sl">${sb.label}${sb.sc?scorecardMark(g):""}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f,dates:wd})}
+    return `<div class="sub${sb.t2?" sub2":""}"><span class="sl"${sb.help?` title="${escHtml(sb.help)}"`:""}>${sb.label}${sb.sc?scorecardMark(g):""}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f,dates:wd})}
       <span class="sv">${fmt(lastReal(sl),f)}</span>${wow(sl,f,{mini:true,code:sb.id})}${fb}</div>`;}).join("");
   const badge=ec?` <a class="srcbadge" href="ecomm.html" title="Pulled straight from the weekly e-comm feed (Shopify + Northbeam). Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
   const fresh=ec?"":` ${freshBadge(g.key.id)}`;
@@ -958,7 +970,7 @@ function buildEditPanel(){
       mets.forEach(m=>{ shown++;
         const cur=lastReal(m.series); const isKey=m.id===g.key.id;
         const own=ownerOf(m.id);
-        html+=`<div class="eprow${isKey?' epkey':''}"><label>${isKey?'<span class="epstar">★</span> ':''}${m.label}`+
+        html+=`<div class="eprow${isKey?' epkey':''}${m.t2?' ep2':''}"><label>${isKey?'<span class="epstar">★</span> ':''}${m.label}`+
               `<span class="eprowmeta">${freshBadge(m.id)}${(!ONLY_MINE&&own)?` <span class="epown">${escHtml(own)}</span>`:""}</span></label>`+
               `<button class="eplist" data-list="${m.id}" title="The list behind this number — check it before counting">📋<span class="lc" id="lc_${m.id}"></span></button>`+
               `<button class="epok" data-confirm="${m.id}" title="Checked it — genuinely unchanged this week. Records that you looked, without changing the number.">✓</button>`+
@@ -1004,8 +1016,13 @@ function confirmMetric(code,btn){
 // when the URL is hit; reading the response back in-browser (JSONP) is the flaky part
 // (its 302 redirect + cold start don't reliably execute as a script), so we don't
 // depend on it — the Save button re-reads the sheet to confirm everything landed.
+// Sent with every save; the Apps Script only uses it when the code has no row
+// yet, to name the one it creates. The "(running total)" suffix isn't decoration
+// — with the Meta tab empty, it is how the script knows to carry the value into
+// next week's column instead of blanking it.
 function labelFor(code){
-  for(const n of NS) for(const g of n.goals) for(const m of [g.key].concat(g.subs)) if(m&&m.id===code) return m.label;
+  for(const n of NS) for(const g of n.goals) for(const m of [g.key].concat(g.subs)) if(m&&m.id===code)
+    return m.label + (m.kind==="run" && !/running total/i.test(m.label) ? " (running total)" : "");
   return code;
 }
 function sendSave(code,value){
