@@ -139,6 +139,33 @@
   .pstat.ok{color:#15803d;font-weight:700}
   .pstat.err{color:#b91c1c;font-weight:700}
 
+  /* ---- rubric pop-out ---- */
+  .rubbtn{border:1px solid var(--line);background:#f8fafc;color:var(--navy);border-radius:99px;
+    font:inherit;font-size:10.5px;font-weight:800;letter-spacing:.03em;padding:3px 9px;cursor:pointer}
+  .rubbtn:hover{background:#eef2f7;border-color:#c9d4e3}
+  .rubmask{position:fixed;inset:0;background:rgba(15,26,45,.55);display:none;z-index:50;
+    align-items:center;justify-content:center;padding:20px}
+  .rubmask.open{display:flex}
+  .rubbox{background:var(--card);border-radius:15px;max-width:640px;width:100%;max-height:88vh;
+    overflow-y:auto;box-shadow:0 18px 50px rgba(10,20,40,.35)}
+  .rubhead{padding:16px 20px 13px;border-bottom:1px solid var(--line);position:sticky;top:0;
+    background:var(--card);border-radius:15px 15px 0 0;display:flex;align-items:flex-start;gap:12px}
+  .rubhead h2{font-size:17px;color:var(--navy);line-height:1.25}
+  .rubhead .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .rubx{margin-left:auto;border:none;background:none;font-size:24px;line-height:1;color:#94a3b8;
+    cursor:pointer;padding:0 2px}
+  .rubx:hover{color:var(--ink)}
+  .rubbody{padding:6px 20px 18px}
+  .rubtier{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:11px;
+    padding:11px 13px;margin-top:12px}
+  .rubtier h3{font-size:13.5px;color:var(--c);display:flex;align-items:center;gap:8px}
+  .rubtier ul{margin:7px 0 0 17px;font-size:12.5px;color:var(--ink)}
+  .rubtier li{margin-bottom:3px}
+  .rubpick{margin-left:auto;border:1px solid var(--c);color:var(--c);background:#fff;border-radius:8px;
+    font:inherit;font-size:11px;font-weight:700;padding:3px 10px;cursor:pointer;white-space:nowrap}
+  .rubpick:hover{background:var(--c);color:#fff}
+  .rubfoot{padding:0 20px 18px;font-size:11.5px;color:var(--muted);line-height:1.5}
+
   footer{max-width:1240px;margin:0 auto;padding:24px 28px 50px;font-size:12px;color:var(--muted);line-height:1.55}
   footer b{color:var(--ink)}
 </style>
@@ -188,6 +215,24 @@
   <div class="cards" id="cards"></div>
 </div>
 
+<div class="rubmask" id="rubmask" onclick="if(event.target===this)closeRubric()">
+  <div class="rubbox" role="dialog" aria-modal="true" aria-labelledby="rubtitle">
+    <div class="rubhead">
+      <div>
+        <h2 id="rubtitle">…</h2>
+        <div class="sub">What counts as what — so the box isn't a matter of mood.</div>
+      </div>
+      <button class="rubx" onclick="closeRubric()" aria-label="Close">&times;</button>
+    </div>
+    <div class="rubbody" id="rubbody"></div>
+    <div class="rubfoot">
+      The through-line: <b>we did something = a little; the other side did something = a big win.</b>
+      Effort is little, commitment is big. If a week genuinely sits between two tiers, take the lower
+      one and say why in the sentence — that's what the sentence is for.
+    </div>
+  </div>
+</div>
+
 <footer>
   <div style="margin-bottom:9px"><b>How this works.</b> One row per pillar per week in the
     <b>Progress</b> tab of the goals Sheet — <code>week | pillar | state | note | priority | who | when</code>.
@@ -208,19 +253,102 @@ const PROG_TAB="Progress";
 
 // The six north-star pillars. `k` is the key written to the sheet — renaming a
 // pillar is safe, changing its `k` orphans its history.
+//
+// `rubric` is what makes the checkbox defensible: concrete examples per tier, in
+// a pop-out on every card. The rule of thumb running through all six is the same
+// — WE did something = a little; THE OTHER SIDE did something = a big win.
+// Effort is little, commitment is big. Edit these freely; they're meant to get
+// sharper as real weeks accumulate and arguments about scoring come up.
 const PILLARS=[
  {k:"donors",    name:"Major Donors",           accent:"#B45309",
-  desc:"Individuals giving at a level that changes what we can do."},
+  desc:"Individuals giving at a level that changes what we can do.",
+  rubric:{
+   regression:["A committed donor pulls out, cuts their amount, or lapses.",
+               "A live prospect says no, or goes cold after a proposal.",
+               "A relationship we were counting on has to be written off."],
+   none:      ["No new prospect identified.",
+               "No outreach went out.",
+               "Replies came back but nothing moved."],
+   little:    ["Identified new prospects.",
+               "Made an initial reach-out.",
+               "Got a first meeting on the calendar."],
+   big:       ["Verbal enthusiasm from a major prospect — they say they're in.",
+               "A donation secured."]}},
+
  {k:"partners",  name:"Major Partners",         accent:"#7C3AED",
-  desc:"Companies and institutions committing real resources, not encouragement."},
+  desc:"Companies and institutions committing real resources, not encouragement.",
+  rubric:{
+   regression:["A partner withdraws, pauses, or lets an agreement lapse.",
+               "A live partnership conversation dies.",
+               "A committed partner quietly stops delivering."],
+   none:      ["No new prospects identified.",
+               "No outreach went out.",
+               "Conversations sat where they were."],
+   little:    ["Good prospects identified.",
+               "Initial reach-out made.",
+               "Substantive connectivity — a real working conversation.",
+               "Working through a specific partnership THEY prompted."],
+   big:       ["Real enthusiasm from the partner.",
+               "A partnership secured."]}},
+
  {k:"programs",  name:"Elite Programs",         accent:"#0369A1",
-  desc:"Programs good enough that people seek them out."},
+  desc:"Programs good enough that people seek them out.",
+  rubric:{
+   regression:["A program partner drops out.",
+               "Program funding lapses or is cut.",
+               "A compliance item slips past its deadline."],
+   none:      ["Materials untouched.",
+               "No follow-up with program partners.",
+               "No compliance item cleared."],
+   little:    ["Refined the materials.",
+               "Followed up with a program partner.",
+               "Checked off a compliance item."],
+   big:       ["A new program partner.",
+               "A new donor to the program."]}},
+
  {k:"public",    name:"Public Engagement",      accent:"#DB2777",
-  desc:"People who've heard us and then did something."},
+  desc:"People who've heard us and then did something.",
+  rubric:{
+   regression:["Reach falls off — a channel goes quiet or declines.",
+               "A post lands badly and costs us goodwill.",
+               "Engaged people drop away faster than they arrive."],
+   none:      ["Nothing shipped.",
+               "Posts went out but none moved above baseline.",
+               "No new coverage, no new engaged people."],
+   little:    ["Posts shipped and performed above our normal baseline.",
+               "A piece of earned coverage.",
+               "New people took a real step — volunteering, or telling us their understanding changed."],
+   big:       ["An organic social post past 50,000 organic views.",
+               "Top-tier media pick us up."]}},
+
  {k:"shop",      name:"Shop Blind Performance", accent:"#16a34a",
-  desc:"The commercial engine that pays for everything else."},
+  desc:"The commercial engine that pays for everything else.",
+  rubric:{
+   regression:["The week came in below the same week last year.",
+               "Contribution after ads and shipping went negative.",
+               "We only hit the number by cutting ads or quality in a way that will cost us later."],
+   none:      ["Flat against last year — inside the noise.",
+               "Nothing shipped, nothing tested, nothing learned."],
+   little:    ["Beat the same week last year.",
+               "Contribution improved on the week.",
+               "A test ran and gave us a real answer."],
+   big:       ["Beat last year decisively, not by a rounding error.",
+               "A structural improvement — margin, MER, or repeat rate — that should hold beyond this week.",
+               "A launch that lands."]}},
+
  {k:"campaigns", name:"Winning Campaigns",      accent:"#EA580C",
-  desc:"Campaigns that land and hold, not ones that merely shipped."}
+  desc:"Campaigns that land and hold, not ones that merely shipped.",
+  rubric:{
+   regression:["A campaign underperforms badly enough to pull.",
+               "Post-launch scoring drops one we'd counted as working.",
+               "A campaign burns margin without buying reach."],
+   none:      ["Nothing new in development.",
+               "Nothing scored, nothing launched."],
+   little:    ["New campaign ideas generated.",
+               "A campaign passed the pre-launch scorecard.",
+               "A campaign moved into development, or launched."],
+   big:       ["A campaign clears 250K+ impressions at neutral-or-better margin — the standing definition of a winning campaign.",
+               "A campaign scores well AFTER launch, not just before."]}}
 ];
 
 // Ordered worst → best, which is also how they're drawn.
@@ -415,12 +543,15 @@ function renderCards(){
     <article class="pcard" id="card_${p.k}" style="--accent:${p.accent}">
       <fieldset>
         <legend>
-          <div class="ptitle"><span class="nm">${esc(p.name)}</span>${chip}</div>
+          <div class="ptitle"><span class="nm">${esc(p.name)}</span>${chip}
+            <button class="rubbtn" onclick="openRubric('${p.k}')"
+              title="What counts as a little win, a big win, or a regression for ${esc(p.name)}">📋 RUBRIC</button></div>
           <div class="pdesc">${esc(p.desc)}</div>
         </legend>
         ${lastBlock}
         <div class="field">
-          <span class="fl">This week <span class="req">*</span></span>
+          <span class="fl">This week <span class="req">*</span>
+            <a onclick="openRubric('${p.k}')" style="float:right;font-weight:700;color:var(--blue);cursor:pointer;text-transform:none;letter-spacing:0">not sure? →</a></span>
           <div class="states">${states}</div>
         </div>
         <div class="field">
@@ -443,6 +574,36 @@ function renderCards(){
   }).join("");
   PILLARS.forEach(p=>validate(p.k));
 }
+
+/* ---------- rubric pop-out ---------- */
+// Drawn best-first: the bar you're trying to clear should be the first thing you
+// read, not the last. Picking a tier here sets the box on the card, so the rubric
+// is a way to answer the question rather than a document you consult and forget.
+let RUB_FOR=null;
+function openRubric(k){
+  const p=PILLARS.find(x=>x.k===k); if(!p||!p.rubric) return;
+  RUB_FOR=k;
+  el("rubtitle").textContent=p.name+" — what counts";
+  el("rubbody").innerHTML=STATES.slice().reverse().map(s=>{
+    const items=(p.rubric[s.k]||[]);
+    return `<div class="rubtier" style="--c:${s.hex}">
+      <h3>${esc(s.label)}
+        <button class="rubpick" onclick="pickFromRubric('${s.k}')">tick this ✓</button></h3>
+      <ul>${items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>
+    </div>`;
+  }).join("");
+  el("rubmask").classList.add("open");
+  const x=el("rubmask").querySelector(".rubx"); if(x) x.focus();
+}
+function closeRubric(){ el("rubmask").classList.remove("open"); RUB_FOR=null; }
+function pickFromRubric(state){
+  const k=RUB_FOR; closeRubric();
+  if(!k) return;
+  const r=document.getElementById(`st_${k}_${state}`);
+  if(r){ r.checked=true; onState(k); }
+  const card=el("card_"+k); if(card) card.scrollIntoView({block:"center",behavior:"smooth"});
+}
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&RUB_FOR) closeRubric(); });
 
 function onState(k){
   DIRTY.add(k); el("card_"+k).classList.add("dirty"); validate(k);
