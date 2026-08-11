@@ -1,5 +1,11 @@
 /**
- * Two Blind Brothers — Goal dashboard write-back service.  v7 (2026-08-11)
+ * Two Blind Brothers — Goal dashboard write-back service.  v8 (2026-08-11)
+ *
+ * WHAT CHANGED IN v8 — writes are open:
+ *   The team passcode is off (REQUIRE_PASS = false, below). It was friction that
+ *   cost more than it bought for a weekly progress read, and reads were always
+ *   public anyway. Flip that one flag to true to put the gate back — WRITE_PASS
+ *   is still in Script properties and passOk_ still works.
  *
  * WHAT CHANGED IN v7 — the weekly progress read:
  *   The dashboard stopped scoring individual metrics and started asking one
@@ -79,7 +85,7 @@ function doGet(e) {
     var fn = e.parameter.fn;
     // Bump this whenever you redeploy — it is a hand-maintained literal, NOT the
     // deployment version, and it is the only way to tell which build is live.
-    if (fn === 'ping')           out = { ok: true, pong: true, version: 7 };
+    if (fn === 'ping')           out = { ok: true, pong: true, version: 8, requirePass: REQUIRE_PASS };
     else if (!passOk_(e))        out = { ok: false, error: 'bad or missing passcode' };
     else if (fn === 'save')      out = saveValue_(e.parameter.code, e.parameter.value, e.parameter.label, e.parameter.who);
     else if (fn === 'confirm')   out = confirmValue_(e.parameter.code, e.parameter.who);
@@ -99,7 +105,22 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
+// WRITES ARE OPEN (2026-08-11, Brad's call). The passcode was friction that cost
+// more than it bought: this holds a weekly progress read and a set of counts, not
+// anything sensitive, and reads were always public anyway.
+//
+// TO PUT THE GATE BACK: flip this to true. Nothing else changes — WRITE_PASS is
+// still in Script properties, passOk_ still works, and the dashboard still sends
+// &pass= when a browser has one stored. Re-add the prompt in index.html if you
+// want people asked for it again.
+//
+// What open writes actually mean: the /exec URL is in a public repo, so anyone
+// who finds it can write to the sheet. The Log tab records every write and Sheets
+// keeps version history, so junk is visible and revertible rather than silent.
+var REQUIRE_PASS = false;
+
 function passOk_(e) {
+  if (!REQUIRE_PASS) return true;
   var want = PropertiesService.getScriptProperties().getProperty('WRITE_PASS');
   if (!want) throw new Error('WRITE_PASS not configured in Script properties');
   var got = (e && e.parameter && e.parameter.pass) || '';

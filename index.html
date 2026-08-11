@@ -198,7 +198,6 @@
     <div class="whoami">
       <label for="whoin">You are</label>
       <input id="whoin" class="ptxt" style="width:11ch" placeholder="name" onchange="setWho(this.value.trim().toLowerCase())">
-      <button class="wtoday" onclick="changePass()" title="Re-enter the team passcode on this device">passcode</button>
     </div>
     <div class="wcount" id="wcount"></div>
   </div>
@@ -378,23 +377,19 @@ function label(isoStr){ const d=fromIso(isoStr); return d?MO[d.getMonth()]+" "+d
 function longLabel(isoStr){ const d=fromIso(isoStr); return d?MO[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear():isoStr; }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
-/* ---------- identity + passcode (same keys the old dashboard used, so nobody re-unlocks) ---------- */
+/* ---------- identity ----------
+   No passcode. Saving used to need the team passcode; it was friction that cost
+   more than it bought for a weekly progress read, so writes are open as of
+   2026-08-11 and the Apps Script gate is off (REQUIRE_PASS there). A stored
+   passcode from the old dashboard is still sent if a browser happens to have
+   one — the server ignores it now, and putting the gate back is one flag. */
 const PASS_KEY="tbb_write_pass", WHO_KEY="tbb_who";
 function getPass(){ try{ return localStorage.getItem(PASS_KEY)||""; }catch(e){ return ""; } }
-function setPass(v){ try{ v?localStorage.setItem(PASS_KEY,v):localStorage.removeItem(PASS_KEY); }catch(e){} }
 function getWho(){ try{ return localStorage.getItem(WHO_KEY)||URL_WHO||""; }catch(e){ return URL_WHO||""; } }
 function setWho(v){ try{ v?localStorage.setItem(WHO_KEY,v):localStorage.removeItem(WHO_KEY); }catch(e){} render(); }
 const URL_WHO=(function(){ try{ return (new URLSearchParams(location.search).get("who")||"").trim().toLowerCase(); }catch(e){ return ""; } })();
 // Following your personal link once puts your name on your saves from then on.
 if(URL_WHO){ try{ if(!localStorage.getItem(WHO_KEY)) localStorage.setItem(WHO_KEY,URL_WHO); }catch(e){} }
-function changePass(){ setPass(""); askPass(); }
-// Asks once per browser, then remembers. The passcode is checked server-side in
-// the Apps Script — it is deliberately not in this public page.
-function askPass(){
-  const v=prompt("Team passcode (ask Brad) — needed to save, not to read:");
-  if(v!=null) setPass(v.trim());
-  return getPass();
-}
 
 /* ---------- reading the sheet (gviz JSONP — public read, no passcode) ---------- */
 function gvDate(v){
@@ -628,7 +623,6 @@ function saveCard(k){
   if(!validate(k)) return;
   const p=PILLARS.find(x=>x.k===k);
   const state=chosen(k), note=el("note_"+k).value.trim(), priority=el("pri_"+k).value.trim();
-  if(!getPass()&&!askPass()){ stat(k,"Saving needs the team passcode.","err"); return; }
   let who=getWho();
   if(!who){
     who=(prompt("Your first name (so the record says who read it):")||"").trim().toLowerCase();
@@ -645,10 +639,13 @@ function saveCard(k){
     "&pass="+encodeURIComponent(getPass());
   jsonp(url).then(r=>{
     if(!r||!r.ok){
+      // Report what the server actually said. A save that fails silently, or that
+      // blames the wrong thing, is how a week goes unrecorded and nobody notices.
       const e=(r&&r.error)||"unknown error";
-      stat(k,/passcode/i.test(e)?"Wrong passcode — click “passcode” above to re-enter it.":("Not saved: "+e),"err");
+      stat(k,/passcode/i.test(e)
+        ? "The Apps Script is still asking for a passcode — redeploy it with REQUIRE_PASS = false."
+        : "Not saved: "+e,"err");
       el("btn_"+k).disabled=false;
-      if(/passcode/i.test(e)) setPass("");
       return;
     }
     // Reflect it locally so the grid and tally move without a reload.
