@@ -1,5 +1,22 @@
 /**
- * Two Blind Brothers — Goal dashboard write-back service.  v6 (2026-08-04)
+ * Two Blind Brothers — Goal dashboard write-back service.  v7 (2026-08-11)
+ *
+ * WHAT CHANGED IN v7 — the weekly progress read:
+ *   The dashboard stopped scoring individual metrics and started asking one
+ *   question per pillar per week: regression / no progress / a little progress /
+ *   a big win, plus the sentence that justifies it and the single priority for
+ *   the week ahead. That lives in a new "Progress" tab:
+ *
+ *       week | pillar | state | note | priority | who | when
+ *
+ *   One row per (week, pillar), UPSERTED — saving again corrects the row instead
+ *   of appending a rival one, so there is exactly one answer per pillar per week.
+ *   v7 is strictly ADDITIVE: every v6 endpoint is untouched, so the archived
+ *   metric dashboard (goal-tree-archive.html) keeps saving as before.
+ *
+ *   New endpoints:
+ *     ?fn=progress&week=&pillar=&state=&note=&priority=&who=  → upsert one read
+ *     ?fn=progress_init                                        → create the tab
  *
  * WHAT CHANGED IN v6:
  *   Duplicate week columns can no longer swallow an entry. Writes now target the
@@ -37,6 +54,9 @@
  * Endpoints (JSONP GET, called by the dashboard):
  *   ?fn=save&code=&value=&label=&who=   → write into THIS WEEK's column (auto-creates row + column)
  *   ?fn=confirm&code=&who=              → "checked it, no change" (logs, doesn't touch the value)
+ *   ?fn=progress&week=&pillar=&state=&note=&priority=&who=
+ *                                       → upsert this week's read for one pillar
+ *   ?fn=progress_init                   → create the "Progress" tab (idempotent)
  *   ?fn=additem&code=&item=&by=         → append one item to the "Items" tab
  *   ?fn=migrate                         → one-time (idempotent) upgrade of an old sheet
  *   ?fn=saveweek                        → deprecated no-op, kept so stale browser tabs don't error
@@ -49,6 +69,7 @@
 var ITEMS_SHEET = 'Items';
 var META_SHEET  = 'Meta';
 var LOG_SHEET   = 'Log';
+var PROG_SHEET  = 'Progress';
 var FIRST_WEEK_COL = 3;          // cols 1-2 are label + code; weeks start at 3
 
 function doGet(e) {
@@ -58,10 +79,13 @@ function doGet(e) {
     var fn = e.parameter.fn;
     // Bump this whenever you redeploy — it is a hand-maintained literal, NOT the
     // deployment version, and it is the only way to tell which build is live.
-    if (fn === 'ping')           out = { ok: true, pong: true, version: 6 };
+    if (fn === 'ping')           out = { ok: true, pong: true, version: 7 };
     else if (!passOk_(e))        out = { ok: false, error: 'bad or missing passcode' };
     else if (fn === 'save')      out = saveValue_(e.parameter.code, e.parameter.value, e.parameter.label, e.parameter.who);
     else if (fn === 'confirm')   out = confirmValue_(e.parameter.code, e.parameter.who);
+    else if (fn === 'progress')  out = saveProgress_(e.parameter.week, e.parameter.pillar, e.parameter.state,
+                                                     e.parameter.note, e.parameter.priority, e.parameter.who);
+    else if (fn === 'progress_init') out = progressInit_();
     else if (fn === 'additem')   out = addItem_(e.parameter.code, e.parameter.item, e.parameter.by);
     else if (fn === 'migrate')   out = migrate_();
     else if (fn === 'saveweek')  out = { ok: true, deprecated: true,
@@ -230,6 +254,81 @@ function confirmValue_(code, who) {
 }
 
 // ---------------------------------------------------------------------------
+// Progress — one honest read per pillar per week (v7).
+//
+// The week column is deliberately PLAIN TEXT. Sheets will happily coerce
+// "2026-08-16" into a date value, and then a sheet whose locale renders dates as
+// 16/08/2026 hands the dashboard back something it has to guess at. Text means
+// the key that is written is exactly the key that is read.
+// ---------------------------------------------------------------------------
+var PROG_STATES = { regression: 1, none: 1, little: 1, big: 1 };
+
+function progSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(PROG_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(PROG_SHEET);
+    sh.appendRow(['week', 'pillar', 'state', 'note', 'priority', 'who', 'when']);
+    sh.setFrozenRows(1);
+    sh.getRange('A:A').setNumberFormat('@');
+    sh.getRange('B:C').setNumberFormat('@');
+    sh.setColumnWidth(4, 420);
+    sh.setColumnWidth(5, 420);
+  }
+  return sh;
+}
+
+// Idempotent: safe to hit after every redeploy.
+function progressInit_() {
+  var sh = progSheet_();
+  return { ok: true, tab: PROG_SHEET, rows: Math.max(0, sh.getLastRow() - 1), week: currentWeekIso_() };
+}
+
+function saveProgress_(week, pillar, state, note, priority, who) {
+  pillar = String(pillar || '').trim();
+  if (!pillar) return { ok: false, error: 'no pillar' };
+
+  week = String(week || '').trim();
+  // Trust the client's week only if it is a well-formed date; otherwise fall
+  // back to this script's clock rather than writing a key nothing can read.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(week)) week = currentWeekIso_();
+
+  state = String(state || '').trim().toLowerCase();
+  if (!PROG_STATES.hasOwnProperty(state)) return { ok: false, error: 'bad state: ' + state };
+
+  note     = String(note     == null ? '' : note).trim().slice(0, 400);
+  priority = String(priority == null ? '' : priority).trim().slice(0, 400);
+  if (!note) return { ok: false, error: 'a one-sentence justification is required' };
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var sh = progSheet_();
+    var last = sh.getLastRow();
+    var row = -1;
+    if (last >= 2) {
+      var keys = sh.getRange(2, 1, last - 1, 2).getValues();
+      for (var i = 0; i < keys.length; i++) {
+        var kw = (keys[i][0] instanceof Date) ? iso_(keys[i][0]) : String(keys[i][0]).trim();
+        if (kw === week && String(keys[i][1]).trim() === pillar) { row = i + 2; break; }
+      }
+    }
+    var isNew = row < 0;
+    if (isNew) row = last + 1;
+    // Format before writing — setting '@' afterwards will not un-parse a value
+    // Sheets has already turned into a date.
+    sh.getRange(row, 1, 1, 3).setNumberFormat('@');
+    sh.getRange(row, 1, 1, 7)
+      .setValues([[week, pillar, state, note, priority, String(who || '').slice(0, 60), new Date()]]);
+    SpreadsheetApp.flush();
+    logWrite_('prog_' + pillar, state, isNew ? 'progress' : 'progress-edit', who);
+    return { ok: true, week: week, pillar: pillar, state: state, row: row, created: isNew };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Audit log — the record that makes staleness computable.
 // ---------------------------------------------------------------------------
 function logSheet_() {
@@ -318,7 +417,7 @@ function addItem_(code, item, by) {
 // ---------------------------------------------------------------------------
 function migrate_() {
   var sh = sheet_();
-  metaSheet_(); logSheet_();
+  metaSheet_(); logSheet_(); progSheet_();
 
   var lastCol = sh.getLastColumn();
   if (lastCol < FIRST_WEEK_COL) return { ok: true, migrated: 0, note: 'no week columns' };

@@ -1,3 +1,78 @@
+# ⏳ v7 — WRITTEN, NOT YET DEPLOYED (2026-08-11)
+
+The dashboard was rebuilt around a **weekly progress read** instead of per-metric
+scoring. Six pillars, four boxes, one required sentence, one priority for next
+week. Until v7 is deployed the new `index.html` loads but **cannot save** — it
+says so in an amber bar at the top rather than failing quietly.
+
+**Do these in order. Step 1 before step 3, or the team sees a broken dashboard.**
+
+### 1. Deploy Apps Script v7
+
+Same rules as always, and the account rule below still bites:
+
+1. Open `https://script.google.com/u/1/home/projects/1u2tx2t7yVqEnUzPWWscmv72NS7LUCOh9SbG_4j4T6oeOLaON3d_EiX4F/edit`
+   — **`/u/1` is the 2BB account.** From the personal account the deploy dialog
+   fails with a misleading "Something went wrong" (see below).
+2. Replace `Code.gs` with `apps-script/2BB-Dashboard-WriteBack.gs` from this repo. Save.
+3. **Deploy ▸ Manage deployments ▸ ✏️ ▸ Version: "New version" ▸ Deploy.**
+   Never "New deployment" — that mints a new URL and everything stops saving.
+4. Verify: `…/exec?fn=ping` must return `"version": 7`.
+
+v7 is **strictly additive** — every v6 endpoint is untouched, so the archived
+metric dashboard (`goal-tree-archive.html`) keeps saving exactly as before.
+
+### 2. Create the Progress tab
+
+Once, in a browser tab (substituting the passcode):
+
+```
+https://script.google.com/macros/s/AKfycbxFYl7yMenuUkVCV9nSDSIvfP0-UnPN-R1NOYVrQM0kRzk8Z2WYtb9JTZBK-aQYwJGu3A/exec?fn=progress_init&pass=YOUR_PASSCODE
+```
+
+Expect `{"ok":true,"tab":"Progress","rows":0,"week":"2026-08-16"}`. Idempotent —
+running it twice does nothing. (`fn=migrate` also creates it.)
+
+The tab is `week | pillar | state | note | priority | who | when`, one row per
+pillar per week, **upserted** — saving again corrects the row rather than adding
+a second answer. Column A is deliberately **plain text**: Sheets will happily turn
+`2026-08-16` into a date value, and a sheet rendering dates as `16/08/2026` then
+hands the dashboard a key it has to guess at.
+
+`state` is one of `regression` · `none` · `little` · `big`. Anything else is
+rejected server-side, and a save with no justification sentence is rejected too —
+the discipline is enforced in both places, not just in the browser.
+
+### 3. Push the dashboard
+
+`index.html` is committed but **not pushed**. Push it *after* step 1, or the live
+site shows the amber can't-save bar to everyone. Note the Monday 07:45
+`monday_refresh.sh` auto-commit **will push it for you** if you leave it — so this
+is a deadline, not a preference.
+
+### What the team sees
+
+- Six pillar cards, current week by default. Tick one box, write one sentence,
+  set next week's priority, Save.
+- **Save stays disabled until there's a sentence.** That's on purpose: "Big win"
+  with no sentence is worth nothing three months from now.
+- Last week's priority and last week's sentence sit at the top of each card, so
+  the first thing you read is what you said you'd do.
+- ◀ ▶ walk back through past weeks; past weeks stay editable (people log late).
+- The Momentum grid is every pillar × every week — the pattern nobody could see
+  when this was thirty metrics.
+- Personal links still work: `?who=krysta` puts their name on their saves.
+- Pillar names and one-liners are the `PILLARS` array at the top of `index.html`.
+
+### Rolling back
+
+`git revert` the rebuild commit — `goal-tree-archive.html` is the old dashboard,
+unchanged and still live, so the fallback is a link away rather than a deploy.
+The Apps Script rolls back separately (Manage deployments ▸ ✏️ ▸ earlier version);
+the Progress tab is inert to v6 and can be left in place.
+
+---
+
 ## ✅ v6 deployed 2026-08-04, 10:28 AM — and WHICH ACCOUNT matters
 
 Version 6 is live on the same `/exec` URL (deployment ID unchanged, ending

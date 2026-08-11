@@ -3,933 +3,322 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Two Blind Brothers — Weekly Metrics Dashboard</title>
+<title>Two Blind Brothers — Weekly Progress</title>
 <style>
   :root{
     --navy:#1F3864; --blue:#2E5496; --ink:#1f2937; --muted:#6b7280; --line:#e5e9f0;
-    --bg:#eef2f7; --card:#ffffff; --gold:#E8B84B; --green:#16a34a; --red:#dc2626;
+    --bg:#eef2f7; --card:#ffffff; --gold:#E8B84B;
     --navygrad:linear-gradient(120deg,#16284a,#2a4878);
+    --s-reg:#dc2626; --s-none:#94a3b8; --s-little:#0891B2; --s-big:#16a34a;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
     background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+  a{color:var(--blue)}
+  :focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+
   header{background:var(--navygrad);color:#fff;padding:22px 32px;
-    display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:8px}
+    display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px}
   header .brand{font-size:13px;letter-spacing:.22em;font-weight:700;opacity:.85}
   header h1{font-size:24px;font-weight:700;margin-top:2px}
-  header .meta{text-align:right;font-size:12px;opacity:.85}
-  header .meta b{color:var(--gold)}
+  header .sub{font-size:12.5px;opacity:.8;margin-top:4px;max-width:52ch}
+  header .meta{text-align:right;font-size:12px;opacity:.9}
   .navlink{display:inline-block;color:#fff;text-decoration:none;font-weight:700;font-size:12px;
-    border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 11px;transition:background .15s}
+    border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 11px;transition:background .15s;margin-left:6px}
   .navlink:hover{background:rgba(255,255,255,.14)}
-  .editlink{background:var(--gold);color:#15233f;border-color:var(--gold);margin-right:6px}
-  .editlink:hover{background:#f1cc63}
-  .sheetlink{color:var(--gold);text-decoration:none;border-bottom:1px solid currentColor}
-  .wrap{max-width:1320px;margin:0 auto;padding:22px 28px 60px}
-  @media(max-width:560px){ .wrap{padding:16px 14px 50px} header{padding:18px 16px} footer{padding:0 14px 40px} .weekclose{padding:0 14px} }
-  .status{font-size:12px;font-weight:600;padding:9px 14px;border-radius:9px;margin:0 0 16px;background:#eef0f3;color:#6b7280}
-  .status a{font-weight:700;text-decoration:none;border-bottom:1px solid currentColor}
-  .legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted);margin:6px 4px 20px}
-  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
-  .star{color:var(--gold)}
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
-  @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
-  .kpi{background:var(--card);border-radius:12px;padding:13px 15px;box-shadow:0 1px 3px rgba(20,40,80,.07);
-    border:1px solid var(--line);display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden}
-  .kstripe{position:absolute;left:0;top:0;height:3px;width:100%}
-  .kpi .lab{font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.02em}
-  .kpi .row{display:flex;align-items:flex-end;justify-content:space-between;gap:6px}
-  .kpi .num{font-size:22px;font-weight:800;line-height:1}
-  .kpi .tgt{font-size:10px;color:var(--muted)}
-  .banner{background:var(--navygrad);color:#fff;padding:11px 18px;display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
-  .banner .bstar{color:var(--gold);font-size:13px}
-  .banner .bname{font-weight:700;letter-spacing:.17em;font-size:13.5px}
-  .banner .bdesc{font-size:11.5px;opacity:.82;font-style:italic}
-  .card,.group{background:var(--card);border-radius:14px;box-shadow:0 1px 4px rgba(20,40,80,.08);
-    border:1px solid var(--line);overflow:hidden}
-  .singles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(370px,100%),1fr));gap:18px;margin-bottom:18px}
-  .cbody{padding:15px 18px 14px}
-  .gname{font-size:16px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px}
-  .gname .sq{width:11px;height:11px;border-radius:3px;display:inline-block}
-  .group{margin-bottom:18px}
-  .gbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))}
-  @media(max-width:760px){.gbody{grid-template-columns:1fr}}
-  .panel{padding:15px 20px 15px}
-  .gbody .panel+.panel{border-left:1px solid var(--line)}
-  @media(max-width:760px){.gbody .panel+.panel{border-left:none;border-top:1px solid var(--line)}}
-  .phead{display:flex;align-items:center;gap:9px;margin-bottom:3px}
-  .badge{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:6px;
-    color:#fff;font-weight:800;font-size:12px;flex:none}
-  .pname{font-size:15px;font-weight:700;color:var(--navy)}
-  .keyblock{display:flex;align-items:center;justify-content:space-between;gap:14px;
-    margin:13px 0 6px;padding:11px 13px;background:#fbfcfe;border:1px solid var(--line);border-radius:10px}
-  /* Not flex: the freshness chip and source badge sit inline with the label and
-     wrap naturally. As a flex row they refused to shrink and squeezed the label
-     into a four-line column. */
-  .keyblock .kl{font-size:12px;color:var(--muted);font-weight:600;line-height:1.45}
-  .keyblock .kl .star{margin-right:3px}
-  .keyblock .kl .fresh,.keyblock .kl .srcbadge{margin-left:5px}
-  .keyblock .kv{font-size:29px;font-weight:800;line-height:1;margin-top:3px}
-  .pill{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:6px}
-  .subs{margin-top:8px}
-  .sub{display:flex;align-items:center;gap:10px;padding:6px 2px;border-top:1px dashed var(--line);font-size:12.5px}
-  .sub:first-child{border-top:none}
-  .sub .sl{flex:1;color:#374151}
-  /* A step that feeds the sub-goal above it (grants submitted -> grants secured). */
-  .sub.sub2{border-top-style:dotted}
-  .sub.sub2 .sl{padding-left:16px;color:#64748b;font-size:12px;position:relative}
-  .sub.sub2 .sl::before{content:"└";position:absolute;left:4px;color:#cbd5e1;font-size:11px}
-  .sub.sub2 .sv{font-weight:600;color:#475569}
-  .sub .sv{font-weight:700;min-width:54px;text-align:right;font-variant-numeric:tabular-nums}
-  .sub .wowmini{font-size:12px;font-weight:800;width:15px;text-align:center;flex:none}
-  .wow{font-size:11.5px;font-weight:700;margin-top:3px}
-  .floor{margin-top:11px;padding-top:9px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
-  .floor b{color:#4b5563}
-  .srcbadge{font-size:9px;font-weight:800;letter-spacing:.02em;color:#0e7490;background:#ecfeff;
-    border:1px solid #a5f3fc;border-radius:20px;padding:1px 7px;text-decoration:none;white-space:nowrap;vertical-align:middle}
-  .srcbadge:hover{background:#cffafe}
-  svg.sp{display:block}
-  footer{max-width:1320px;margin:0 auto;padding:0 28px 40px;font-size:11.5px;color:var(--muted)}
-  /* ---- live edit panel ---- */
-  .fab{position:fixed;right:20px;bottom:20px;z-index:40;background:var(--gold);color:#15233f;border:none;
-    border-radius:30px;padding:12px 19px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(20,40,80,.28)}
-  .fab:hover{background:#f1cc63}
-  .editmask{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:50;display:none}
-  .editmask.open{display:block}
-  .editpanel{position:fixed;top:0;right:0;height:100%;width:min(460px,94vw);background:#fff;z-index:51;
-    box-shadow:-6px 0 24px rgba(20,40,80,.25);transform:translateX(100%);transition:transform .22s;display:flex;flex-direction:column}
-  .editmask.open .editpanel{transform:translateX(0)}
-  .ephead{background:var(--navygrad);color:#fff;padding:16px 18px;position:relative}
-  .ephead h2{font-size:16px;font-weight:800;margin:0}
-  .ephead .sub{font-size:11.5px;opacity:.85;margin-top:3px}
-  .ephead .x{position:absolute;top:12px;right:15px;color:#fff;font-size:22px;cursor:pointer;opacity:.85;text-decoration:none;line-height:1}
-  .epwarn{background:#fff8e1;color:#92400e;font-size:11.5px;padding:9px 16px;border-bottom:1px solid #fde68a}
-  .epbody{flex:1;overflow:auto;padding:6px 16px 14px}
-  .epsec{font-size:11px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--navy);padding:6px 10px;border-radius:7px;margin:14px 0 6px}
-  .epgoal{font-size:11.5px;font-weight:800;color:#475569;margin:11px 0 3px;padding:1px 0 1px 9px;border-left:3px solid #94a3b8}
-  .eprow{display:flex;align-items:center;gap:10px;padding:6px 2px;border-bottom:1px dashed var(--line)}
-  .eprow label{flex:1;font-size:12.5px;color:#374151;line-height:1.25}
-  .eprow input{width:86px;text-align:right;font-size:14px;font-weight:700;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-variant-numeric:tabular-nums}
-  .eprow input:focus{outline:2px solid var(--gold);border-color:var(--gold)}
-  .eprow.epkey{background:#fff8e8;border-left:3px solid var(--gold);padding-left:9px;border-bottom-color:#efe1bd;margin-top:2px}
-  .eprow.epkey label{font-weight:800;color:#15233f;font-size:13px}
-  .eprow.ep2 label{padding-left:15px;color:#64748b;position:relative}
-  .eprow.ep2 label::before{content:"└";position:absolute;left:2px;color:#cbd5e1}
-  .epstar{color:var(--gold);font-size:12px}
-  /* per-metric item lists (the things behind the counts) */
-  .eplist{flex:none;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:12px;padding:5px 7px;cursor:pointer;color:#475569;line-height:1}
-  .eplist:hover{border-color:var(--gold)}
-  .eplist .lc{font-weight:800;font-size:11px;margin-left:3px;color:#15233f}
-  .epitems{background:#f8fafc;border:1px solid var(--line);border-radius:9px;margin:2px 0 8px;padding:9px 11px;font-size:12px}
-  .epitems .eiadd{display:flex;gap:7px;margin-bottom:6px}
-  .epitems .eiadd input{flex:1;font-size:12.5px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;text-align:left;font-weight:400;width:auto}
-  .epitems .eiadd button{border:0;background:var(--navy);color:#fff;font-weight:700;font-size:12px;border-radius:7px;padding:6px 11px;cursor:pointer}
-  .epitems .eidup{display:none;background:#fff8e1;color:#92400e;border:1px solid #fde68a;border-radius:6px;padding:5px 8px;margin-bottom:6px;font-size:11.5px}
-  .epitems .eichips{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
-  .epitems .eichips .chip{background:#fff;border:1px solid var(--line);border-radius:12px;padding:2px 9px;font-size:11px;color:#475569}
-  .epitems .eichips .use{border:1px solid var(--gold);background:#fff8e8;color:#92400e;border-radius:12px;padding:2px 9px;font-size:11px;font-weight:700;cursor:pointer}
-  .epitems ul{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto}
-  .epitems li{display:flex;justify-content:space-between;gap:8px;padding:3.5px 2px;border-bottom:1px dashed var(--line)}
-  .epitems li:last-child{border-bottom:0}
-  .epitems li .it{color:#1f2937}
-  .epitems li .when{color:#94a3b8;font-size:11px;flex:none;font-variant-numeric:tabular-nums}
-  .epitems .eistatus{font-size:11px;color:#64748b;margin-top:5px;min-height:14px}
-  .epitems .eifoot{margin-top:4px;font-size:11px}
-  .epitems .eifoot a{color:#2563eb;text-decoration:none}
-  .epfoot{border-top:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;gap:12px;background:#fbfcfe}
-  .savewk{background:var(--green);color:#fff;border:none;border-radius:9px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer;flex:none}
-  .savewk:hover{filter:brightness(1.07)}
-  .epstatus{font-size:12px;color:var(--muted);flex:1}
-  .epsave{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 18px;font-weight:800;font-size:14px;cursor:pointer;flex:none}
-  .epsave:hover{background:#2a4878}
-  /* ---- end-of-week (Save Week) band at the bottom of the page ---- */
-  .weekclose{max-width:1320px;margin:24px auto 0;padding:0 28px}
-  .wcbox{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;
-    padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(20,40,80,.07)}
-  .wctitle{font-size:15px;font-weight:800;color:var(--navy)}
-  .wcsub{font-size:12px;color:var(--muted);margin-top:2px;max-width:560px;line-height:1.45}
-  .wcaction{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .wcbtn{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 17px;font-weight:800;font-size:13.5px;cursor:pointer}
-  .wcbtn:hover{background:#2a4878}
-  .wcconfirm{font-size:13px;font-weight:800;color:var(--red)}
-  .wcyes{background:var(--red);color:#fff;border:none;border-radius:9px;padding:10px 16px;font-weight:800;font-size:13.5px;cursor:pointer}
-  .wcyes:hover{filter:brightness(1.08)}
-  .wccancel{background:#eef0f3;color:#374151;border:none;border-radius:9px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer}
-  .wcstatus{font-size:12.5px;color:var(--muted);font-weight:600}
-  /* ---- freshness, week note, scorecard links, per-person entry ---- */
-  .weeknote{font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--line);
-    border-radius:9px;padding:8px 13px;margin:0 4px 18px;line-height:1.5}
-  .weeknote b{color:#374151}
-  .fresh{display:inline-block;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:20px;
-    white-space:nowrap;vertical-align:middle;letter-spacing:.01em}
-  .sub .fresh{flex:none;min-width:34px;text-align:center}
-  .kfresh{margin-top:3px}
-  .khelp{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.4;max-width:330px}
-  .scmark{font-size:9px;font-weight:800;color:#4338ca;background:#eef2ff;border:1px solid #c7d2fe;
-    border-radius:20px;padding:1px 7px;text-decoration:none;white-space:nowrap;vertical-align:middle}
-  .scmark:hover{background:#e0e7ff}
-  .scmissing{color:#92400e;background:#fff8e1;border-color:#fde68a;cursor:help}
-  .epme{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#f8fafc;border:1px solid var(--line);
-    border-radius:9px;padding:8px 11px;margin:8px 0 4px;font-size:12px;color:#475569}
-  .epme label{font-weight:700;color:#334155}
-  .epme input{flex:1;min-width:110px;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:7px}
-  .epfilter{font-size:11.5px;color:#64748b}
-  .epfilter a{color:#2563eb;text-decoration:none;font-weight:700}
-  .eprowmeta{display:block;margin-top:3px}
-  .epown{font-size:9.5px;font-weight:700;color:#475569;background:#eef2f7;border-radius:20px;padding:1px 6px;text-transform:capitalize}
-  .epok{flex:none;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:12px;font-weight:800;
-    padding:5px 8px;cursor:pointer;color:#15803d;line-height:1}
-  .epok:hover{border-color:var(--green);background:#e8f6ec}
-  .epok:disabled{opacity:.5;cursor:default}
-  /* ---- pulse bar: replaces the strip that repeated every goal's ★ ---- */
-  .pulse{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;margin-bottom:26px}
-  .pcell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px 11px;
-    box-shadow:0 1px 3px rgba(20,40,80,.07);position:relative;overflow:hidden}
-  .pcell .pnum{font-size:24px;font-weight:800;line-height:1.05;color:var(--navy)}
-  .pcell .plab{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.35}
-  .pcell .pbar{position:absolute;left:0;top:0;height:3px;width:100%;opacity:.85}
-  .pwide{grid-column:span 2}
-  @media(max-width:640px){.pwide{grid-column:1 / -1}}
-  .ptrack{margin-top:8px;height:6px;border-radius:6px;background:#eef2f7;overflow:hidden}
-  .ptrack span{display:block;height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:6px}
-  /* ---- a goal deliberately left blank ---- */
-  .ptbd{background:repeating-linear-gradient(135deg,#fbfcfe,#fbfcfe 10px,#f5f7fb 10px,#f5f7fb 20px)}
-  .tbdbox{margin:13px 0 6px;padding:14px 15px;border:1px dashed #cbd5e1;border-radius:10px;background:#fff}
-  .tbdtitle{font-size:12.5px;font-weight:800;color:#475569;letter-spacing:.02em}
-  .tbdbody{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.5}
-  .ptag{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;
-    background:#eef2f7;border-radius:20px;padding:2px 8px;white-space:nowrap}
-  @media(max-width:560px){
-    .epbody{padding:6px 12px 14px}
-    .eprow{flex-wrap:wrap;gap:7px}
-    .eprow label{flex:1 1 100%;min-width:0}
-    .eprow input{flex:1 1 auto;width:auto;min-width:0;text-align:right}
-    .epme input{flex:1 1 100%}
-  }
+  .navlink.gold{background:var(--gold);color:#15233f;border-color:var(--gold)}
+  .navlink.gold:hover{background:#f1cc63}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:20px 28px 70px}
+  @media(max-width:620px){ .wrap{padding:14px 13px 50px} header{padding:18px 15px} footer{padding:0 14px 40px} }
+
+  .status{font-size:12.5px;font-weight:600;padding:9px 14px;border-radius:9px;margin:0 0 14px;background:#eef0f3;color:#6b7280}
+  .status.warn{background:#fef3c7;color:#7c2d12;border:1px solid #fcd34d}
+  .status.bad{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+  .status a{font-weight:700}
+
+  /* ---- week bar ---- */
+  .weekbar{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 14px;
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(20,40,80,.07);margin-bottom:16px}
+  .wnav{display:flex;align-items:center;gap:7px}
+  .wbtn{border:1px solid var(--line);background:#f8fafc;border-radius:8px;font-size:15px;line-height:1;
+    padding:7px 11px;cursor:pointer;color:var(--navy);font-weight:700}
+  .wbtn:hover:not(:disabled){background:#eef2f7}
+  .wbtn:disabled{opacity:.35;cursor:default}
+  .wlabel{font-weight:800;font-size:15px;color:var(--navy);min-width:15ch}
+  .wlabel .wsub{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+  .wtoday{border:none;background:none;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline}
+  .wcount{margin-left:auto;font-size:12.5px;color:var(--muted);font-weight:600}
+  .wcount b{color:var(--navy)}
+  .whoami{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .whoami input{border:1px solid var(--line);border-radius:7px;padding:5px 8px;font:inherit;font-size:12px;width:11ch}
+
+  /* ---- tally ---- */
+  .tally{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  @media(max-width:640px){.tally{grid-template-columns:repeat(2,1fr)}}
+  .tcell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;
+    position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(20,40,80,.06)}
+  .tcell .bar{position:absolute;left:0;top:0;height:3px;width:100%}
+  .tcell .n{font-size:23px;font-weight:800;line-height:1.1}
+  .tcell .l{font-size:11px;color:var(--muted);font-weight:700}
+
+  /* ---- momentum grid ---- */
+  .mom{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 16px 12px;
+    box-shadow:0 1px 3px rgba(20,40,80,.07);margin-bottom:20px}
+  .mom h2{font-size:14px;color:var(--navy);margin-bottom:2px}
+  .mom .h2sub{font-size:11.5px;color:var(--muted);margin-bottom:11px}
+  /* Only the grid scrolls, and it opens at the newest week — on a phone the
+     column that matters is the right-hand one, not May. */
+  #momwrap{overflow-x:auto}
+  table.momt{border-collapse:collapse;font-size:11.5px}
+  table.momt th{font-weight:700;color:var(--muted);text-align:center;padding:2px 3px;font-size:10px;white-space:nowrap}
+  table.momt th.rowh{text-align:left;color:var(--navy);font-size:11.5px;padding-right:12px;white-space:nowrap;font-weight:700;
+    position:sticky;left:0;background:var(--card);z-index:1}
+  table.momt td{padding:2px 3px}
+  .mcell{width:22px;height:20px;border-radius:5px;background:#f1f5f9;border:1px solid #e2e8f0;display:block;cursor:default}
+  .mcell.has{border-color:transparent}
+  .mcell.sel{outline:2px solid var(--navy);outline-offset:1px}
+  th.wsel{color:var(--navy);text-decoration:underline}
+  .mcolbtn{background:none;border:none;font:inherit;color:inherit;cursor:pointer;padding:0}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:11.5px;color:var(--muted);margin-top:10px}
+  .legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+  /* ---- pillar cards ---- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(430px,100%),1fr));gap:16px}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 1px 4px rgba(20,40,80,.08);overflow:hidden;border-top:3px solid var(--accent,#ccc)}
+  .pcard.dirty{box-shadow:0 0 0 2px var(--gold),0 1px 4px rgba(20,40,80,.08)}
+  .pcard fieldset{border:0;padding:15px 17px 14px}
+  .pcard legend{display:block;padding:0;width:100%}
+  .ptitle{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .ptitle .nm{font-size:16.5px;font-weight:800;color:var(--navy)}
+  .ptitle .chip{font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:99px;color:#fff}
+  .ptitle .chip.empty{background:#e2e8f0;color:#64748b}
+  .pdesc{font-size:12px;color:var(--muted);margin:3px 0 11px}
+
+  .lastwk{background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--navy);
+    border-radius:9px;padding:9px 11px;margin-bottom:13px;font-size:12.5px}
+  .lastwk .lab{font-size:10px;font-weight:800;letter-spacing:.07em;color:var(--muted);text-transform:uppercase}
+  .lastwk .pri{font-weight:600;color:var(--ink);margin-top:2px}
+  .lastwk .pri.none{font-weight:400;color:#94a3b8;font-style:italic}
+  .lastwk .why{color:var(--muted);margin-top:4px;font-size:11.5px}
+
+  .states{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+  @media(max-width:520px){.states{grid-template-columns:repeat(2,1fr)}}
+  .states input{position:absolute;opacity:0;width:0;height:0}
+  .states label{display:block;border:1.5px solid var(--line);border-radius:10px;padding:9px 8px;cursor:pointer;
+    text-align:center;background:#fbfcfe;transition:border-color .12s,background .12s}
+  .states label:hover{background:#f1f5f9}
+  .states .box{display:inline-block;width:15px;height:15px;border:1.8px solid #b6c1d1;border-radius:4px;
+    margin-bottom:5px;position:relative;background:#fff}
+  .states .nmt{display:block;font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.25}
+  .states input:checked+label{border-color:var(--c);background:color-mix(in srgb,var(--c) 9%,#fff)}
+  .states input:checked+label .box{background:var(--c);border-color:var(--c)}
+  .states input:checked+label .box::after{content:"";position:absolute;left:4px;top:0px;width:5px;height:10px;
+    border:solid #fff;border-width:0 2.4px 2.4px 0;transform:rotate(42deg)}
+  .states input:checked+label .nmt{color:var(--c)}
+  .states input:focus-visible+label{outline:3px solid #2563eb;outline-offset:2px}
+
+  .fl{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:4px}
+  .fl .req{color:#dc2626}
+  textarea,input.ptxt{width:100%;font:inherit;font-size:13px;border:1.5px solid var(--line);border-radius:9px;
+    padding:8px 10px;background:#fbfcfe;color:var(--ink);resize:vertical}
+  textarea{min-height:52px}
+  textarea:focus,input.ptxt:focus{background:#fff;border-color:var(--blue)}
+  .field{margin-bottom:11px}
+  .hint{font-size:11px;color:#94a3b8;margin-top:3px}
+  .hint.bad{color:#b91c1c}
+
+  .prow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px}
+  .save{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:8px 16px;font:inherit;
+    font-size:13px;font-weight:700;cursor:pointer}
+  .save:hover:not(:disabled){background:#2a4878}
+  .save:disabled{background:#cbd5e1;cursor:default}
+  .pstat{font-size:11.5px;color:var(--muted);min-height:1em}
+  .pstat.ok{color:#15803d;font-weight:700}
+  .pstat.err{color:#b91c1c;font-weight:700}
+
+  footer{max-width:1240px;margin:0 auto;padding:24px 28px 50px;font-size:12px;color:var(--muted);line-height:1.55}
+  footer b{color:var(--ink)}
 </style>
 </head>
 <body>
 <header>
   <div>
     <div class="brand">TWO BLIND BROTHERS</div>
-    <h1>Weekly Metrics Dashboard</h1>
+    <h1>Weekly Progress</h1>
+    <div class="sub">Six pillars. One honest read a week: did it go backwards, sit still, move a
+      little, or land something big — and what has to be done before next Sunday.</div>
   </div>
   <div class="meta">
-    <a class="navlink editlink" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">✏️ Update the Sheet ↗</a>
-    <a class="navlink" href="ecomm.html">Ecomm Metrics &rarr;</a><br>
-    Week <b id="wkdate">…</b><br>Live — reads from your <a class="sheetlink" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">Google Sheet ↗</a>
+    <a class="navlink gold" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">📊 The Sheet ↗</a>
+    <a class="navlink" href="ecomm.html">Ecomm Metrics →</a>
+    <a class="navlink" href="goal-tree-archive.html" title="The metric-scoring goal tree this replaced. Still live, still reading the same sheet.">📦 Old goal tree</a>
   </div>
 </header>
+
 <div class="wrap">
-  <div class="status" id="status">Connecting to live data…</div>
-  <div class="legend">
-    <span><span class="star">★</span> = the main number for this goal</span>
-    <span><span class="dot" style="background:var(--blue)"></span>lines are drawn on a real date axis — gaps mean nobody entered</span>
-    <span><span class="dot" style="background:var(--green)"></span>beating last year</span>
-    <span><span class="dot" style="background:var(--red)"></span>behind</span>
-    <span title="Green under 7 days, amber 7-14, red older, grey never">the grey/green chip = when it was last updated or confirmed</span>
-    <span>the steps under each ★ move first</span>
+  <div class="status" id="status">Loading this week…</div>
+
+  <div class="weekbar">
+    <div class="wnav">
+      <button class="wbtn" id="wprev" onclick="stepWeek(-1)" aria-label="Previous week">◀</button>
+      <div class="wlabel" id="wlabel" aria-live="polite">…<span class="wsub" id="wsub"></span></div>
+      <button class="wbtn" id="wnext" onclick="stepWeek(1)" aria-label="Next week">▶</button>
+      <button class="wtoday" id="wtoday" onclick="goToday()" hidden>this week</button>
+    </div>
+    <div class="whoami">
+      <label for="whoin">You are</label>
+      <input id="whoin" class="ptxt" style="width:11ch" placeholder="name" onchange="setWho(this.value.trim().toLowerCase())">
+      <button class="wtoday" onclick="changePass()" title="Re-enter the team passcode on this device">passcode</button>
+    </div>
+    <div class="wcount" id="wcount"></div>
   </div>
-  <div class="weeknote" id="weeknote">Waiting for the sheet…</div>
-  <div class="kpis" id="kpis"></div>
-  <div class="singles" id="singles"></div>
-  <div id="groups"></div>
+
+  <div class="tally" id="tally"></div>
+
+  <section class="mom" aria-labelledby="momh">
+    <h2 id="momh">Momentum</h2>
+    <div class="h2sub">Every pillar, every week. Click a week to open it.</div>
+    <div id="momwrap"></div>
+    <div class="legend" id="momlegend"></div>
+  </section>
+
+  <div class="cards" id="cards"></div>
 </div>
 
-<div class="weekclose">
-  <div class="wcbox">
-    <div>
-      <div class="wctitle">📅 The week closes itself</div>
-      <div class="wcsub">There's no button to press any more. Every save lands in the column for the week it's actually made in, and a new week opens automatically each Monday. If you check a number and it genuinely hasn't moved, hit <b>✓</b> next to it in ✏️ Update metrics — that records that you looked, which is what stops a stale number from passing for a stable one.</div>
-    </div>
-  </div>
-</div>
 <footer>
-  <div style="margin-bottom:10px;line-height:1.5"><b>✱ Scorecard</b> — products and campaigns are screened before they go, and campaigns are scored again afterwards. The ✱ on those rows links to the scorecard itself.</div>
-  <div style="margin-bottom:10px;line-height:1.5"><b>Commercial numbers.</b> <b>Net sales</b> is line items after discounts, excluding shipping and tax — the same figure as the weekly memo. <b>Gross order value</b> is what the customer paid, including shipping and tax. Contribution is net sales less modelled shipping and ad spend; <b>it does not include COGS</b>, so it isn't profit.</div>
-  Live data from Google Sheet <b>2BB Dashboard Data</b>. Edit the sheet and refresh to update. ·
-  Two Blind Brothers — Goal Tree, rebuilt July 2026.
+  <div style="margin-bottom:9px"><b>How this works.</b> One row per pillar per week in the
+    <b>Progress</b> tab of the goals Sheet — <code>week | pillar | state | note | priority | who | when</code>.
+    Saving overwrites that week's row for that pillar, so a correction replaces rather than duplicates.
+    Nothing is ever computed or inferred: a blank week is a week nobody read.</div>
+  <div style="margin-bottom:9px"><b>The justification is the point.</b> The checkbox is a headline; the
+    sentence is the record. "Big win" with no sentence is worth nothing three months from now, so the
+    save button stays off until there's a sentence.</div>
+  <div><b>Pillar names and one-liners</b> live at the top of <code>index.html</code> (<code>PILLARS</code>) —
+    change them there. Previous dashboard, with the full metric tree and its history:
+    <a href="goal-tree-archive.html">archived goal tree ↗</a>.</div>
 </footer>
 
-<button class="fab" id="fab" onclick="openEdit()">✏️ Update metrics</button>
-<div class="editmask" id="editmask" onclick="if(event.target===this)closeEdit()">
-  <div class="editpanel">
-    <div class="ephead">
-      <a class="x" onclick="closeEdit()">×</a>
-      <h2>Update this week's numbers</h2>
-      <div class="sub" id="epweek">Type your numbers — they save automatically.</div>
-    </div>
-    <div class="epwarn" id="epwarn" style="display:none"></div>
-    <div class="epbody" id="epbody"></div>
-    <div class="epfoot">
-      <button class="epsave" onclick="saveAll()">💾 Save</button>
-      <span class="epstatus" id="epstatus">Type your numbers, then click Save.</span>
-      <a onclick="changePass()" style="margin-left:auto;font-size:11px;color:#94a3b8;cursor:pointer;text-decoration:underline" title="Re-enter the team passcode on this device">passcode</a>
-    </div>
-  </div>
-</div>
-
-<script src="ecomm-data.js"></script>
 <script>
 const SHEET_ID="1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w";
-// Week columns, oldest first. Filled from the sheet's header row at load time.
-// Each entry is {iso, date, label}. Since 2026-07-30 the sheet stores real
-// week-ending Sundays (yyyy-mm-dd); legacy "Jun 25" text labels are still
-// parsed so an un-migrated sheet keeps working.
-let WEEKS=[];
+const APPS_URL="https://script.google.com/macros/s/AKfycbxFYl7yMenuUkVCV9nSDSIvfP0-UnPN-R1NOYVrQM0kRzk8Z2WYtb9JTZBK-aQYwJGu3A/exec";
+const PROG_TAB="Progress";
 
-// Scorecards that gate product + campaign decisions. The ✱ on a metric links here.
-const SCORECARDS={
-  campaign:{url:"https://docs.google.com/document/d/1sAyoevDT2SuAMU12Z0VQ11u7vfrrxDpCsMqV7vj0DUs/edit",
-            name:"Campaign Scorecard & Validation Checklist",
-            note:"Validation checklist, then a 0–2 score on five criteria. 8–10 = proceed, 6–7 = iterate, 0–5 = drop. Scored again after launch."},
-  // Katie's final scorecard (emailed as a PDF 2026-07-24) converted to an editable
-  // Doc so it can be linked here. Move it into the team Drive folder next to the
-  // campaign scorecard if you want everyone to reach it.
-  product:{url:"https://docs.google.com/document/d/1vTAifxTHR5YeVPzNZ_lmw5S7fPnDRzmbku8xKDoI2o8/edit",
-           name:"Product Scorecard & Validation",
-           note:"Validation checklist, then 0–2 on margin, differentiation, accessibility, revenue potential and brand story. 8–10 = proceed, 6–7 = iterate, 0–5 = drop."}
-};
-
-// The goal tree. Series arrays start EMPTY and are filled from the Google Sheet —
-// there is deliberately no hardcoded fallback data, so a failed load shows nothing
-// rather than plausible-looking numbers nobody entered.
-//   own  = default owner, used by the ?who= entry view until the sheet's Meta tab
-//          overrides it. kind:"run" marks a running total (never decreases; a drop
-//          is rendered as a correction, not a trend).
-// Major Donors and Major Partners used to be north stars of their own. Both were
-// folded into Major Impact D (Major Relationships) on 2026-08-04 — the same
-// ladder, counted once. Their metric CODES are reused there, so the history in
-// the sheet carries over untouched.
-const NS=[
- {star:"Operating Leverage", short:"Leverage", desc:"More output from the team we have.", goals:[
-  {id:"lev", tag:"GOAL 3", accent:"#7C3AED", name:"Build 100 AI agents we actually use", win:"100 agents", fmt:"int",
-   key:{id:"g3_inu", label:"AI agents in use for more than a month", series:[], own:"brad"},
-   subs:[{id:"g3_task", label:"Agent ideas generated", series:[], own:"brad", kind:"run"},
-         {id:"g3_blt",  label:"Agents in development",  series:[], own:"brad", kind:"run"},
-         {id:"g3_solo", label:"Agents running on their own", series:[], own:"brad"}],
-   floor:"An agent only counts if it does real work people accept and use — no demos padding the count."}]},
-
- // ── MAJOR IMPACT ────────────────────────────────────────────────────────────
- // Restructured 2026-07-31, revised 2026-08-04 on Brad's direction. A stays pure
- // awareness (the action metrics moved out to B). B is Engaged — the headline is
- // now the COUNT of people engaged toward 10,000, with cost-per-engaged demoted
- // to a step beneath it. C is Thrive Blind, deliberately left blank for Kevin to
- // define rather than filled with metrics nobody agreed to. D is Major
- // Relationships — grants, corporate and major donors on one ladder, having
- // absorbed the old Major Donors and Major Partners north stars.
- {star:"Major Impact", short:"Impact", desc:"The whole reason the rest exists.", goals:[
-  {id:"brd", tag:"A", tagName:"Awareness", accent:"#DB2777", name:"Reach people who’ve never heard of us", win:"A top-tier inbound", fmt:"int",
-   key:{id:"b_key", label:"Top-tier media inbound inquiries", series:[], own:"krysta"},
-   subs:[{id:"b_ideas",  label:"Mainstream campaign ideas generated",   series:[], own:"krysta", kind:"run"},
-         {id:"b_launch", label:"Mainstream campaigns launched",          series:[], own:"krysta", kind:"run"},
-         {id:"b_1m",     label:"Campaigns past 1M impressions",          series:[], own:"krysta", kind:"run"},
-         {id:"b_social", label:"Organic posts past 10K impressions",     series:[], own:"krysta", kind:"run"}],
-   floor:"Real mainstream reach, not vanity — a campaign or post counts only when it actually lands."},
-
-  {id:"eng", tag:"B", tagName:"Engaged", accent:"#7C3AED", name:"Engage 10,000 people", win:"10,000 engaged", fmt:"int",
-   key:{id:"imp_engaged", label:"People engaged", series:[], own:"krysta", kind:"run",
-        help:"Engaged means one of three things: they’ve said they’re willing to volunteer; they report a dramatic shift in attitude or understanding; or they’ve given monthly for more than a year. Running total toward 10,000."},
-   subs:[{id:"imp_cpe", label:"Cost per person engaged", series:[], own:"krysta", fmt:"usd",
-          help:"Engagement spend ÷ the people newly engaged that week. Derived, not typed."},
-         {id:"imp_engspend", label:"Engagement spend behind them ($)", series:[], own:"krysta", fmt:"usd"},
-         {id:"fnd_recur", label:"Monthly recurring donors", series:[], own:"kevin", kind:"run"}],
-   floor:"Engaged is a person taking a real step — volunteering, changing how they see blindness, or giving every month for a year. Not an impression, a like, or a scroll."},
-
-  {id:"prog", tag:"C", tagName:"Thrive Blind", accent:"#0369A1", name:"Programme success — to be defined", win:"TBD", fmt:"int",
-   tbd:"Kevin",
-   key:{id:"tb_key", label:"Thrive Blind north-star metric — TBD", series:[], own:"kevin"},
-   subs:[],
-   floor:"Deliberately empty. Kevin defines what programme success means before we start counting it — a metric nobody agreed to is worse than a blank."},
-
-  // Three ladders — grants, corporate, major donors — each with the step that
-  // feeds it beneath it (t2). p_conn/p_pros/d_reach/d_pros are the old Major
-  // Partners and Major Donors codes, kept so their history comes with them.
-  {id:"rel", tag:"D", tagName:"Major Relationships", accent:"#B45309", name:"Build 100 high-impact relationships", win:"100 relationships", fmt:"int",
-   key:{id:"rel_key", label:"High-impact relationships", series:[], own:"kevin", kind:"run",
-        help:"A relationship counts when someone has made a real commitment — a grant, a corporate partnership, or a major gift. Intent doesn’t count; commitment does."},
-   subs:[{id:"fnd_gwon", label:"Grants secured",                        series:[], own:"kevin", kind:"run"},
-         {id:"fnd_gsub", label:"Grants submitted",                      series:[], own:"kevin", kind:"run", t2:true},
-
-         {id:"fnd_corp", label:"Corporate partners committed",          series:[], own:"brad",  kind:"run"},
-         {id:"p_pros",   label:"Corporate prospects identified",        series:[], own:"brad",  kind:"run", t2:true},
-         {id:"p_conn",   label:"Corporate conversations initiated",     series:[], own:"brad",  kind:"run", t2:true},
-
-         {id:"d_sec",    label:"Major donors secured",                  series:[], own:"brad",  kind:"run"},
-         {id:"d_pros",   label:"Major donor prospects identified",      series:[], own:"brad",  kind:"run", t2:true},
-         {id:"d_reach",  label:"Major donor conversations initiated",   series:[], own:"brad",  kind:"run", t2:true}],
-   floor:"Committed means signed, granted or given — not verbally encouraging."}]},
-
- {star:"Community", short:"Community", desc:"Whether people actually feel it.", goals:[
-  {id:"dep", tag:"GOAL 4", accent:"#D97706", name:"1,000 heartfelt thank-you messages", win:"1,000 messages", fmt:"int",
-   key:{id:"dp_key", label:"Heartfelt messages received", series:[], own:"shannen", kind:"run",
-        help:"Scanned from Gorgias and social by an agent, then judged. A one-line “thanks, love these!” doesn’t count — it has to say something real."},
-   subs:[{id:"dp_helped", label:"People helped in a significant way", series:[], own:"shannen", kind:"run"}],
-   floor:"Messages are genuine and unprompted — we don’t solicit thank-yous."}]},
-
- {star:"Shop Blind Program Success", short:"Shop Blind", desc:"Protect and grow the engine that pays for it all.", goals:[
-  {id:"com", tag:"A", tagName:"Beat last year", accent:"#16a34a", name:"Beat last year, every month", win:"Beat last year", fmt:"usdk1",
-   key:{id:"c_nm", label:"Contribution after ads & shipping", series:[]},
-   subs:[{id:"c_mear", label:"MER — revenue ÷ ad spend",       series:[], fmt:"x2"},
-         {id:"c_sales",label:"Net sales ($k) — matches the memo", series:[], fmt:"usdk1"},
-         {id:"c_gross",label:"Gross order value incl. ship & tax ($k)", series:[], fmt:"usdk1"}],
-   floor:"Don’t hit the number by cutting ads or quality so far that sales or new customers drop."},
-
-  {id:"prod", tag:"B", tagName:"Products", accent:"#EA580C", name:"Build winning products", win:"Top-25% products", fmt:"int",
-   scorecard:"product",
-   key:{id:"wp_key", label:"Winning products (top 25% of category)", series:[], own:"katie"},
-   subs:[{id:"wp_ideas", label:"New product ideas generated",      series:[], own:"katie", kind:"run"},
-         {id:"wp_score", label:"Products passing the scorecard",   series:[], own:"katie", kind:"run", sc:true},
-         {id:"wp_dev",   label:"Products in development",          series:[], own:"katie"},
-         {id:"wp_launch",label:"Products launched",                series:[], own:"katie", kind:"run"}],
-   floor:"A win is earned by the market — a product ranking in the top 25% of its category. The scorecard is the screen to get there."},
-
-  {id:"camp", tag:"C", tagName:"Campaigns", accent:"#0891B2", name:"Build winning campaigns", win:"Campaigns that hold", fmt:"int",
-   scorecard:"campaign",
-   key:{id:"wc_key", label:"Winning campaigns (250K+ impressions at neutral margin)", series:[], own:"krysta"},
-   subs:[{id:"wc_ideas", label:"New campaign ideas",              series:[], own:"krysta", kind:"run"},
-         {id:"wc_score", label:"Passed the pre-launch scorecard", series:[], own:"krysta", kind:"run", sc:true},
-         {id:"wc_dev",   label:"Campaigns in development",        series:[], own:"krysta"},
-         {id:"wc_launch",label:"Campaigns launched",              series:[], own:"krysta", kind:"run"},
-         {id:"wc_post",  label:"Scored after launch",             series:[], own:"krysta", kind:"run", sc:true}],
-   floor:"A winning campaign holds 250K+ impressions at neutral-or-better margin after ad and product cost. Score it before launch AND after."}]}
+// The six north-star pillars. `k` is the key written to the sheet — renaming a
+// pillar is safe, changing its `k` orphans its history.
+const PILLARS=[
+ {k:"donors",    name:"Major Donors",           accent:"#B45309",
+  desc:"Individuals giving at a level that changes what we can do."},
+ {k:"partners",  name:"Major Partners",         accent:"#7C3AED",
+  desc:"Companies and institutions committing real resources, not encouragement."},
+ {k:"programs",  name:"Elite Programs",         accent:"#0369A1",
+  desc:"Programs good enough that people seek them out."},
+ {k:"public",    name:"Public Engagement",      accent:"#DB2777",
+  desc:"People who've heard us and then did something."},
+ {k:"shop",      name:"Shop Blind Performance", accent:"#16a34a",
+  desc:"The commercial engine that pays for everything else."},
+ {k:"campaigns", name:"Winning Campaigns",      accent:"#EA580C",
+  desc:"Campaigns that land and hold, not ones that merely shipped."}
 ];
 
-function fmt(v,t){
-  if(v===""||v==null) return "–";
-  if(t==="usd") return "$"+Math.round(v).toLocaleString();
-  if(t==="usdk") return "$"+Math.round(v).toLocaleString()+"k";
-  if(t==="usdk1") return "$"+(Math.round(v*10)/10).toFixed(1)+"k";
-  if(t==="pct") return Math.round(v*100)+"%";
-  if(t==="x") return v.toFixed(1)+"x";
-  if(t==="x2") return v.toFixed(2)+"x";
-  return Math.round(v).toLocaleString();
-}
-// Sparklines are plotted on a REAL TIME AXIS. The old version spaced every
-// column evenly, so a 4-day gap and a 27-day gap were drawn identically —
-// which is how a five-month, irregularly-sampled series passed for "the last
-// 14 weeks". Nulls break the line instead of being drawn as zero.
-function xScale(dates,w){
-  if(!dates||!dates.length||!dates[0]) return i=>2+(w-4)/2;
-  const t=dates.map(d=>d?d.getTime():null).filter(v=>v!=null);
-  const lo=Math.min(...t), hi=Math.max(...t), span=(hi-lo)||1;
-  if(t.length<2) return _=>2+(w-4)/2;
-  return i=>{ const d=dates[i]; return d?2+((d.getTime()-lo)/span)*(w-4):2; };
-}
-function segments(vals,X,Y){   // contiguous runs of non-null points
-  const out=[]; let cur=[];
-  vals.forEach((v,i)=>{ if(v==null){ if(cur.length)out.push(cur); cur=[]; return; }
-    cur.push([X(i),Y(v)]); });
-  if(cur.length) out.push(cur); return out;
-}
-function spark(vals,{w=128,h=34,color="#2E5496",fill=true,dots=false,dotr=1.7,labels=null,vfmt=null,dates=null}={}){
-  const real=(vals||[]).filter(v=>v!=null);
-  if(!real.length) return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"></svg>`;
-  const n=vals.length,mn=Math.min(...real),mx=Math.max(...real),rng=(mx-mn)||1;
-  const X=dates?xScale(dates,w):(n<2?(_=>w/2):(i=>2+(i/(n-1))*(w-4)));
-  const Y=v=>h-3-((v-mn)/rng)*(h-6);
-  const segs=segments(vals,X,Y);
-  const polys=segs.map(s=>`<polyline points="${s.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`).join("");
-  const big=segs[segs.length-1];
-  const area=(fill&&big.length>1)?`<path d="M${big[0][0].toFixed(1)},${h} L`+big.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" L")+` L${big[big.length-1][0].toFixed(1)},${h} Z" fill="${color}" opacity=".10"/>`:"";
-  let lastIdx=-1; vals.forEach((v,i)=>{ if(v!=null) lastIdx=i; });
-  const marks=dots?vals.map((v,i)=>{ if(v==null) return "";
-      const t=labels?`<title>${labels[i]}: ${fmt(v,vfmt)}</title>`:"";
-      return `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i===lastIdx?dotr+0.9:dotr}" fill="${color}" opacity="${i===lastIdx?1:.5}">${t}</circle>`;}).join("")
-    :`<circle cx="${X(lastIdx).toFixed(1)}" cy="${Y(vals[lastIdx]).toFixed(1)}" r="2.6" fill="${color}"/>`;
-  return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${area}${polys}${marks}</svg>`;
-}
-function spark2(a,b,{w=128,h=34,c1="#16a34a",c2="#9aa6b8",dots=false,labels=null,vfmt=null,dates=null,bDim=false}={}){
-  const real=(a||[]).concat(b||[]).filter(v=>v!=null);
-  if(!a||!a.length||!real.length) return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"></svg>`;
-  const n=a.length,mn=Math.min(...real),mx=Math.max(...real),rng=(mx-mn)||1;
-  const X=dates?xScale(dates,w):(n<2?(_=>w/2):(i=>2+(i/(n-1))*(w-4)));
-  const Y=v=>h-3-((v-mn)/rng)*(h-6);
-  const poly=(arr,col,extra)=>segments(arr,X,Y).map(s=>`<polyline points="${s.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}" fill="none" stroke="${col}" ${extra}/>`).join("");
-  let lastIdx=-1; a.forEach((v,i)=>{ if(v!=null) lastIdx=i; });
-  const marks=dots?a.map((v,i)=>{ if(v==null) return "";
-      const t=labels?`<title>${labels[i]}: ${fmt(v,vfmt)}</title>`:"";
-      return `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i===lastIdx?2.6:1.6}" fill="${c1}" opacity="${i===lastIdx?1:.5}">${t}</circle>`;}).join("")
-    :`<circle cx="${X(lastIdx).toFixed(1)}" cy="${Y(a[lastIdx]).toFixed(1)}" r="2.8" fill="${c1}"/>`;
-  return `<svg class="sp" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-    ${poly(b,c2,`stroke-width="1.4" stroke-dasharray="3,2" opacity="${bDim?.45:1}"`)}
-    ${poly(a,c1,'stroke-width="2"')}
-    ${marks}</svg>`;
-}
-function lastReal(s){ for(let i=(s||[]).length-1;i>=0;i--) if(s[i]!=null) return s[i]; return null; }
-function statusOf(g){
-  const last=lastReal(g.key.series);
-  if(g.key.vs){ const lv=lastReal(g.key.vs);
-    if(last!=null&&lv!=null) return last>lv?["Beating last year","var(--green)","#e8f6ec"]:["Behind last year","var(--red)","#fde8e8"]; }
-  if(last==null) return ["No data yet","#6b7280","#eef0f3"];
-  if(last>0) return ["Making progress",g.accent,g.accent+"1a"];
-  return ["Not started yet","#6b7280","#eef0f3"];
-}
-function fmtDelta(d,f){
-  if(f==="usd")  return "$"+Math.round(d).toLocaleString();
-  if(f==="usdk") return "$"+Math.round(d).toLocaleString()+"k";
-  if(f==="usdk1") return "$"+(Math.round(d*10)/10).toFixed(1)+"k";
-  if(f==="pct") return Math.round(d*100)+"%";
-  if(f==="x"||f==="x2") return d.toFixed(2)+"x";
-  return Math.round(d).toLocaleString();
-}
-// Week-over-week movement between the last two weeks that actually have values.
-// A running total that goes DOWN is a correction, not a trend — it gets a grey
-// pencil rather than a red down-arrow, because a cumulative count cannot fall.
-function wow(series,f,{mini=false,code=null}={}){
-  const idx=[]; (series||[]).forEach((v,i)=>{ if(v!=null) idx.push(i); });
-  if(idx.length<2) return mini?`<span class="wowmini" style="color:#cbd5e1" title="not enough data">·</span>`
-                             :`<div class="wow" style="color:#9aa6b8">— <span style="color:var(--muted);font-weight:500">no prior week</span></div>`;
-  const b=idx[idx.length-1],a=idx[idx.length-2],d=series[b]-series[a];
-  const gap=(WEEKS[b]&&WEEKS[a])?Math.round((WEEKS[b].date-WEEKS[a].date)/86400000):7;
-  const span=gap>10?`vs ${gap} days earlier`:"vs last week";
-  const corrected=code&&isRunning(code)&&d<-1e-9;
-  if(corrected){
-    if(mini) return `<span class="wowmini" style="color:#94a3b8" title="running total went down — recorded as a correction, not a decline">✎</span>`;
-    return `<div class="wow" style="color:#94a3b8">✎ ${fmtDelta(Math.abs(d),f)} <span style="color:var(--muted);font-weight:500">correction</span></div>`;
-  }
-  const up=d>1e-9,down=d<-1e-9;
-  const col=up?"#16a34a":down?"#dc2626":"#9aa6b8",arrow=up?"▲":down?"▼":"—";
-  if(mini) return `<span class="wowmini" style="color:${col}" title="${span}">${arrow}</span>`;
-  const mag=d!==0?" "+fmtDelta(Math.abs(d),f):"";
-  return `<div class="wow" style="color:${col}">${arrow}${mag} <span style="color:var(--muted);font-weight:500">${span}</span></div>`;
-}
-// The ✱ next to a scorecard-gated metric becomes a real link to the scorecard.
-function scorecardMark(g){
-  if(!g.scorecard) return "";
-  const sc=SCORECARDS[g.scorecard]; if(!sc) return "";
-  return sc.url
-    ? ` <a class="scmark" href="${sc.url}" target="_blank" rel="noopener" title="${escHtml(sc.name)} — ${escHtml(sc.note)}">✱ scorecard ↗</a>`
-    : ` <span class="scmark scmissing" title="${escHtml(sc.name)} exists but its link hasn't been set — paste the URL into SCORECARDS in index.html">✱ link not set</span>`;
-}
-// Cost per person engaged is derived, never typed — that way it can't drift from
-// the two numbers it claims to summarise. "People engaged" is a RUNNING TOTAL
-// toward 10,000, so the week's cost is that week's spend ÷ the people added that
-// week (the delta), not ÷ the cumulative count. The first week with a value has
-// no prior to subtract from, so it is left blank rather than divided by itself.
-function applyDerived(){
-  const g=findGoal("eng"); if(!g) return;
-  const cpe=g.subs.find(s=>s.id==="imp_cpe"); if(!cpe) return;
-  const n=g.key.series||[];
-  const sp=(g.subs.find(s=>s.id==="imp_engspend")||{}).series||[];
-  const len=Math.max(n.length,sp.length);
-  const out=[];
-  let prev=null;
-  for(let i=0;i<len;i++){
-    const tot=n[i], d=sp[i];
-    const added=(tot==null||prev==null)?null:tot-prev;
-    out.push((added==null||d==null||added<=0)?null:+(d/added).toFixed(2));
-    if(tot!=null) prev=tot;
-  }
-  cpe.series=out;
-}
-function metricBlock(g){
-  const s=g.key.series,last=lastReal(s);
-  const [stxt,scol,sbg]=statusOf(g);
-  if(g.tbd) return `<div class="tbdbox"><div class="tbdtitle">Waiting on ${escHtml(g.tbd)}</div>
-      <div class="tbdbody">${escHtml(g.floor)}</div></div>`;
-  const ec=(g.src==="ecomm"&&window.ECOMM_HIST);
-  const wl=ec?window.ECOMM_HIST.labels:WEEKS.map(w=>w.label);
-  const wd=ec?window.ECOMM_HIST.dates:WEEKS.map(w=>w.date);
-  const ksvg=g.key.vs?spark2(g.key.series,g.key.vs,{color:g.accent,dots:true,labels:wl,vfmt:g.fmt,dates:wd})
-                     :spark(s,{color:g.accent,w:150,h:42,dots:true,labels:wl,vfmt:g.fmt,dates:wd});
-  const subs=g.subs.map(sb=>{const f=sb.fmt||g.fmt;const sl=sb.series;
-    const fb=ec?"":freshBadge(sb.id,{mini:true});
-    return `<div class="sub${sb.t2?" sub2":""}"><span class="sl"${sb.help?` title="${escHtml(sb.help)}"`:""}>${sb.label}${sb.sc?scorecardMark(g):""}</span>${spark(sl,{w:84,h:22,color:"#9aa6b8",fill:false,dots:true,dotr:1.1,labels:wl,vfmt:f,dates:wd})}
-      <span class="sv">${fmt(lastReal(sl),f)}</span>${wow(sl,f,{mini:true,code:sb.id})}${fb}</div>`;}).join("");
-  const badge=ec?` <a class="srcbadge" href="ecomm.html" title="Pulled straight from the weekly e-comm feed (Shopify + Northbeam). Nothing to enter in the team sheet for this goal.">⟲ from e-comm ↗</a>`:"";
-  const fresh=ec?"":` ${freshBadge(g.key.id)}`;
-  const cap=g.key.vs
-    ?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">solid = this year · dashed = last year${g.vsNote?` · <span style="color:#b45309">${g.vsNote}</span>`:""}</div>`
-    :(ec?`<div style="font-size:9.5px;color:var(--muted);margin-top:2px">from the weekly e-comm feed</div>`:"");
-  const help=g.key.help?`<div class="khelp">${escHtml(g.key.help)}</div>`:"";
-  return `<div class="keyblock"><div>
-      <div class="kl"><span class="star">★</span>${g.key.label}${badge}${fresh}</div>
-      <div class="kv" style="color:${g.accent}">${fmt(last,g.fmt)}</div>
-      ${wow(s,g.fmt,{code:g.key.id})}
-      <span class="pill" style="color:${scol};background:${sbg}">${stxt}${g.key.vs?"":" · target "+g.win}</span>
-      ${help}
-    </div><div style="text-align:right">${ksvg}${cap}</div></div>
-    <div class="subs">${subs}</div>
-    <div class="floor"><b>Floor:</b> ${g.floor}</div>`;
-}
-function bannerHTML(n){return `<div class="banner"><span class="bstar">★</span><span class="bname">${n.star.toUpperCase()}</span><span class="bdesc">${n.desc}</span></div>`;}
+// Ordered worst → best, which is also how they're drawn.
+const STATES=[
+ {k:"regression", label:"Regression",        color:"var(--s-reg)",    hex:"#dc2626"},
+ {k:"none",       label:"No progress",       color:"var(--s-none)",   hex:"#94a3b8"},
+ {k:"little",     label:"A little progress", color:"var(--s-little)", hex:"#0891B2"},
+ {k:"big",        label:"Big win",           color:"var(--s-big)",    hex:"#16a34a"}
+];
+const STATE=Object.fromEntries(STATES.map(s=>[s.k,s]));
 
-// How current is this board? Counts every metric a person is meant to enter
-// (skipping the ones fed automatically from the e-comm feed) and buckets it by
-// how long since anyone last touched or confirmed it.
-function renderPulse(){
-  const el=document.getElementById("kpis"); if(!el) return;
-  let fresh=0,aging=0,stale=0,never=0,total=0,tbd=0;
-  NS.forEach(n=>n.goals.forEach(g=>{
-    if(g.tbd){ tbd++; return; }
-    [g.key].concat(g.subs).forEach(m=>{
-      if(!m||!m.id||NOEDIT.has(m.id)) return;
-      total++;
-      const f=FRESH[m.id];
-      if(!f){ never++; return; }
-      const d=daysAgo(f.when);
-      if(d<7) fresh++; else if(d<=14) aging++; else stale++;
-    });
-  }));
-  const pct=total?Math.round(fresh/total*100):0;
-  const cell=(v,label,col,bg,title)=>
-    `<div class="pcell" title="${title}"><div class="pnum" style="color:${col}">${v}</div><div class="plab">${label}</div><div class="pbar" style="background:${bg}"></div></div>`;
-  el.className="pulse";
-  el.innerHTML=
-    `<div class="pcell pwide"><div class="pnum">${pct}%</div><div class="plab">of what people enter is current this week</div>
-       <div class="ptrack"><span style="width:${pct}%"></span></div></div>`+
-    cell(fresh,"updated this week","#15803d","#16a34a","Touched or confirmed in the last 7 days")+
-    cell(aging,"1–2 weeks old","#92400e","#f59e0b","Last touched 7–14 days ago")+
-    cell(stale,"older than 2 weeks","#b91c1c","#dc2626","Last touched more than 14 days ago")+
-    cell(never,"never confirmed","#64748b","#94a3b8","Nobody has ever saved or confirmed this metric")+
-    (tbd?cell(tbd,"awaiting definition","#334155","#64748b","Goals deliberately left blank until an owner defines them"):"");
-}
+// PROG[week][pillar] = {state,note,priority,who,when}
+let PROG={};
+let VIEW=null;          // ISO week being viewed
+let LOADED=false;
+const DIRTY=new Set();
 
-function render(){
-  // The strip used to repeat every goal's ★ — the same ten numbers the cards
-  // below already show. Replaced with the thing the cards CAN'T tell you at a
-  // glance: how much of this board is actually current.
-  renderPulse();
-  document.getElementById("singles").innerHTML=NS.filter(n=>n.goals.length===1).map(n=>{
-    const g=n.goals[0];
-    return `<div class="card">${bannerHTML(n)}<div class="cbody">
-      <div class="gname"><span class="sq" style="background:${g.accent}"></span>${g.name}</div>
-      ${metricBlock(g)}</div></div>`;
-  }).join("");
-  document.getElementById("groups").innerHTML=NS.filter(n=>n.goals.length>=2).map(n=>{
-    const panels=n.goals.map(g=>`<div class="panel${g.tbd?' ptbd':''}">
-       <div class="phead"><span class="badge" style="background:${g.accent}">${g.tag}</span>
-         <span class="pname">${g.name}</span>
-         ${g.tagName?`<span class="ptag">${g.tagName}</span>`:""}</div>
-       ${metricBlock(g)}</div>`).join("");
-    return `<div class="group">${bannerHTML(n)}<div class="gbody">${panels}</div></div>`;
-  }).join("");
-}
+/* ---------- dates: weeks are the week-ENDING Sunday, same anchor as the sheet ---------- */
+const p2=n=>String(n).padStart(2,"0");
+function iso(d){ return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()); }
+function weekEnd(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()+((7-x.getDay())%7)); return x; }
+function fromIso(s){ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||"").trim()); return m?new Date(+m[1],+m[2]-1,+m[3]):null; }
+function shiftWeeks(isoStr,n){ const d=fromIso(isoStr); if(!d) return isoStr; d.setDate(d.getDate()+7*n); return iso(d); }
+function thisWeek(){ return iso(weekEnd(new Date())); }
+const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function label(isoStr){ const d=fromIso(isoStr); return d?MO[d.getMonth()]+" "+d.getDate():isoStr; }
+function longLabel(isoStr){ const d=fromIso(isoStr); return d?MO[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear():isoStr; }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
-function setStatus(live){
-  const b=document.getElementById("status");
-  if(live){ b.style.background="#e8f6ec"; b.style.color="#15803d";
-    b.innerHTML='<b>● Live</b> — reading from your <a href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener" style="color:inherit">Google Sheet ↗</a>. Edit it and refresh to update. &nbsp;·&nbsp; <a href="example.html">view example ↗</a>'; }
-  else { b.style.background="#fef3c7"; b.style.color="#92400e";
-    b.innerHTML='<b>● Showing example data</b> — the live sheet isn’t shared yet. In the sheet: <b>Share → Anyone with the link → Viewer</b>, then refresh. &nbsp;·&nbsp; <a href="example.html">example ↗</a>'; }
-}
-// The "Beat last year" goal is sourced from the e-comm feed, not the team sheet.
-const ECOMM_IDS=new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales","c_gross"]);
-function findGoal(id){ for(const n of NS) for(const g of n.goals) if(g.id===id) return g; return null; }
-function applyEcomm(){
-  const E=window.ECOMM_HIST; if(!E) return;
-  const g=findGoal("com"); if(!g) return;
-  g.src="ecomm"; g.fmt="usdk1";
-  g.subs = g.subs.filter(sb=> sb.id!=="c_ret");   // returning-customers isn't in the feed
-  g.key.series=E.marginK(E.thisYear);
-  if(E.lastYear && E.lastYear.net_sales && E.lastYear.net_sales.length){
-    g.key.vs=E.marginK(E.lastYear); g.key.vsId="c_nm_vs";
-    // Last year ran on far less ad spend — verified against Meta's own API on
-    // 2026-07-30, where Northbeam matches to the cent. It is a real spending
-    // pause, not a tracking gap, so the comparison stands and the note states
-    // the fact rather than casting doubt on it.
-    const t=(E.thisYear.ad_spend||[]).filter(v=>v!=null).reduce((a,b)=>a+b,0);
-    const l=(E.lastYear.ad_spend||[]).filter(v=>v!=null).reduce((a,b)=>a+b,0);
-    g.vsNote = (t&&l&&l/t<0.75)
-      ? `last year did this on <b>${Math.round(l/t*100)}%</b> of the ad spend`
-      : "";
-  } else {
-    delete g.key.vs; delete g.key.vsId; g.vsNote="";
-  }
-  g.subs.forEach(sb=>{
-    if(sb.id==="c_mear"){  sb.series=E.mearX(E.thisYear);  sb.fmt="x2"; }
-    if(sb.id==="c_sales"){ sb.series=E.salesK(E.thisYear); sb.fmt="usdk1"; }
-    if(sb.id==="c_gross"){ sb.series=E.grossK(E.thisYear); sb.fmt="usdk1"; }
-  });
-}
-// Fallback only if kpi_history.json is unavailable: read the single current week
-// from ecomm.html's SNAPSHOT (still real data, just one week).
-function syncCurrentFromEcomm(){
-  return fetch("ecomm.html",{cache:"no-store"}).then(r=>r.ok?r.text():"").then(html=>{
-    if(!html||!window.ECOMM_HIST) return false;
-    const pick=re=>{ const m=html.match(re); return m?m[1]:null; };
-    const rev=pick(/net_revenue:\s*([\d.]+)/), ad=pick(/ad_spend:\s*([\d.]+)/), pe=pick(/period_end:\s*"([^"]+)"/);
-    if(rev==null||ad==null) return false;
-    const E=window.ECOMM_HIST;
-    // Last-resort snapshot: only a gross figure is available here, so it fills
-    // both slots and the memo-comparable net-sales row simply won't be exact.
-    E.thisYear.net_sales=[Number(rev)]; E.thisYear.gross_revenue=[Number(rev)];
-    E.thisYear.ad_spend=[Number(ad)];
-    E.weeks=[pe||""]; E.labels=[ pe?pe.replace(/,?\s*20\d\d\s*$/,""):"" ]; E.dates=[null];
-    E._realWeeks=1;
-    return true;
-  }).catch(()=>false);
-}
-function prettyShort(s){
-  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||""));
-  if(!m) return String(s||"");
-  return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m[2]-1]+" "+(+m[3]);
-}
-// Preferred source: margin_yoy.json (tools/backfill_margin_yoy.py). Carries BOTH
-// revenue definitions — net_sales (excludes shipping + tax; matches the weekly
-// memo) and gross_revenue (includes them; what this dashboard used to show as
-// "Sales / revenue") — plus frozen history so closed weeks stop restating.
-function loadMarginYoY(){
-  return fetch("margin_yoy.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{
-    if(!d||!window.ECOMM_HIST||!Array.isArray(d.weeks)||!d.weeks.length) return false;
-    const E=window.ECOMM_HIST, ty=d.thisYear||{}, ly=d.lastYear||{};
-    const num=(o,k,i)=>{ const v=(o[k]||[])[i]; return (v==null||isNaN(v))?null:+v; };
-    // net_sales is the basis; fall back to the legacy net_revenue key so an old
-    // margin_yoy.json still renders during a partial deploy.
-    const rev=(o,i)=>{ const v=num(o,"net_sales",i); return v!=null?v:num(o,"net_revenue",i); };
-    const keep=[];
-    for(let i=0;i<d.weeks.length;i++){
-      if([rev(ty,i),num(ty,"ad_spend",i),rev(ly,i),num(ly,"ad_spend",i)].every(v=>v!=null)) keep.push(i);
-    }
-    if(!keep.length) return false;
-    if(typeof d.shipPct==="number") E.shipPct=d.shipPct;
-    const iso=i=>String(d.weeks[i]||"");
-    E.weeks  = keep.map(iso);
-    E.labels = keep.map(i=>(d.labels&&d.labels[i])?d.labels[i]:prettyShort(iso(i)));
-    E.dates  = keep.map(i=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso(i)); return m?new Date(+m[1],+m[2]-1,+m[3]):null; });
-    E.thisYear = {net_sales:keep.map(i=>rev(ty,i)),
-                  gross_revenue:keep.map(i=>num(ty,"gross_revenue",i)),
-                  ad_spend:keep.map(i=>num(ty,"ad_spend",i))};
-    E.lastYear = {net_sales:keep.map(i=>rev(ly,i)),
-                  gross_revenue:keep.map(i=>num(ly,"gross_revenue",i)),
-                  ad_spend:keep.map(i=>num(ly,"ad_spend",i)),
-                  ad_spend_ratio:keep.map(i=>(ly.ad_spend_ratio_vs_this_year||[])[i])};
-    E._realWeeks=keep.length; E._yoy=true;
-    return true;
-  }).catch(()=>false);
-}
-// Build the "this year" net-margin series entirely from the REAL WBR history
-// (kpi_history.json). Only weeks that have both net_revenue and ad_spend can form
-// a net margin. No estimates, no padding — the line is exactly as long as the data.
-function loadKpiHistory(){
-  return fetch("kpi_history.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(h=>{
-    if(!Array.isArray(h)||!h.length||!window.ECOMM_HIST) return false;
-    const E=window.ECOMM_HIST;
-    const rows=h.filter(r=> r.net_revenue!=null && r.ad_spend!=null);
-    if(!rows.length) return false;
-    // kpi_history only carries the gross figure, so it fills both slots.
-    E.weeks  = rows.map(r=>String(r.period_end||""));
-    E.labels = rows.map(r=>prettyShort(r.period_end));
-    E.dates  = rows.map(r=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(r.period_end||"")); return m?new Date(+m[1],+m[2]-1,+m[3]):null; });
-    E.thisYear.net_sales     = rows.map(r=>Number(r.net_revenue));
-    E.thisYear.gross_revenue = rows.map(r=>Number(r.net_revenue));
-    E.thisYear.ad_spend      = rows.map(r=>Number(r.ad_spend));
-    E._realWeeks             = rows.length;
-    return true;
-  }).catch(()=>false);
-}
-function applyLive(map){
-  const skip=window.ECOMM_HIST?ECOMM_IDS:new Set();
-  let hit=0;
-  NS.forEach(n=>n.goals.forEach(g=>{
-    if(!skip.has(g.key.id)&&map[g.key.id]&&map[g.key.id].length){ g.key.series=map[g.key.id]; hit++; }
-    if(g.key.vsId&&!skip.has(g.key.vsId)&&map[g.key.vsId]&&map[g.key.vsId].length){ g.key.vs=map[g.key.vsId]; }
-    g.subs.forEach(sb=>{ if(!skip.has(sb.id)&&map[sb.id]&&map[sb.id].length){ sb.series=map[sb.id]; } });
-  }));
-  return hit;
-}
-// ---------------------------------------------------------------------------
-// Week headers -> real dates.
-// The sheet stores week-ending Sundays as yyyy-mm-dd (gviz hands those back as
-// "Date(2026,6,26)"). Legacy free-text labels ("Jun 25") are still parsed, with
-// the year inferred by walking left->right and only rolling forward when the
-// month goes backwards — deterministic, and it can't silently reorder columns
-// the way the old max-month wrap heuristic could every January.
-// ---------------------------------------------------------------------------
-const MI={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-function weekEndOf(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()+((7-x.getDay())%7)); return x; }
-function labelOf(d){ return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]+" "+d.getDate(); }
-// Only a real gviz Date(...) cell counts as a date here. gvDate() falls back to
-// `new Date(str)`, and V8 parses a bare "July 20" as the year 2001 — which
-// quietly turned the newest column into a 25-year-old week.
-function gvDateStrict(v){
-  const m=/^\s*Date\((\d+),(\d+),(\d+)/.exec(String(v==null?"":v));
-  return m?new Date(+m[1],+m[2],+m[3]):null;
-}
-function parseWeekHeaders(raw){
-  const out=raw.map(s=>{
-    if(s instanceof Date) return {date:weekEndOf(s)};
-    const g=gvDateStrict(s); if(g) return {date:weekEndOf(g)};
-    const t=String(s==null?"":s).trim();
-    let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
-    if(m) return {date:weekEndOf(new Date(+m[1],+m[2]-1,+m[3]))};
-    m=/^([A-Za-z]{3,9})\.?\s+(\d{1,2})$/.exec(t);
-    if(m){ const mo=MI[m[1].slice(0,3).toLowerCase()]; if(mo!=null) return {mo, day:+m[2]}; }
-    return {date:null};
-  });
-  let year=new Date().getFullYear(), prevMo=-1;
-  out.forEach(p=>{ if(p.date){ prevMo=p.date.getMonth(); return; }
-    if(p.mo==null) return;
-    if(p.mo<prevMo) year++;
-    prevMo=p.mo; p.date=weekEndOf(new Date(year,p.mo,p.day)); });
-  // If inference pushed anything past this week, shift the inferred ones back a year.
-  const now=weekEndOf(new Date()), mx=out.reduce((a,p)=>(p.date&&(!a||p.date>a))?p.date:a,null);
-  if(mx&&mx>now) out.forEach(p=>{ if(p.date&&p.mo!=null) p.date=new Date(p.date.getFullYear()-1,p.date.getMonth(),p.date.getDate()); });
-  return out.map(p=>p.date?{date:p.date, iso:isoOf(p.date), label:labelOf(p.date)}:null);
-}
-function isoOf(d){ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
-function daysAgo(d){ return d?Math.floor((Date.now()-d.getTime())/86400000):null; }
-
-window.__gv=function(resp){
-  try{
-    const t=resp.table,map={};
-    const heads=parseWeekHeaders((t.cols||[]).slice(2).map(c=>c.label||c.id||""));
-    // Blank cells stay NULL. Previously every empty cell became 0, so a week
-    // nobody touched was indistinguishable from a measured zero — which is how
-    // 13 columns of untouched history ended up drawn as a flat line at zero.
-    t.rows.forEach(r=>{ if(!r.c||!r.c[1]||r.c[1].v==null||r.c[1].v==="") return;
-      map[String(r.c[1].v)]=r.c.slice(2).map(c=>(c&&c.v!=null&&c.v!=="")?Number(c.v):null); });
-
-    // Order columns by date (so column order in the sheet doesn't matter), and
-    // drop unparseable ones rather than guessing.
-    let order=heads.map((h,i)=>({h,i})).filter(x=>x.h).sort((a,b)=>a.h.date-b.h.date);
-
-    // Collapse any columns that normalise to the SAME week, keeping the
-    // rightmost (most recently written). Two headers a day apart — say a
-    // Saturday and the Sunday that ends the same week — are one week, not two,
-    // and must not draw as two points. Cheap insurance against a sheet that has
-    // been written by more than one version of the Apps Script.
-    const byWeek=new Map();
-    order.forEach(x=>byWeek.set(x.h.iso,x));
-    order=Array.from(byWeek.values()).sort((a,b)=>a.h.date-b.h.date);
-
-    // Drop leading pre-history: columns where EVERY metric is null or 0, before
-    // the first column that has any real entry. These are the carried-forward
-    // zeros from before the team started using the sheet.
-    const hasData=order.map(({i})=>Object.keys(map).some(k=>{const v=map[k][i]; return v!=null&&v!==0;}));
-    let first=hasData.indexOf(true); if(first<0) first=0;
-    const dropped=first;
-    order=order.slice(first);
-
-    WEEKS=order.map(x=>x.h);
-    Object.keys(map).forEach(id=>{ map[id]=order.map(x=>map[id][x.i]); });
-    window.__droppedWeeks=dropped;
-
-    const wd=document.getElementById("wkdate");
-    if(wd&&WEEKS.length){ const w=WEEKS[WEEKS.length-1]; wd.textContent="ending "+w.label; }
-    const hit=applyLive(map);
-    applyEcomm(); applyDerived();
-    setStatus(hit>0); render();
-  }catch(e){ setStatus(false); }
-};
-
-// ---------------------------------------------------------------------------
-// Freshness. Reads the Log tab the Apps Script writes on every save/confirm,
-// so the page can say "updated 3d ago by Katie" or "nobody has touched this in
-// 5 weeks". Without this there is no way to tell a stable number from an
-// abandoned one — which was the single biggest gap in the old dashboard.
-// ---------------------------------------------------------------------------
-let FRESH={};   // code -> {when:Date, who, action}
-function loadFresh(){
-  return new Promise(resolve=>{
-    let done=false; const finish=()=>{ if(!done){done=true;resolve();} };
-    window.__gvLog=function(resp){
-      try{
-        FRESH={};
-        if(resp && resp.status!=="error" && resp.table){
-          const cols=resp.table.cols.map(c=>String(c.label||c.id||"").toLowerCase()), idx={};
-          cols.forEach((c,i)=>idx[c]=i);
-          (resp.table.rows||[]).forEach(r=>{
-            const c=r.c||[], cell=k=>(idx[k]!=null&&c[idx[k]])?c[idx[k]].v:null;
-            const code=String(cell("code")||"").trim(); if(!code) return;
-            const when=gvDate(cell("when")); if(!when) return;
-            const prev=FRESH[code];
-            if(!prev||when>prev.when) FRESH[code]={when, who:String(cell("who")||"").trim(), action:String(cell("action")||"").trim()};
-          });
-        }
-      }catch(e){ FRESH={}; }
-      finish();
-    };
-    const s=document.createElement("script");
-    s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gvLog&sheet=Log&headers=1&_="+Date.now();
-    s.onerror=finish; document.head.appendChild(s);
-    setTimeout(finish,6000);
-  });
-}
-// Per-metric owner overrides from the sheet's Meta tab (code|owner|kind|link).
-let META={};
-function loadMeta(){
-  return new Promise(resolve=>{
-    let done=false; const finish=()=>{ if(!done){done=true;resolve();} };
-    window.__gvMeta=function(resp){
-      try{
-        META={};
-        if(resp && resp.status!=="error" && resp.table){
-          const cols=resp.table.cols.map(c=>String(c.label||c.id||"").toLowerCase()), idx={};
-          cols.forEach((c,i)=>idx[c]=i);
-          (resp.table.rows||[]).forEach(r=>{
-            const c=r.c||[], cell=k=>(idx[k]!=null&&c[idx[k]])?c[idx[k]].v:null;
-            const code=String(cell("code")||"").trim(); if(!code) return;
-            META[code]={owner:String(cell("owner")||"").trim().toLowerCase(),
-                        kind:String(cell("kind")||"").trim().toLowerCase(),
-                        link:String(cell("link")||"").trim()};
-          });
-        }
-      }catch(e){ META={}; }
-      finish();
-    };
-    const s=document.createElement("script");
-    s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gvMeta&sheet=Meta&headers=1&_="+Date.now();
-    s.onerror=finish; document.head.appendChild(s);
-    setTimeout(finish,6000);
-  });
-}
-function metricDef(code){
-  for(const n of NS) for(const g of n.goals) for(const m of [g.key].concat(g.subs)) if(m&&m.id===code) return m;
-  return null;
-}
-function ownerOf(code){ const m=META[code]; if(m&&m.owner) return m.owner; const d=metricDef(code); return d&&d.own?d.own:""; }
-function isRunning(code){
-  const m=META[code]; if(m&&m.kind) return m.kind.indexOf("run")===0;
-  const d=metricDef(code); if(d&&d.kind) return d.kind==="run";
-  return /running total/i.test(labelFor(code));
-}
-// Freshness badge: green <7d, amber 7-14d, red older, grey never.
-function freshBadge(code,{mini=false}={}){
-  const f=FRESH[code], d=f?daysAgo(f.when):null;
-  let col,bg,txt;
-  if(!f){ col="#94a3b8"; bg="#f1f5f9"; txt=mini?"?":"never confirmed"; }
-  else{
-    const ago=d<=0?"today":d===1?"1d":d+"d";
-    txt=mini?ago:(f.action==="confirm"?"confirmed ":"updated ")+ago+" ago"+(f.who?" · "+escHtml(f.who):"");
-    if(d<7){ col="#15803d"; bg="#e8f6ec"; } else if(d<=14){ col="#92400e"; bg="#fef3c7"; } else { col="#b91c1c"; bg="#fde8e8"; }
-  }
-  return `<span class="fresh" style="color:${col};background:${bg}" title="${f?("last write: "+f.action+(f.who?" by "+escHtml(f.who):"")):"no save or confirm has ever been logged for this metric"}">${txt}</span>`;
-}
-// ===== Live editing — writes back to the sheet via the deployed Apps Script web app =====
-const APPS_URL = "https://script.google.com/macros/s/AKfycbxFYl7yMenuUkVCV9nSDSIvfP0-UnPN-R1NOYVrQM0kRzk8Z2WYtb9JTZBK-aQYwJGu3A/exec";   // deployed Apps Script web app
-// Writes need the shared team passcode (checked server-side in the Apps
-// Script; it is NOT in this public page). Each browser asks once and
-// remembers it here. Reading the dashboard needs no passcode.
-const PASS_KEY="tbb_write_pass";
+/* ---------- identity + passcode (same keys the old dashboard used, so nobody re-unlocks) ---------- */
+const PASS_KEY="tbb_write_pass", WHO_KEY="tbb_who";
 function getPass(){ try{ return localStorage.getItem(PASS_KEY)||""; }catch(e){ return ""; } }
 function setPass(v){ try{ v?localStorage.setItem(PASS_KEY,v):localStorage.removeItem(PASS_KEY); }catch(e){} }
-function changePass(){ setPass(""); buildEditPanel(); }
-const NOEDIT = new Set(["c_nm","c_nm_vs","c_mear","c_ret","c_sales","c_gross","imp_cpe"]);  // auto from the e-comm feed — not typed in
-// Who's entering, remembered per browser and sent with every write (the Log tab
-// is what powers "updated 3d ago by Katie").
-// A personal ?who=katie link now also SAYS who you are, not just what you see.
-// Before this, everyone who followed their link saved anonymously — the first
-// four entries ever logged have a blank author — because filtering the view and
-// naming the author were two separate switches and only one of them was flipped.
-// A typed name still wins: it's stored, and the stored value is checked first.
-const WHO_KEY="tbb_who";
-function getWho(){ try{ return localStorage.getItem(WHO_KEY)||ONLY_MINE||""; }catch(e){ return ONLY_MINE||""; } }
-function setWho(v){ try{ v?localStorage.setItem(WHO_KEY,v):localStorage.removeItem(WHO_KEY); }catch(e){} }
-// ?who=katie gives one person a link that shows only their metrics, instead of
-// everyone scrolling past 30 rows to find their six.
-const ONLY_MINE=(function(){
-  try{ return (new URLSearchParams(location.search).get("who")||"").trim().toLowerCase(); }catch(e){ return ""; }
-})();
-// Remember it, so following your link once keeps your name on your saves even
-// after you click "show all" and the param goes away.
-if(ONLY_MINE){ try{ if(!localStorage.getItem(WHO_KEY)) setWho(ONLY_MINE); }catch(e){} }
+function getWho(){ try{ return localStorage.getItem(WHO_KEY)||URL_WHO||""; }catch(e){ return URL_WHO||""; } }
+function setWho(v){ try{ v?localStorage.setItem(WHO_KEY,v):localStorage.removeItem(WHO_KEY); }catch(e){} render(); }
+const URL_WHO=(function(){ try{ return (new URLSearchParams(location.search).get("who")||"").trim().toLowerCase(); }catch(e){ return ""; } })();
+// Following your personal link once puts your name on your saves from then on.
+if(URL_WHO){ try{ if(!localStorage.getItem(WHO_KEY)) localStorage.setItem(WHO_KEY,URL_WHO); }catch(e){} }
+function changePass(){ setPass(""); askPass(); }
+// Asks once per browser, then remembers. The passcode is checked server-side in
+// the Apps Script — it is deliberately not in this public page.
+function askPass(){
+  const v=prompt("Team passcode (ask Brad) — needed to save, not to read:");
+  if(v!=null) setPass(v.trim());
+  return getPass();
+}
+
+/* ---------- reading the sheet (gviz JSONP — public read, no passcode) ---------- */
+function gvDate(v){
+  if(v instanceof Date) return v;
+  const m=/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?/.exec(String(v||""));
+  if(m) return new Date(+m[1],+m[2],+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));
+  const d=new Date(v); return isNaN(d)?null:d;
+}
+// A week cell should be text ("2026-08-16"), but a sheet that got reformatted by
+// hand will hand back a real date. Accept both rather than silently dropping rows.
+function cellWeek(v){
+  if(v==null) return "";
+  const s=String(v).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const d=gvDate(v); return d?iso(weekEnd(d)):"";
+}
+function loadProgress(cb){
+  window.__gvProg=function(res){
+    try{
+      if(!res||res.status==="error"){ cb(new Error((res&&res.errors&&res.errors[0]&&res.errors[0].detailed_message)||"gviz error")); return; }
+      const cols=(res.table.cols||[]).map(c=>String(c.label||"").trim().toLowerCase());
+      const at=n=>{ const i=cols.indexOf(n); return i<0?null:i; };
+      const iW=at("week"),iP=at("pillar"),iS=at("state"),iN=at("note"),iR=at("priority"),iO=at("who"),iT=at("when");
+      if(iW==null||iP==null||iS==null){ cb(new Error("Progress tab is missing week/pillar/state columns")); return; }
+      const out={};
+      for(const r of (res.table.rows||[])){
+        const g=i=>(i==null||!r.c||!r.c[i])?null:r.c[i].v;
+        const wk=cellWeek(g(iW)), pl=String(g(iP)||"").trim();
+        if(!wk||!pl) continue;
+        (out[wk]=out[wk]||{})[pl]={
+          state:String(g(iS)||"").trim().toLowerCase(),
+          note:String(g(iN)==null?"":g(iN)),
+          priority:String(g(iR)==null?"":g(iR)),
+          who:String(g(iO)==null?"":g(iO)),
+          when:gvDate(g(iT))
+        };
+      }
+      PROG=out; cb(null);
+    }catch(e){ cb(e); }
+  };
+  const s=document.createElement("script");
+  s.onerror=()=>cb(new Error("network"));
+  s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gvProg&sheet="+encodeURIComponent(PROG_TAB)+"&headers=1&_="+Date.now();
+  document.head.appendChild(s);
+}
+
+/* ---------- writing (JSONP to the Apps Script) ---------- */
 function jsonp(url){
   return new Promise((resolve,reject)=>{
     const cb="__cb"+Math.random().toString(36).slice(2);
     let s=document.createElement("script");
-    const done=()=>{ try{delete window[cb];}catch(e){window[cb]=undefined;} if(s){s.remove();} s=null; };
+    const done=()=>{ try{delete window[cb];}catch(e){window[cb]=undefined;} if(s) s.remove(); s=null; };
     window[cb]=d=>{ resolve(d); done(); };
     s.onerror=()=>{ reject(new Error("network")); done(); };
     s.src=url+(url.indexOf("?")>=0?"&":"?")+"callback="+cb+"&_="+Date.now();
@@ -937,307 +326,202 @@ function jsonp(url){
     setTimeout(()=>{ if(window[cb]){ reject(new Error("timeout")); done(); } },15000);
   });
 }
-function epStatus(m){ const e=document.getElementById("epstatus"); if(e) e.textContent=m||""; }
-function buildEditPanel(){
-  const warn=document.getElementById("epwarn");
-  if(!APPS_URL){
-    warn.style.display="block";
-    warn.innerHTML="Editing isn’t connected yet — deploy the Apps Script and paste its URL into the dashboard. You can preview the fields below.";
-  } else if(!getPass()){
-    warn.style.display="block";
-    warn.innerHTML='🔑 <b>One-time setup:</b> enter the team passcode to turn on saving (ask Brad). '+
-      '<input id="eppass" type="password" autocomplete="off" style="width:130px;font-size:12px;padding:4px 7px;border:1px solid #d6c79a;border-radius:6px"> '+
-      '<button id="eppassgo" style="border:0;background:#15233f;color:#fff;font-weight:700;font-size:11.5px;border-radius:6px;padding:5px 10px;cursor:pointer">Unlock</button>';
-    setTimeout(()=>{
-      const i=document.getElementById("eppass"), b=document.getElementById("eppassgo");
-      const go=()=>{ if(i.value.trim()){ setPass(i.value.trim()); buildEditPanel(); epStatus("Passcode saved on this device — your edits will save now."); } };
-      if(b) b.addEventListener("click",go);
-      if(i) i.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); go(); } });
-    },0);
-  } else {
-    warn.style.display="none";
+
+/* ---------- state helpers ---------- */
+function entry(week,pillar){ return (PROG[week]||{})[pillar]||null; }
+function el(id){ return document.getElementById(id); }
+function setStatus(msg,kind){ const e=el("status"); e.className="status"+(kind?" "+kind:""); e.innerHTML=msg; }
+
+/* ---------- render ---------- */
+function render(){
+  renderWeekBar(); renderTally(); renderMomentum(); renderCards();
+}
+
+function renderWeekBar(){
+  const now=thisWeek();
+  el("wlabel").innerHTML="Week ending "+esc(longLabel(VIEW))+
+    '<span class="wsub">'+(VIEW===now?"the week we're in":(VIEW<now?"a past week — you can still log it":"a future week"))+"</span>";
+  el("wnext").disabled = VIEW>=now;
+  el("wtoday").hidden  = VIEW===now;
+  const logged=PILLARS.filter(p=>entry(VIEW,p.k)).length;
+  el("wcount").innerHTML="<b>"+logged+"</b> of "+PILLARS.length+" pillars logged this week";
+  const w=el("whoin"); if(document.activeElement!==w) w.value=getWho();
+}
+function stepWeek(n){ if(!guardDirty()) return; VIEW=shiftWeeks(VIEW,n); render(); }
+function goToday(){ if(!guardDirty()) return; VIEW=thisWeek(); render(); }
+function guardDirty(){
+  if(!DIRTY.size) return true;
+  return confirm("You have unsaved changes on "+DIRTY.size+" pillar"+(DIRTY.size>1?"s":"")+". Leave them unsaved?");
+}
+
+function renderTally(){
+  const counts=Object.fromEntries(STATES.map(s=>[s.k,0]));
+  for(const p of PILLARS){ const e=entry(VIEW,p.k); if(e&&counts[e.state]!=null) counts[e.state]++; }
+  el("tally").innerHTML=STATES.map(s=>
+    `<div class="tcell"><div class="bar" style="background:${s.hex}"></div>
+       <div class="n" style="color:${counts[s.k]?s.hex:"#cbd5e1"}">${counts[s.k]}</div>
+       <div class="l">${esc(s.label.toUpperCase())}</div></div>`).join("");
+}
+
+function renderMomentum(){
+  // The 12 weeks ending at the one being viewed (oldest first), extended back if
+  // there's older history so nothing recorded ever falls off the left silently.
+  const weeks=[]; for(let i=11;i>=0;i--) weeks.push(shiftWeeks(VIEW,-i));
+  const known=Object.keys(PROG).filter(w=>w<weeks[0]).sort();
+  const shown=known.slice(-4).concat(weeks);
+  let h='<table class="momt"><thead><tr><th class="rowh"></th>'+
+    shown.map(w=>`<th class="${w===VIEW?"wsel":""}"><button class="mcolbtn" onclick="jumpWeek('${w}')" title="Open week ending ${esc(longLabel(w))}">${esc(label(w))}</button></th>`).join("")+
+    "</tr></thead><tbody>";
+  for(const p of PILLARS){
+    h+=`<tr><th class="rowh" scope="row"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${p.accent};margin-right:6px"></span>${esc(p.name)}</th>`;
+    for(const w of shown){
+      const e=entry(w,p.k), st=e&&STATE[e.state];
+      const tip=e?`${label(w)} — ${st?st.label:e.state}${e.note?": "+e.note:""}`:`${label(w)} — not logged`;
+      h+=`<td><span class="mcell${st?" has":""}${w===VIEW?" sel":""}" style="${st?"background:"+st.hex:""}" title="${esc(tip)}"></span></td>`;
+    }
+    h+="</tr>";
   }
-  // Who's entering. Stored per browser and sent with every write so the Log tab
-  // can answer "who last touched this" — which is what the freshness badges read.
-  const me=getWho();
-  let html=`<div class="epme"><label for="epwho">You are</label>`+
-           `<input id="epwho" type="text" placeholder="your first name" value="${escHtml(me)}" autocomplete="given-name">`+
-           (ONLY_MINE?`<span class="epfilter">showing <b>${escHtml(ONLY_MINE)}</b>’s metrics · <a href="${location.pathname}">show all</a></span>`
-                     :(me?`<span class="epfilter"><a href="?who=${encodeURIComponent(me.toLowerCase())}">just show mine ↗</a></span>`:``))+
-           `</div>`;
-  let shown=0;
-  NS.forEach(n=>{
-    const groups=n.goals.filter(g=>!g.tbd).map(g=>({g, mets:[g.key].concat(g.subs)
-        .filter(m=>m&&m.id&&!NOEDIT.has(m.id))
-        .filter(m=>!ONLY_MINE||ownerOf(m.id)===ONLY_MINE)})).filter(x=>x.mets.length);
-    if(!groups.length) return;
-    html+=`<div class="epsec">${n.star.toUpperCase()}</div>`;
-    const multi=groups.length>1;
-    groups.forEach(({g,mets})=>{
-      if(multi) html+=`<div class="epgoal" style="border-color:${g.accent||'#94a3b8'}">${g.tag?g.tag+" · ":""}${g.name}</div>`;
-      mets.forEach(m=>{ shown++;
-        const cur=lastReal(m.series); const isKey=m.id===g.key.id;
-        const own=ownerOf(m.id);
-        html+=`<div class="eprow${isKey?' epkey':''}${m.t2?' ep2':''}"><label>${isKey?'<span class="epstar">★</span> ':''}${m.label}`+
-              `<span class="eprowmeta">${freshBadge(m.id)}${(!ONLY_MINE&&own)?` <span class="epown">${escHtml(own)}</span>`:""}</span></label>`+
-              `<button class="eplist" data-list="${m.id}" title="The list behind this number — check it before counting">📋<span class="lc" id="lc_${m.id}"></span></button>`+
-              `<button class="epok" data-confirm="${m.id}" title="Checked it — genuinely unchanged this week. Records that you looked, without changing the number.">✓</button>`+
-              `<input type="number" inputmode="numeric" data-code="${m.id}" value="${(cur==null)?'':cur}"></div>`+
-              `<div class="epitems" id="ei_${m.id}" style="display:none"></div>`; });
-    });
-  });
-  if(!shown) html+=`<div style="padding:18px 4px;color:#64748b;font-size:13px">No metrics are assigned to <b>${escHtml(ONLY_MINE||"you")}</b> yet. Set owners in the sheet's <b>Meta</b> tab (code | owner | kind | link), or <a href="${location.pathname}">show all metrics</a>.</div>`;
-  const body=document.getElementById("epbody");
-  body.innerHTML=html;
-  const who=document.getElementById("epwho");
-  if(who) who.addEventListener("change",()=>{ setWho(who.value.trim()); epStatus("Saved as "+(who.value.trim()||"anonymous")+"."); });
-  body.querySelectorAll("input[data-code]").forEach(inp=> inp.addEventListener("change",()=>saveField(inp)));
-  body.querySelectorAll("button[data-list]").forEach(b=> b.addEventListener("click",()=>toggleItems(b.getAttribute("data-list"))));
-  body.querySelectorAll("button[data-confirm]").forEach(b=> b.addEventListener("click",()=>confirmMetric(b.getAttribute("data-confirm"),b)));
-  loadItems().then(()=>{ updateListBadges(); refreshOpenItemDrawers(); });
-  const w=WEEKS.length?WEEKS[WEEKS.length-1]:null;
-  document.getElementById("epweek").textContent=
-    (w?"Week ending "+w.label:"This week")+" — numbers save as you type. ✓ = checked it, no change.";
+  h+="</tbody></table>";
+  const mw=el("momwrap");
+  mw.innerHTML=h;
+  mw.scrollLeft=mw.scrollWidth;      // open on the newest week
+  el("momlegend").innerHTML=STATES.map(s=>`<span><span class="sw" style="background:${s.hex}"></span>${esc(s.label)}</span>`).join("")+
+    '<span><span class="sw" style="background:#f1f5f9;border:1px solid #e2e8f0"></span>not logged</span>';
 }
-// "I looked and it genuinely didn't move." Without this, a carried-forward number
-// and a verified-unchanged number are identical — which is most of this dashboard.
-function confirmMetric(code,btn){
-  if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
-  if(!getPass()){ epStatus("Enter the team passcode above to turn on saving."); return; }
-  if(btn){ btn.textContent="…"; btn.disabled=true; }
-  const before=FRESH[code]?FRESH[code].when.getTime():0;
-  fetch(APPS_URL+"?fn=confirm&code="+encodeURIComponent(code)+"&who="+encodeURIComponent(getWho())+"&pass="+encodeURIComponent(getPass())+"&_="+Date.now(),
-        {method:"GET", mode:"no-cors"})
-    .then(()=>new Promise(r=>setTimeout(r,1800)))
-    .then(loadFresh)
-    .then(()=>{ if(btn){ btn.textContent="✓"; btn.disabled=false; }
-                // The write is fire-and-forget (no-cors), so verify it actually
-                // landed rather than claiming success on a request we can't read.
-                const after=FRESH[code]?FRESH[code].when.getTime():0;
-                epStatus(after>before
-                  ? "✓ Confirmed unchanged: "+labelFor(code)
-                  : "⚠ Nothing was logged — the Apps Script may still be on the old version (deploy v4 and run ?fn=migrate), or the passcode is wrong.");
-                render(); buildEditPanel(); })
-    .catch(()=>{ if(btn){ btn.textContent="✓"; btn.disabled=false; } epStatus("Confirm failed — check your connection."); });
-}
-// Writes use a fire-and-forget request (mode:no-cors). Apps Script runs the write
-// when the URL is hit; reading the response back in-browser (JSONP) is the flaky part
-// (its 302 redirect + cold start don't reliably execute as a script), so we don't
-// depend on it — the Save button re-reads the sheet to confirm everything landed.
-// Sent with every save; the Apps Script only uses it when the code has no row
-// yet, to name the one it creates. The "(running total)" suffix isn't decoration
-// — with the Meta tab empty, it is how the script knows to carry the value into
-// next week's column instead of blanking it.
-function labelFor(code){
-  for(const n of NS) for(const g of n.goals) for(const m of [g.key].concat(g.subs)) if(m&&m.id===code)
-    return m.label + (m.kind==="run" && !/running total/i.test(m.label) ? " (running total)" : "");
-  return code;
-}
-function sendSave(code,value){
-  return fetch(APPS_URL+"?fn=save&code="+encodeURIComponent(code)+"&value="+encodeURIComponent(value)+"&label="+encodeURIComponent(labelFor(code))+"&who="+encodeURIComponent(getWho())+"&pass="+encodeURIComponent(getPass())+"&_="+Date.now(),
-               {method:"GET", mode:"no-cors"});
-}
-function saveField(inp){
-  const code=inp.getAttribute("data-code"), val=String(inp.value).trim();
-  optimistic(code,val);
-  if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
-  if(!getPass()){ epStatus("Enter the team passcode above to turn on saving."); return; }
-  epStatus("Saving…");
-  sendSave(code,val).then(()=>epStatus("Saved ✓  ·  click Save to confirm all"))
-    .catch(()=>epStatus("Save failed — check your connection"));
-}
-function saveAll(){
-  if(!APPS_URL){ epStatus("Not connected — deploy the script first."); return; }
-  if(!getPass()){ epStatus("Enter the team passcode above to turn on saving."); return; }
-  const inps=[].slice.call(document.querySelectorAll("#epbody input[data-code]"));
-  if(!inps.length) return;
-  const sent={}; inps.forEach(inp=>{ sent[inp.getAttribute("data-code")]=String(inp.value).trim(); });
-  epStatus("Saving "+inps.length+" metrics…");
-  Promise.all(inps.map(inp=> sendSave(inp.getAttribute("data-code"), String(inp.value).trim())
-      .then(()=>optimistic(inp.getAttribute("data-code"), String(inp.value).trim()))))
-    .then(()=>{ epStatus("Saved — re-reading the sheet to confirm…");
-                loadSheet(()=>{ buildEditPanel();
-                  // the rebuilt inputs now hold the SHEET's values — compare to
-                  // what we sent so a rejected write (e.g. wrong passcode) can't
-                  // masquerade as a confirmed save
-                  let misses=0;
-                  document.querySelectorAll("#epbody input[data-code]").forEach(inp=>{
-                    const code=inp.getAttribute("data-code");
-                    if(!(code in sent)) return;
-                    const want=sent[code]===""?0:Number(sent[code]), got=inp.value===""?0:Number(inp.value);
-                    if(!(isNaN(want)&&isNaN(got)) && want!==got) misses++;
-                  });
-                  epStatus(misses
-                    ? "⚠ "+misses+" value(s) didn’t stick in the sheet — wrong passcode? Use the “passcode” link below, then Save again."
-                    : "✓ All "+inps.length+" metrics saved & confirmed in the sheet"); }); })
-    .catch(()=>epStatus("Some saves failed — check your connection and click Save again"));
-}
-function optimistic(code,val){
-  const v=(val===""?null:Number(val));   // empty means "no value", not zero
-  NS.forEach(n=>n.goals.forEach(g=>{
-    if(g.key.id===code && g.key.series.length) g.key.series[g.key.series.length-1]=v;
-    g.subs.forEach(s=>{ if(s.id===code && s.series.length) s.series[s.series.length-1]=v; });
-  }));
-  applyEcomm(); applyDerived(); render();
-}
-// ---------------------------------------------------------------------------
-// Per-metric item lists — the actual things behind the counts (prospects,
-// products, campaign ideas…). Stored one-row-per-item in the goals Sheet's
-// "Items" tab (auto-created by the Apps Script) so the team can check what's
-// already been counted before bumping a number — no double counting — and fix
-// or remove entries directly in the Sheet. Reads use the same gviz JSONP
-// channel as the metrics; adds go through the Apps Script (fn=additem) with
-// the usual no-cors send + read-back-to-confirm.
-// ---------------------------------------------------------------------------
-let ITEMS = {};   // code -> [{when:Date|null, item, by}], newest first
+function jumpWeek(w){ if(!guardDirty()) return; VIEW=w; render(); }
 
-function gvDate(v){   // gviz cell value -> Date ("Date(2026,5,10,14,3,0)" or parseable string)
-  if(v==null) return null;
-  const m=/Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?/.exec(String(v));
-  if(m) return new Date(+m[1],+m[2],+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));
-  const d=new Date(v); return isNaN(d)?null:d;
-}
-function loadItems(){
-  return new Promise(resolve=>{
-    let done=false; const finish=()=>{ if(!done){ done=true; resolve(); } };
-    window.__gvItems=function(resp){
-      try{
-        ITEMS={};
-        if(resp && resp.status!=="error" && resp.table){   // status "error" = no Items tab yet
-          const cols=resp.table.cols.map(c=>String(c.label||c.id||"").toLowerCase()), idx={};
-          cols.forEach((c,i)=>idx[c]=i);
-          (resp.table.rows||[]).forEach(r=>{
-            const c=r.c||[], cell=k=>(idx[k]!=null&&c[idx[k]])?c[idx[k]].v:null;
-            const code=String(cell("code")||"").trim(), item=String(cell("item")||"").trim();
-            if(!code||!item) return;
-            (ITEMS[code]=ITEMS[code]||[]).push({when:gvDate(cell("added_at")), item, by:String(cell("by")||"").trim()});
-          });
-          Object.values(ITEMS).forEach(a=>a.sort((x,y)=>(y.when||0)-(x.when||0)));
-        }
-      }catch(e){ ITEMS={}; }
-      finish();
-    };
-    const s=document.createElement("script");
-    s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gvItems&sheet=Items&headers=1&_="+Date.now();
-    s.onerror=function(){ finish(); };
-    document.head.appendChild(s);
-    setTimeout(finish, 6000);
-  });
-}
-// Monday of the CURRENT week, straight from the clock. (It used to be reverse-
-// engineered from the header label, which meant that when the sheet's active
-// column was three weeks stale, "added this week" counted three weeks of items.)
-function weekStart(){
-  const now=new Date();
-  return new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
-}
-function fmtWhen(d){ if(!d) return ""; const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return MO[d.getMonth()]+" "+d.getDate(); }
-function escHtml(s){ return String(s).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
-function isRunningTotal(code){ return isRunning(code); }
-function updateListBadges(){
-  document.querySelectorAll("button[data-list]").forEach(b=>{
-    const n=(ITEMS[b.getAttribute("data-list")]||[]).length;
-    const lc=document.getElementById("lc_"+b.getAttribute("data-list")); if(lc) lc.textContent=n?String(n):"";
-  });
-}
-function refreshOpenItemDrawers(){
-  document.querySelectorAll(".epitems").forEach(d=>{ if(d.style.display!=="none"&&d.innerHTML) renderItems(d.id.slice(3)); });
-}
-function toggleItems(code){
-  const d=document.getElementById("ei_"+code); if(!d) return;
-  if(d.style.display==="none"){ renderItems(code); d.style.display="block"; const i=d.querySelector(".eiadd input"); if(i) i.focus(); }
-  else d.style.display="none";
-}
-function setEiStatus(code,msg){ const d=document.getElementById("ei_"+code), s=d&&d.querySelector(".eistatus"); if(s) s.textContent=msg||""; }
-function renderItems(code){
-  const d=document.getElementById("ei_"+code); if(!d) return;
-  const items=ITEMS[code]||[], ws=weekStart();
-  const thisWeek=items.filter(x=>x.when&&x.when>=ws).length, total=items.length;
-  const running=isRunningTotal(code), suggest=running?total:thisWeek;
-  let html=`<div class="eiadd"><input type="text" maxlength="200" placeholder="Add one item — a name, product, idea…"><button>Add</button></div>`+
-           `<div class="eidup"></div>`+
-           `<div class="eichips"><span class="chip">${total} on the list</span><span class="chip">${thisWeek} added this week</span>`+
-           (total?`<button class="use">Use ${running?"total":"this week"}: ${suggest}</button>`:"")+`</div>`;
-  html+= total
-    ? "<ul>"+items.map(x=>`<li><span class="it">${escHtml(x.item)}${x.by?` <span style="color:#94a3b8">· ${escHtml(x.by)}</span>`:""}</span><span class="when">${fmtWhen(x.when)}</span></li>`).join("")+"</ul>"
-    : `<div style="color:#94a3b8;padding:2px 0 4px">Nothing tracked yet — add the first item so next week you can see what's already been counted.</div>`;
-  html+=`<div class="eistatus"></div>`+
-        `<div class="eifoot"><a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit" target="_blank" rel="noopener">Fix or remove entries in the Sheet’s “Items” tab ↗</a></div>`;
-  d.innerHTML=html;
-  const inp=d.querySelector(".eiadd input"), dup=d.querySelector(".eidup");
-  inp.addEventListener("input",()=>{   // the anti-double-count check, live as you type
-    const q=inp.value.trim().toLowerCase();
-    if(q.length<3){ dup.style.display="none"; return; }
-    const near=items.filter(x=>x.item.toLowerCase().includes(q)||q.includes(x.item.toLowerCase())).slice(0,3);
-    if(near.length){ dup.style.display="block"; dup.innerHTML="⚠ Already on the list? "+near.map(x=>`<b>${escHtml(x.item)}</b>${x.when?` (${fmtWhen(x.when)})`:""}`).join(" · "); }
-    else dup.style.display="none";
-  });
-  const submit=()=>addListItem(code, inp);
-  d.querySelector(".eiadd button").addEventListener("click",submit);
-  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); submit(); } });
-  const use=d.querySelector(".use");
-  if(use) use.addEventListener("click",()=>{
-    const ni=document.querySelector(`#epbody input[data-code="${code}"]`);
-    if(ni){ ni.value=suggest; saveField(ni); }
-  });
-}
-function addListItem(code, inp){
-  const text=inp.value.trim(); if(!text) return;
-  if(!APPS_URL){ setEiStatus(code,"Not connected — deploy the script first."); return; }
-  if(!getPass()){ setEiStatus(code,"Enter the team passcode (top of this panel) to turn on saving."); return; }
-  (ITEMS[code]=ITEMS[code]||[]).unshift({when:new Date(), item:text, by:""});   // optimistic
-  renderItems(code); updateListBadges();
-  setEiStatus(code,"Saving “"+text+"”…");
-  fetch(APPS_URL+"?fn=additem&code="+encodeURIComponent(code)+"&item="+encodeURIComponent(text)+"&pass="+encodeURIComponent(getPass())+"&_="+Date.now(),
-        {method:"GET", mode:"no-cors"})
-    .then(()=>new Promise(r=>setTimeout(r,2000)))   // give the Sheet a beat, then confirm for real
-    .then(loadItems)
-    .then(()=>{
-      const saved=(ITEMS[code]||[]).some(x=>x.item===text);
-      if(!saved) (ITEMS[code]=ITEMS[code]||[]).unshift({when:new Date(), item:text, by:""});  // keep it visible + warn
-      renderItems(code); updateListBadges();
-      setEiStatus(code, saved ? "Saved ✓ “"+text+"”"
-                              : "⚠ “"+text+"” didn’t appear in the Sheet — wrong passcode? Fix it via the “passcode” link in the panel footer, then add again.");
-    })
-    .catch(()=>setEiStatus(code,"Save failed — check your connection and try again"));
+function renderCards(){
+  const prevWeek=shiftWeeks(VIEW,-1);
+  el("cards").innerHTML=PILLARS.map(p=>{
+    const cur=entry(VIEW,p.k)||{}, prev=entry(prevWeek,p.k);
+    const st=STATE[cur.state];
+    const chip=st?`<span class="chip" style="background:${st.hex}">${esc(st.label)}</span>`
+                 :`<span class="chip empty">not logged</span>`;
+    const prevSt=prev&&STATE[prev.state];
+    const lastBlock=`
+      <div class="lastwk">
+        <span class="lab">Last week's priority · ${esc(label(prevWeek))}${prevSt?" · "+esc(prevSt.label):""}</span>
+        <div class="pri${prev&&prev.priority?"":" none"}">${prev&&prev.priority?esc(prev.priority):(prev?"No priority was set.":"Nothing was logged last week.")}</div>
+        ${prev&&prev.note?`<div class="why">They said: “${esc(prev.note)}”</div>`:""}
+      </div>`;
+    const states=STATES.map(s=>{
+      const id=`st_${p.k}_${s.k}`;
+      return `<input type="radio" name="st_${p.k}" id="${id}" value="${s.k}"${cur.state===s.k?" checked":""}
+                 onchange="onState('${p.k}')">
+              <label for="${id}" style="--c:${s.hex}"><span class="box"></span><span class="nmt">${esc(s.label)}</span></label>`;
+    }).join("");
+    const savedBy=cur.who?` · last saved by ${esc(cur.who)}`:"";
+    return `
+    <article class="pcard" id="card_${p.k}" style="--accent:${p.accent}">
+      <fieldset>
+        <legend>
+          <div class="ptitle"><span class="nm">${esc(p.name)}</span>${chip}</div>
+          <div class="pdesc">${esc(p.desc)}</div>
+        </legend>
+        ${lastBlock}
+        <div class="field">
+          <span class="fl">This week <span class="req">*</span></span>
+          <div class="states">${states}</div>
+        </div>
+        <div class="field">
+          <label class="fl" for="note_${p.k}">Why — one sentence <span class="req">*</span></label>
+          <textarea id="note_${p.k}" maxlength="400" oninput="onEdit('${p.k}')"
+            placeholder="What actually happened, in one sentence.">${esc(cur.note||"")}</textarea>
+          <div class="hint" id="hint_${p.k}"></div>
+        </div>
+        <div class="field">
+          <label class="fl" for="pri_${p.k}">Biggest priority to finish before next week</label>
+          <input class="ptxt" id="pri_${p.k}" maxlength="400" oninput="onEdit('${p.k}')"
+            value="${esc(cur.priority||"")}" placeholder="The one thing that has to be done by ${esc(label(shiftWeeks(VIEW,1)))}.">
+        </div>
+        <div class="prow">
+          <button class="save" id="btn_${p.k}" onclick="saveCard('${p.k}')">Save</button>
+          <span class="pstat" id="stat_${p.k}" role="status">${cur.state?"Saved"+savedBy:""}</span>
+        </div>
+      </fieldset>
+    </article>`;
+  }).join("");
+  PILLARS.forEach(p=>validate(p.k));
 }
 
-function openEdit(){ buildEditPanel(); document.getElementById("editmask").classList.add("open"); }
-function closeEdit(){ document.getElementById("editmask").classList.remove("open"); }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeEdit(); });
-
-// Footnote under the page: how many pre-history columns were hidden, and how
-// current the week is. Both used to be invisible.
-function renderWeekNote(){
-  const el=document.getElementById("weeknote"); if(!el) return;
-  if(!WEEKS.length){ el.innerHTML="Waiting for the sheet…"; return; }
-  const last=WEEKS[WEEKS.length-1], behind=Math.floor((weekEndOf(new Date())-last.date)/86400000/7);
-  const drop=window.__droppedWeeks||0;
-  const gaps=WEEKS.map((w,i)=>i?Math.round((w.date-WEEKS[i-1].date)/86400000):7).filter(d=>d>10).length;
-  el.innerHTML=
-    `<b>${WEEKS.length}</b> week${WEEKS.length===1?"":"s"} of entries, newest ending <b>${last.label}</b>`+
-    (behind>0?` — <span style="color:#b91c1c">${behind} week${behind===1?"":"s"} behind today</span>`:` — current`)+
-    (gaps?` · ${gaps} gap${gaps===1?"":"s"} of more than a week (drawn as gaps, not straight lines)`:"")+
-    (drop?` · ${drop} empty pre-launch column${drop===1?"":"s"} hidden`:"")+
-    ` · the week now rolls over on its own every Monday.`;
+function onState(k){
+  DIRTY.add(k); el("card_"+k).classList.add("dirty"); validate(k);
+  const n=el("note_"+k); if(n&&!n.value.trim()) n.focus();
 }
-const _render=render;
-render=function(){ _render(); renderWeekNote(); };
-
-applyEcomm(); applyDerived(); setStatus(false); render();
-loadMarginYoY().then(used=> used ? null : loadKpiHistory().then(u2=> u2?null:syncCurrentFromEcomm()))
-  .catch(()=>null)                       // a failed loader must not block the re-render below
-  .then(()=>{ applyEcomm(); applyDerived(); render(); });
-function loadSheet(after){
-  const s=document.createElement("script");
-  s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gv&headers=1&gid=0&_="+Date.now();
-  s.onload=function(){ if(after) setTimeout(after,300); };
-  s.onerror=function(){ setStatus(false); if(after) after(); };
-  document.head.appendChild(s);
+function onEdit(k){ DIRTY.add(k); el("card_"+k).classList.add("dirty"); validate(k); }
+function chosen(k){ const r=document.querySelector(`input[name="st_${k}"]:checked`); return r?r.value:""; }
+function validate(k){
+  const st=chosen(k), note=(el("note_"+k).value||"").trim(), pri=(el("pri_"+k).value||"").trim();
+  const ok=!!st&&note.length>=3;
+  el("btn_"+k).disabled=!ok;
+  const h=el("hint_"+k);
+  if(!st) h.textContent="Tick a box first.";
+  else if(note.length<3) h.textContent="A sentence is required — the checkbox on its own tells nobody anything.";
+  else if(!pri) h.textContent="No priority set for next week. You can save without one, but that's the field that gets read on Monday.";
+  else h.textContent="";
+  h.className="hint"+(!st||note.length<3?" bad":"");
+  return ok;
 }
-// Owners and freshness first, so the very first paint already shows who owns
-// what and how stale it is — no flash of un-annotated numbers.
-Promise.all([loadMeta(),loadFresh()]).then(()=>loadSheet());
+
+function saveCard(k){
+  if(!validate(k)) return;
+  const p=PILLARS.find(x=>x.k===k);
+  const state=chosen(k), note=el("note_"+k).value.trim(), priority=el("pri_"+k).value.trim();
+  if(!getPass()&&!askPass()){ stat(k,"Saving needs the team passcode.","err"); return; }
+  let who=getWho();
+  if(!who){
+    who=(prompt("Your first name (so the record says who read it):")||"").trim().toLowerCase();
+    if(who) setWho(who);
+  }
+  el("btn_"+k).disabled=true; stat(k,"Saving…","");
+  const url=APPS_URL+"?fn=progress"+
+    "&week="+encodeURIComponent(VIEW)+
+    "&pillar="+encodeURIComponent(k)+
+    "&state="+encodeURIComponent(state)+
+    "&note="+encodeURIComponent(note)+
+    "&priority="+encodeURIComponent(priority)+
+    "&who="+encodeURIComponent(who)+
+    "&pass="+encodeURIComponent(getPass());
+  jsonp(url).then(r=>{
+    if(!r||!r.ok){
+      const e=(r&&r.error)||"unknown error";
+      stat(k,/passcode/i.test(e)?"Wrong passcode — click “passcode” above to re-enter it.":("Not saved: "+e),"err");
+      el("btn_"+k).disabled=false;
+      if(/passcode/i.test(e)) setPass("");
+      return;
+    }
+    // Reflect it locally so the grid and tally move without a reload.
+    (PROG[VIEW]=PROG[VIEW]||{})[k]={state,note,priority,who,when:new Date()};
+    DIRTY.delete(k);
+    render();
+    stat(k,"Saved ✓","ok");
+    setStatus("Saved <b>"+esc(p.name)+"</b> for week ending "+esc(longLabel(VIEW))+".","");
+  }).catch(err=>{
+    stat(k,"Not saved ("+err.message+"). Check your connection and try again.","err");
+    el("btn_"+k).disabled=false;
+  });
+}
+function stat(k,msg,kind){ const e=el("stat_"+k); if(!e) return; e.textContent=msg; e.className="pstat"+(kind?" "+kind:""); }
+
+window.addEventListener("beforeunload",e=>{ if(DIRTY.size){ e.preventDefault(); e.returnValue=""; } });
+
+/* ---------- boot ---------- */
+VIEW=thisWeek();
+render();
+loadProgress(err=>{
+  LOADED=!err;
+  if(err){
+    const missing=/missing week|invalid|not found|does not exist|unable to parse/i.test(err.message);
+    setStatus(missing
+      ? "⚠️ The Sheet has no <b>Progress</b> tab yet, so nothing can load or save. Deploy Apps Script v7 and hit <code>?fn=progress_init&amp;pass=…</code> once — see <b>DEPLOY.md</b>. The form below is live but every save will fail until then."
+      : "⚠️ Couldn't read the Sheet ("+esc(err.message)+"). Check it's shared <b>Anyone with the link → Viewer</b>, then refresh.","warn");
+    render(); return;
+  }
+  const n=Object.keys(PROG).length;
+  setStatus(n? "Live — "+n+" week"+(n>1?"s":"")+" of progress recorded in the Sheet's <b>Progress</b> tab."
+            : "Live — nothing recorded yet. This week's read is the first one.","");
+  render();
+});
 </script>
 </body>
 </html>
