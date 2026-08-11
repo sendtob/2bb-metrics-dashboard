@@ -1,11 +1,58 @@
-# ⏳ v7 — WRITTEN, NOT YET DEPLOYED (2026-08-11)
+# ✅ v7 DEPLOYED 2026-08-11, 9:47 AM — and two UI traps that cost most of the time
+
+Version 7 is live on the unchanged `/exec` URL (deployment ID still ends
+`…aQYwJGu3A`). Verified: `?fn=ping` → `"version": 7`; `?fn=progress` without a
+passcode returns `bad or missing passcode` (so the route exists and is gated, not
+`unknown fn`); the `Progress` tab reads clean through gviz with all seven columns;
+the live dashboard shows "Live — nothing recorded yet" instead of the amber bar.
+
+**Still owed by a human (one minute):** make the first real save from the
+dashboard. That is the only untested link in the chain — it needs the team
+passcode typed into the browser prompt, which no automation should be handling.
+Tick a box on any pillar, write the sentence, Save. If it lands, a row appears in
+the `Progress` tab and the momentum grid colours in.
+
+### TRAP 1 — Apps Script's dropdowns ignore synthetic clicks
+
+Both the **Run function selector** and the **deployment Version selector** are
+Material listboxes whose options either render at zero size or swallow coordinate
+clicks and keyboard events. The label updates visually while the underlying
+selection does **not** change. Two "successful" editor runs of `initProgressTab`
+were actually running `doGet` — the Executions page (which lists the real function
+name per run) is the only place that tells the truth. The Execution log's
+"Execution completed" does not mean your function ran.
+
+What works: dispatch a real pointer sequence at the option element —
+`pointerdown → mousedown → pointerup → mouseup → click` — then **verify the field's
+text before committing.** This matters most on the Version selector, where a
+silent mis-selection redeploys an OLD version and rolls the service back.
+
+### TRAP 2 — pressing Return in the editor starts a debugger
+
+An Enter keystroke aimed at the function dropdown started a **debug session**
+paused inside `doGet`, which then blocks the Deploy dialog. The toolbar shows
+**Stop** instead of Run when this happens. Click Stop before deploying.
+
+### How the Progress tab actually got created
+
+Not by `fn=progress_init` and not by the editor Run — by hand, because it is four
+clicks and zero ambiguity: **+ (add sheet) ▸ rename to `Progress` ▸ paste the
+header row.** Note that typing tab characters into a cell puts the whole row in
+**one cell**; copy a real TSV line to the clipboard and ⌘V instead, which Sheets
+splits into columns.
+
+Hand-creating it is safe because `saveProgress_` sets column A:C to plain text on
+**every** write, so the week key stays text no matter how the tab was made.
+`fn=progress_init` and `initProgressTab` both still exist and are idempotent.
+
+---
+
+# Deploying v7 (kept for the next redeploy)
 
 The dashboard was rebuilt around a **weekly progress read** instead of per-metric
 scoring. Six pillars, four boxes, one required sentence, one priority for next
-week. Until v7 is deployed the new `index.html` loads but **cannot save** — it
-says so in an amber bar at the top rather than failing quietly.
-
-**Do these in order. Step 1 before step 3, or the team sees a broken dashboard.**
+week. If v7 were ever rolled back, the new `index.html` would load but **not
+save** — it says so in an amber bar rather than failing quietly.
 
 ### 1. Deploy Apps Script v7
 

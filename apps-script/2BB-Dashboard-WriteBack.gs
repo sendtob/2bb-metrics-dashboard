@@ -278,6 +278,11 @@ function progSheet_() {
   return sh;
 }
 
+// Runnable straight from the Apps Script editor (Run ▸ initProgressTab), which
+// creates the tab without putting the team passcode into a URL. The underscore
+// version stays the web-app path.
+function initProgressTab() { return progressInit_(); }
+
 // Idempotent: safe to hit after every redeploy.
 function progressInit_() {
   var sh = progSheet_();
