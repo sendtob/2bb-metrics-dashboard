@@ -1,3 +1,33 @@
+# ✅ v8 DEPLOYED 2026-08-11, 12:28 PM — writes are OPEN, and saving is finally proven
+
+**No passcode any more.** Saving was failing, and the gate wasn't worth what it
+cost: this holds a weekly progress read and a set of counts, and reads were always
+public. Server side that's `REQUIRE_PASS = false` near the top of the `.gs` —
+**flip it to true and the gate is back**, since `WRITE_PASS` is still in Script
+properties and `passOk_` is untouched. Client side the prompt and the passcode
+link are gone.
+
+Say the consequence out loud so it isn't a surprise later: the `/exec` URL is in a
+public repo, so **anyone who finds it can write to the sheet**. The `Log` tab
+records every write and Sheets keeps version history, so junk is visible and
+revertible rather than silent.
+
+**Saving is verified end to end** — the link that was untested until now:
+`?fn=ping` → `{version: 8, requirePass: false}`; a passcode-free `fn=progress`
+returned `ok:true` and created row 2; gviz read it back with the week key intact
+as the text `2026-08-16`; the test row was then deleted. The `Progress` tab is
+back to headers only.
+
+**A third trap, caught live during this deploy** (see the two below): the version
+dropdown **stays open after you pick from it**. A triple-click aimed at the
+Description field underneath landed on the option list and silently selected
+**Version 5** — a two-version rollback, with the dialog looking completely normal.
+Read the Version field back from the DOM immediately before clicking Deploy, every
+time. Escape does not reliably close the dropdown either; it left the list open
+and the dialog up.
+
+---
+
 # ✅ v7 DEPLOYED 2026-08-11, 9:47 AM — and two UI traps that cost most of the time
 
 Version 7 is live on the unchanged `/exec` URL (deployment ID still ends
