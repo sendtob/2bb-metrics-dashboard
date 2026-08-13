@@ -63,6 +63,10 @@
  *   ?fn=progress&week=&pillar=&state=&note=&priority=&who=
  *                                       → upsert this week's read for one pillar
  *   ?fn=progress_init                   → create the "Progress" tab (idempotent)
+ *   ?fn=progress_delete&week=&pillar=&who=&pass=
+ *                                       → remove one (week,pillar) row entirely.
+ *                                         NEEDS the passcode even though writes are open:
+ *                                         it is the only op that leaves nothing behind.
  *   ?fn=additem&code=&item=&by=         → append one item to the "Items" tab
  *   ?fn=migrate                         → one-time (idempotent) upgrade of an old sheet
  *   ?fn=saveweek                        → deprecated no-op, kept so stale browser tabs don't error
@@ -85,13 +89,15 @@ function doGet(e) {
     var fn = e.parameter.fn;
     // Bump this whenever you redeploy — it is a hand-maintained literal, NOT the
     // deployment version, and it is the only way to tell which build is live.
-    if (fn === 'ping')           out = { ok: true, pong: true, version: 8, requirePass: REQUIRE_PASS };
+    if (fn === 'ping')           out = { ok: true, pong: true, version: 9, requirePass: REQUIRE_PASS };
     else if (!passOk_(e))        out = { ok: false, error: 'bad or missing passcode' };
     else if (fn === 'save')      out = saveValue_(e.parameter.code, e.parameter.value, e.parameter.label, e.parameter.who);
     else if (fn === 'confirm')   out = confirmValue_(e.parameter.code, e.parameter.who);
     else if (fn === 'progress')  out = saveProgress_(e.parameter.week, e.parameter.pillar, e.parameter.state,
                                                      e.parameter.note, e.parameter.priority, e.parameter.who);
     else if (fn === 'progress_init') out = progressInit_();
+    else if (fn === 'progress_delete') out = deleteProgress_(e.parameter.week, e.parameter.pillar,
+                                                            e.parameter.who, e.parameter.pass);
     else if (fn === 'additem')   out = addItem_(e.parameter.code, e.parameter.item, e.parameter.by);
     else if (fn === 'migrate')   out = migrate_();
     else if (fn === 'saveweek')  out = { ok: true, deprecated: true,
@@ -305,6 +311,69 @@ function progSheet_() {
 function initProgressTab() { return progressInit_(); }
 
 // Idempotent: safe to hit after every redeploy.
+/**
+ * Remove one (week, pillar) row outright. v9.
+ *
+ * saveProgress_ can only ever overwrite, because it requires a non-empty state
+ * and a non-empty note. That meant a row written by mistake -- a test entry, a
+ * week logged against the wrong date -- could be blanked in spirit but never
+ * actually removed, and it went on counting as "logged" on the dashboard and as
+ * a real read at the Tuesday meeting. Deleting is the only honest correction for
+ * a row that should never have existed; editing is the right correction for one
+ * that should.
+ *
+ * Deletes the FIRST matching row, same tie-break saveProgress_ and the dashboard
+ * both use. Idempotent: deleting a row that isn't there returns ok with
+ * deleted:false rather than an error.
+ */
+function deleteProgress_(week, pillar, who, pass) {
+  week   = String(week   || '').trim();
+  pillar = String(pillar || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(week)) return { ok: false, error: 'week must look like 2026-08-16' };
+  if (!pillar) return { ok: false, error: 'no pillar' };
+  who = String(who || '').trim().slice(0, 60);
+  if (!who) return { ok: false, error: 'deleting requires &who= - a delete with no name is not auditable' };
+
+  // Writes are open; DELETE is not. Overwriting leaves content in the Log and in
+  // Sheets version history, so it is visible and revertible. Removing a row is
+  // the one operation that leaves nothing behind, and the /exec URL is in a
+  // public repo -- so this one keeps the gate that the rest gave up in v8.
+  // The passcode is unchanged in Script properties (WRITE_PASS).
+  var want = PropertiesService.getScriptProperties().getProperty('WRITE_PASS');
+  if (!want || String(pass || '') !== String(want)) {
+    return { ok: false, error: 'delete needs the team passcode (&pass=)' };
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var sh = progSheet_();
+    var last = sh.getLastRow();
+    if (last < 2) return { ok: true, deleted: false, week: week, pillar: pillar };
+    var keys = sh.getRange(2, 1, last - 1, 2).getValues();
+    for (var i = 0; i < keys.length; i++) {
+      var kw = (keys[i][0] instanceof Date) ? iso_(keys[i][0]) : String(keys[i][0]).trim();
+      if (kw === week && String(keys[i][1]).trim() === pillar) {
+        // Read what is about to be destroyed and put it in the Log, INCLUDING the
+        // week being deleted -- logWrite_ stamps its own week column from the
+        // clock, so without this the audit row says only "some prog_<pillar> row
+        // went away today". Recovery would be Sheets version history or nothing.
+        var gone = sh.getRange(i + 2, 1, 1, 7).getValues()[0];
+        sh.deleteRow(i + 2);
+        SpreadsheetApp.flush();
+        logWrite_('prog_' + pillar,
+                  'DELETED ' + week + ' | state=' + gone[2] + ' | note=' + String(gone[3]).slice(0, 120) +
+                  ' | priority=' + String(gone[4]).slice(0, 120) + ' | was_who=' + gone[5],
+                  'progress-delete', who);
+        return { ok: true, deleted: true, week: week, pillar: pillar, row: i + 2 };
+      }
+    }
+    return { ok: true, deleted: false, week: week, pillar: pillar };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function progressInit_() {
   var sh = progSheet_();
   return { ok: true, tab: PROG_SHEET, rows: Math.max(0, sh.getLastRow() - 1), week: currentWeekIso_() };

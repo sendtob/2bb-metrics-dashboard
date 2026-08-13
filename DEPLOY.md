@@ -1,3 +1,72 @@
+# ⚠️ v9 IS IN THE REPO AND **NOT DEPLOYED** — plus one blocker fix that needs no deploy
+
+Two separate things landed 2026-08-13. Read both before touching anything.
+
+## A. The dashboard (index.html) — live the moment it is pushed, no deploy needed
+
+Rebuilt around three things the previous version didn't have: **one named owner per
+pillar**, **one org-wide #1 priority per week** with a grade history, and a first
+screen that says what *you* owe and by when.
+
+**The blocker this fixed, which had nothing to do with the UI.** Every write used
+to go out as a `<script>` tag (JSONP). That fails outright in a browser signed into
+**more than one Google account**: `script.google.com/macros/s/<id>/exec` answers 503
+and redirects to `/macros/u/1/s/<id>/exec`, and a script tag does not survive it.
+The gviz **read** to `docs.google.com` follows the same redirect happily — so the
+page looked completely healthy right up until Save, and then said *"Not saved
+(network). Check your connection."* Brad's Chrome has three Google accounts on it
+(u/0 personal, u/1 2BB, u/2 drakefoundry) and the team's will too. This was
+every save, for everyone. `callApi()` now uses `fetch()` (which follows the
+redirect and returns 200) and falls back to JSONP only if fetch is blocked.
+**Test a save from a real team member's browser before telling anyone it works.**
+
+The **#1 priority** is stored in the same `Progress` tab under the pillar key
+`__focus`, so it inherits week history, upsert and audit logging and needed no
+server change. One deliberate difference on that row: **`who` holds the person
+ACCOUNTABLE for the priority**, not whoever typed it — the typist is in the `Log`
+tab, which is the right place for it. Semantics, which the whole page depends on:
+a `priority` written on week W is due during **W+1**, and the `state` written on
+week W grades what was set on **W-1**.
+
+The page lands on `reviewWeek()`, not the calendar week: **on Monday, and on
+Tuesday before 3pm, it opens the week that just ENDED** — the one the meeting
+reviews. Without that, the first grading meeting opens on an empty band reading
+"nobody named the one thing", on the projector.
+
+## B. Apps Script v9 — `fn=progress_delete`, NOT deployed
+
+`saveProgress_` can only overwrite: it requires a non-empty state and a non-empty
+note, so a row written by mistake could be blanked in spirit but never removed, and
+it went on counting as a real read. v9 adds `?fn=progress_delete&week=&pillar=&who=&pass=`.
+
+**Deleting requires the passcode even though writing doesn't.** That asymmetry is
+deliberate, not an oversight: overwriting leaves content in the `Log` and in Sheets
+version history, so it is visible and revertible; removing a row leaves nothing.
+`WRITE_PASS` is unchanged in Script properties. The delete also logs the target
+week and the row's prior state/note/priority/who, because an audit line that says
+only "some row went away today" is not an audit line.
+
+Deploy exactly as always — **Manage deployments ▸ ✏️ ▸ New version**, never "New
+deployment" (that mints a different URL), from `/u/1`
+(bradford@twoblindbrothers.com). Verify with `?fn=ping` → `{version: 9}`.
+**Re-read the three UI traps below before you start.** Until it is deployed,
+`fn=progress_delete` returns `unknown fn` and everything else works normally.
+
+## C. 🧹 FOUR JUNK ROWS ARE IN THE SHEET RIGHT NOW — delete them by hand
+
+Automated review agents wrote test rows and the API had no way to remove them.
+In the **Progress** tab, delete every row whose `note` begins **"DELETE THIS ROW"**
+— at the time of writing that is rows 3–6 (`2026-08-16` × `donors`, `partners`,
+`programs`, `__focus`) and up to four more at `2026-05-03`. Select the rows ▸
+right-click ▸ Delete rows. **Do not delete row 2** (`2026-08-09 / __focus`) — that
+is the real #1 priority for this week.
+
+Until they are gone the dashboard counts them as real reads: Kevin's card shows
+"all your pillars are logged" when he has logged nothing, and the #1 band shows a
+grade of "Not done" that nobody chose.
+
+---
+
 # ✅ v8 DEPLOYED 2026-08-11, 12:28 PM — writes are OPEN, and saving is finally proven
 
 **No passcode any more.** Saving was failing, and the gate wasn't worth what it

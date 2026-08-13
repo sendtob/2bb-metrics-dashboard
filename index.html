@@ -6,142 +6,202 @@
 <title>Two Blind Brothers — Weekly Progress</title>
 <style>
   :root{
-    --navy:#1F3864; --blue:#2E5496; --ink:#1f2937; --muted:#6b7280; --line:#e5e9f0;
-    --bg:#eef2f7; --card:#ffffff; --gold:#E8B84B;
+    --navy:#1F3864; --blue:#2E5496; --ink:#1f2937; --muted:#5b6472; --line:#e5e9f0;
+    --bg:#eef2f7; --card:#ffffff; --gold:#E8B84B; --dim:#64748b;
     --navygrad:linear-gradient(120deg,#16284a,#2a4878);
-    --s-reg:#dc2626; --s-none:#94a3b8; --s-little:#0891B2; --s-big:#16a34a;
+    --s-reg:#dc2626; --s-none:#7c8798; --s-little:#0e7490; --s-big:#15803d;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+    background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;
+    overflow-x:hidden}
   a{color:var(--blue)}
   :focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+  .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .skip{position:absolute;left:-9999px;top:0;background:#fff;color:var(--navy);font-weight:800;
+    padding:12px 18px;border-radius:0 0 9px 0;z-index:99}
+  .skip:focus{left:0}
 
-  header{background:var(--navygrad);color:#fff;padding:22px 32px;
+  header{background:var(--navygrad);color:#fff;padding:18px 32px;
     display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px}
   header .brand{font-size:13px;letter-spacing:.22em;font-weight:700;opacity:.85}
-  header h1{font-size:24px;font-weight:700;margin-top:2px}
-  header .sub{font-size:12.5px;opacity:.8;margin-top:4px;max-width:52ch}
+  header h1{font-size:23px;font-weight:700;margin-top:2px}
+  header .sub{font-size:12.5px;opacity:.85;margin-top:4px;max-width:54ch}
   header .meta{text-align:right;font-size:12px;opacity:.9}
-  .navlink{display:inline-block;color:#fff;text-decoration:none;font-weight:700;font-size:12px;
-    border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 11px;transition:background .15s;margin-left:6px}
-  .navlink:hover{background:rgba(255,255,255,.14)}
+  .navlink{display:inline-block;color:#fff;text-decoration:none;font-weight:700;font-size:12px;line-height:20px;
+    border:1px solid rgba(255,255,255,.45);border-radius:8px;padding:11px 13px;transition:background .15s;margin-left:6px}
+  .navlink:hover{background:rgba(255,255,255,.16)}
   .navlink.gold{background:var(--gold);color:#15233f;border-color:var(--gold)}
   .navlink.gold:hover{background:#f1cc63}
 
-  .wrap{max-width:1240px;margin:0 auto;padding:20px 28px 70px}
-  @media(max-width:620px){ .wrap{padding:14px 13px 50px} header{padding:18px 15px} footer{padding:0 14px 40px} }
+  .wrap{max-width:1240px;margin:0 auto;padding:16px 28px 70px}
+  @media(max-width:620px){ .wrap{padding:12px 13px 50px} header{padding:15px 15px} footer{padding:0 14px 40px} }
 
-  .status{font-size:12.5px;font-weight:600;padding:9px 14px;border-radius:9px;margin:0 0 14px;background:#eef0f3;color:#6b7280}
+  /* ---- the ask: what you owe, by when ---- */
+  .ask{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--navy);
+    border-radius:12px;padding:12px 16px;margin-bottom:13px;box-shadow:0 1px 3px rgba(20,40,80,.07)}
+  .ask:empty{display:none}
+  .ask .big{font-size:17px;font-weight:800;color:var(--navy);line-height:1.3}
+  .ask .by{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .ask .by b{color:var(--ink)}
+  .ask.warn{border-left-color:var(--gold)}
+  .ask.bad{border-left-color:var(--s-reg)}
+  .ask.ok{border-left-color:var(--s-big)}
+  .askgo{margin-top:9px;background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 17px;
+    font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;min-height:44px}
+  .askgo:hover{background:#2a4878}
+
+  .status{font-size:12.5px;font-weight:600;padding:9px 14px;border-radius:9px;margin:0 0 13px;background:#eef0f3;color:var(--muted)}
+  .status:empty{display:none}
   .status.warn{background:#fef3c7;color:#7c2d12;border:1px solid #fcd34d}
   .status.bad{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+  .status.ok{background:#dcfce7;color:#14532d;border:1px solid #86efac}
   .status a{font-weight:700}
 
-  /* ---- week bar ---- */
-  .weekbar{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 14px;
-    display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(20,40,80,.07);margin-bottom:16px}
+  /* ---- week bar + identity ---- */
+  .weekbar{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:10px 13px;
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(20,40,80,.07);margin-bottom:14px}
   .wnav{display:flex;align-items:center;gap:7px}
   .wbtn{border:1px solid var(--line);background:#f8fafc;border-radius:8px;font-size:15px;line-height:1;
-    padding:7px 11px;cursor:pointer;color:var(--navy);font-weight:700}
+    padding:7px 14px;cursor:pointer;color:var(--navy);font-weight:700;min-height:44px;min-width:46px}
   .wbtn:hover:not(:disabled){background:#eef2f7}
-  .wbtn:disabled{opacity:.35;cursor:default}
+  .wbtn:disabled{opacity:.4;cursor:default}
   .wlabel{font-weight:800;font-size:15px;color:var(--navy);min-width:15ch}
-  .wlabel .wsub{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.02em}
-  .wtoday{border:none;background:none;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline}
-  .wcount{margin-left:auto;font-size:12.5px;color:var(--muted);font-weight:600}
-  .wcount b{color:var(--navy)}
-  .whoami{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-  .whoami input{border:1px solid var(--line);border-radius:7px;padding:5px 8px;font:inherit;font-size:12px;width:11ch}
+  .wlabel .wsub{display:block;font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+  .wtoday{border:none;background:none;color:var(--blue);font-size:12.5px;font-weight:700;cursor:pointer;
+    text-decoration:underline;min-height:44px;padding:0 8px}
+  .whobar{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .wholab{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .chipbtn{border:1.5px solid var(--line);background:#f8fafc;color:var(--navy);border-radius:99px;
+    font:inherit;font-size:12.5px;font-weight:700;padding:8px 14px;cursor:pointer;min-height:44px}
+  .chipbtn:hover{background:#eef2f7}
+  .chipbtn.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .chipbtn.ghost{font-weight:600;color:var(--muted)}
 
-  /* ---- tally ---- */
-  .tally{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-  @media(max-width:640px){.tally{grid-template-columns:repeat(2,1fr)}}
-  .tcell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;
-    position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(20,40,80,.06)}
-  .tcell .bar{position:absolute;left:0;top:0;height:3px;width:100%}
-  .tcell .n{font-size:23px;font-weight:800;line-height:1.1}
-  .tcell .l{font-size:11px;color:var(--muted);font-weight:700}
+  /* ---- the one thing ---- */
+  .focus{background:var(--navygrad);color:#fff;border-radius:14px;padding:16px 19px 15px;margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(20,40,80,.18)}
+  .focus h2.flab{font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;opacity:.82}
+  .focus .ftext{font-size:19px;font-weight:700;line-height:1.35;margin:5px 0 2px;max-width:80ch}
+  @media(max-width:620px){.focus .ftext{font-size:16.5px}}
+  .focus .ftext.none{font-size:15px;font-weight:600;opacity:.85;font-style:italic}
+  .focus .fmeta{font-size:12px;opacity:.9;margin-top:5px}
+  .focus .fmeta b{font-weight:800}
+  .focus .fresult{font-size:12.5px;margin-top:9px;background:rgba(255,255,255,.15);border-radius:9px;padding:9px 12px}
+  .focus .fresult b{font-weight:800}
+  .fgrade{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .gbtn{border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.1);color:#fff;border-radius:9px;
+    font:inherit;font-size:12.5px;font-weight:700;padding:11px 15px;cursor:pointer;min-height:44px}
+  .gbtn:hover{background:rgba(255,255,255,.22)}
+  .gbtn.on{background:#fff;border-color:#fff;color:var(--navy)}
+  .gbtn.on[data-s="big"]{background:#22c55e;border-color:#22c55e;color:#052e16}
+  .gbtn.on[data-s="little"]{background:#22d3ee;border-color:#22d3ee;color:#083344}
+  .gbtn.on[data-s="none"]{background:#e2e8f0;border-color:#e2e8f0;color:#1e293b}
+  .gbtn.on[data-s="regression"]{background:#f87171;border-color:#f87171;color:#450a0a}
+  .focus textarea,.focus input.ptxt{background:#fff;border-color:transparent;color:var(--ink)}
+  .focus .fl{color:#fff;opacity:.92}
+  .focus .hint{color:#fff;opacity:.9}
+  .focus .hint.bad{color:#fecaca;opacity:1;font-weight:700}
+  .fedit{margin-top:12px;border-top:1px solid rgba(255,255,255,.2);padding-top:12px;display:none}
+  .fedit.open{display:block}
+  .flink{border:none;background:none;color:#fff;font:inherit;font-size:12.5px;font-weight:700;
+    text-decoration:underline;cursor:pointer;opacity:.92;padding:11px 4px;min-height:44px}
+  .flink:hover{opacity:1}
+  .fstat{font-size:12px;font-weight:700;min-height:1em}
+  .fstat.ok{color:#bbf7d0} .fstat.err{color:#fecaca}
+  .ownpick{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+  .obtn{border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.1);color:#fff;
+    border-radius:99px;font:inherit;font-size:12px;font-weight:700;padding:11px 14px;cursor:pointer;min-height:44px}
+  .obtn.on{background:#fff;border-color:#fff;color:var(--navy)}
 
-  /* ---- momentum grid ---- */
-  .mom{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 16px 12px;
-    box-shadow:0 1px 3px rgba(20,40,80,.07);margin-bottom:20px}
-  .mom h2{font-size:14px;color:var(--navy);margin-bottom:2px}
-  .mom .h2sub{font-size:11.5px;color:var(--muted);margin-bottom:11px}
-  /* Only the grid scrolls, and it opens at the newest week — on a phone the
-     column that matters is the right-hand one, not May. */
-  #momwrap{overflow-x:auto}
-  table.momt{border-collapse:collapse;font-size:11.5px}
-  table.momt th{font-weight:700;color:var(--muted);text-align:center;padding:2px 3px;font-size:10px;white-space:nowrap}
-  table.momt th.rowh{text-align:left;color:var(--navy);font-size:11.5px;padding-right:12px;white-space:nowrap;font-weight:700;
-    position:sticky;left:0;background:var(--card);z-index:1}
-  table.momt td{padding:2px 3px}
-  .mcell{width:22px;height:20px;border-radius:5px;background:#f1f5f9;border:1px solid #e2e8f0;display:block;cursor:default}
-  .mcell.has{border-color:transparent}
-  .mcell.sel{outline:2px solid var(--navy);outline-offset:1px}
-  th.wsel{color:var(--navy);text-decoration:underline}
-  .mcolbtn{background:none;border:none;font:inherit;color:inherit;cursor:pointer;padding:0}
-  .legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:11.5px;color:var(--muted);margin-top:10px}
-  .legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  /* ---- waiting on ---- */
+  .waiting{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:11px;padding:10px 14px;margin-bottom:16px;font-size:13px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(20,40,80,.06)}
+  .waiting:empty{display:none}
+  .waiting.done{border-left-color:var(--s-big)}
+  .waiting .wl{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  .waiting .names{color:var(--muted)}
 
   /* ---- pillar cards ---- */
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(430px,100%),1fr));gap:16px}
   .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;
-    box-shadow:0 1px 4px rgba(20,40,80,.08);overflow:hidden;border-top:3px solid var(--accent,#ccc)}
+    box-shadow:0 1px 4px rgba(20,40,80,.08);overflow:hidden;border-top:3px solid var(--accent,#ccc);scroll-margin-top:12px}
   .pcard.dirty{box-shadow:0 0 0 2px var(--gold),0 1px 4px rgba(20,40,80,.08)}
+  .pcard.mine{border-left:4px solid var(--navy)}
   .pcard fieldset{border:0;padding:15px 17px 14px}
   .pcard legend{display:block;padding:0;width:100%}
   .ptitle{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-  .ptitle .nm{font-size:16.5px;font-weight:800;color:var(--navy)}
-  .ptitle .chip{font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:99px;color:#fff}
-  .ptitle .chip.empty{background:#e2e8f0;color:#64748b}
+  .ptitle h2{font-size:16.5px;font-weight:800;color:var(--navy)}
+  .ptitle .chip{font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:99px;color:#fff}
+  .ptitle .chip.empty{background:#e2e8f0;color:#475569}
+  .owner{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 9px;border-radius:99px;
+    background:#eef2f7;color:var(--navy);border:1px solid var(--line)}
+  .owner.you{background:var(--navy);color:#fff;border-color:var(--navy)}
   .pdesc{font-size:12px;color:var(--muted);margin:3px 0 11px}
 
   .lastwk{background:#f8fafc;border:1px solid var(--line);border-left:3px solid var(--navy);
     border-radius:9px;padding:9px 11px;margin-bottom:13px;font-size:12.5px}
   .lastwk .lab{font-size:10px;font-weight:800;letter-spacing:.07em;color:var(--muted);text-transform:uppercase}
   .lastwk .pri{font-weight:600;color:var(--ink);margin-top:2px}
-  .lastwk .pri.none{font-weight:400;color:#94a3b8;font-style:italic}
-  .lastwk .why{color:var(--muted);margin-top:4px;font-size:11.5px}
+  .lastwk .pri.none{font-weight:400;color:var(--dim);font-style:italic}
+  .lastwk .why{color:var(--muted);margin-top:6px;font-size:11.5px;padding-top:6px;border-top:1px dashed var(--line)}
 
-  .states{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+  .states{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:8px}
   @media(max-width:520px){.states{grid-template-columns:repeat(2,1fr)}}
   .states input{position:absolute;opacity:0;width:0;height:0}
   .states label{display:block;border:1.5px solid var(--line);border-radius:10px;padding:9px 8px;cursor:pointer;
-    text-align:center;background:#fbfcfe;transition:border-color .12s,background .12s}
+    text-align:center;background:#fbfcfe;transition:border-color .12s,background .12s;min-height:58px}
   .states label:hover{background:#f1f5f9}
-  .states .box{display:inline-block;width:15px;height:15px;border:1.8px solid #b6c1d1;border-radius:4px;
+  .states .box{display:inline-block;width:15px;height:15px;border:1.8px solid #96a3b5;border-radius:50%;
     margin-bottom:5px;position:relative;background:#fff}
   .states .nmt{display:block;font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.25}
   .states input:checked+label{border-color:var(--c);background:color-mix(in srgb,var(--c) 9%,#fff)}
   .states input:checked+label .box{background:var(--c);border-color:var(--c)}
-  .states input:checked+label .box::after{content:"";position:absolute;left:4px;top:0px;width:5px;height:10px;
-    border:solid #fff;border-width:0 2.4px 2.4px 0;transform:rotate(42deg)}
+  /* A round dot, not a checkmark. Four square boxes with ticks read as "choose
+     any", and first-timers tried to select two. */
+  .states input:checked+label .box::after{content:"";position:absolute;left:3px;top:3px;width:5px;height:5px;
+    border-radius:50%;background:#fff}
   .states input:checked+label .nmt{color:var(--c)}
   .states input:focus-visible+label{outline:3px solid #2563eb;outline-offset:2px}
+  .bar1{font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.45}
+  .bar1 b{color:var(--ink)}
 
   .fl{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
     color:var(--muted);margin-bottom:4px}
-  .fl .req{color:#dc2626}
+  .fl .req{color:#b91c1c}
   textarea,input.ptxt{width:100%;font:inherit;font-size:13px;border:1.5px solid var(--line);border-radius:9px;
-    padding:8px 10px;background:#fbfcfe;color:var(--ink);resize:vertical}
-  textarea{min-height:52px}
+    padding:9px 10px;background:#fbfcfe;color:var(--ink);resize:vertical}
+  textarea{min-height:56px}
   textarea:focus,input.ptxt:focus{background:#fff;border-color:var(--blue)}
+  textarea[aria-invalid="true"],input[aria-invalid="true"]{border-color:#dc2626;background:#fff5f5}
   .field{margin-bottom:11px}
-  .hint{font-size:11px;color:#94a3b8;margin-top:3px}
-  .hint.bad{color:#b91c1c}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .hint.bad{color:#b91c1c;font-weight:700}
+  .sug{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+  .sugbtn{border:1px dashed #b6c1d1;background:#fbfcfe;color:var(--navy);border-radius:8px;font:inherit;
+    font-size:11.5px;font-weight:600;padding:11px 12px;cursor:pointer;text-align:left;min-height:44px}
+  .sugbtn:hover{background:#eef2f7;border-style:solid}
+  .suglab{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);
+    margin-top:8px}
+
+  .optbtn{border:none;background:none;color:var(--blue);font:inherit;font-size:12.5px;font-weight:700;
+    cursor:pointer;text-decoration:underline;padding:11px 0;min-height:44px}
+  .optwrap{display:none} .optwrap.open{display:block}
 
   .prow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px}
-  .save{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:8px 16px;font:inherit;
-    font-size:13px;font-weight:700;cursor:pointer}
+  .save{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:12px 19px;font:inherit;
+    font-size:13.5px;font-weight:700;cursor:pointer;min-height:44px}
   .save:hover:not(:disabled){background:#2a4878}
-  .save:disabled{background:#cbd5e1;cursor:default}
-  .pstat{font-size:11.5px;color:var(--muted);min-height:1em}
+  .save:disabled{background:#94a3b8;cursor:default}
+  .pstat{font-size:12px;color:var(--muted);min-height:1em}
   .pstat.ok{color:#15803d;font-weight:700}
   .pstat.err{color:#b91c1c;font-weight:700}
+  .pstat.dirtytxt{color:#92400e;font-weight:700}
 
   /* ---- rubric pop-out ---- */
   .rubbtn{border:1px solid var(--line);background:#f8fafc;color:var(--navy);border-radius:99px;
-    font:inherit;font-size:10.5px;font-weight:800;letter-spacing:.03em;padding:3px 9px;cursor:pointer}
+    font:inherit;font-size:11px;font-weight:800;letter-spacing:.03em;padding:11px 13px;cursor:pointer;min-height:44px}
   .rubbtn:hover{background:#eef2f7;border-color:#c9d4e3}
   .rubmask{position:fixed;inset:0;background:rgba(15,26,45,.55);display:none;z-index:50;
     align-items:center;justify-content:center;padding:20px}
@@ -152,8 +212,8 @@
     background:var(--card);border-radius:15px 15px 0 0;display:flex;align-items:flex-start;gap:12px}
   .rubhead h2{font-size:17px;color:var(--navy);line-height:1.25}
   .rubhead .sub{font-size:12px;color:var(--muted);margin-top:3px}
-  .rubx{margin-left:auto;border:none;background:none;font-size:24px;line-height:1;color:#94a3b8;
-    cursor:pointer;padding:0 2px}
+  .rubx{margin-left:auto;border:none;background:none;font-size:26px;line-height:1;color:var(--dim);
+    cursor:pointer;padding:0 8px;min-height:44px;min-width:44px}
   .rubx:hover{color:var(--ink)}
   .rubbody{padding:6px 20px 18px}
   .rubtier{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:11px;
@@ -162,86 +222,148 @@
   .rubtier ul{margin:7px 0 0 17px;font-size:12.5px;color:var(--ink)}
   .rubtier li{margin-bottom:3px}
   .rubpick{margin-left:auto;border:1px solid var(--c);color:var(--c);background:#fff;border-radius:8px;
-    font:inherit;font-size:11px;font-weight:700;padding:3px 10px;cursor:pointer;white-space:nowrap}
+    font:inherit;font-size:11.5px;font-weight:700;padding:11px 13px;cursor:pointer;white-space:nowrap;min-height:44px}
   .rubpick:hover{background:var(--c);color:#fff}
   .rubfoot{padding:0 20px 18px;font-size:11.5px;color:var(--muted);line-height:1.5}
+
+  /* ---- history + momentum ---- */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 16px 13px;
+    box-shadow:0 1px 3px rgba(20,40,80,.07);margin-top:20px}
+  .panel h2{font-size:14px;color:var(--navy)}
+  .panel .h2sub{font-size:11.5px;color:var(--muted);margin-bottom:11px}
+  .tally{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:13px}
+  @media(max-width:640px){.tally{grid-template-columns:repeat(2,1fr)}}
+  .tcell{border:1px solid var(--line);border-radius:11px;padding:9px 12px;position:relative;overflow:hidden}
+  .tcell .bar{position:absolute;left:0;top:0;height:3px;width:100%}
+  .tcell .n{font-size:21px;font-weight:800;line-height:1.15}
+  .tcell .l{font-size:10.5px;color:var(--muted);font-weight:700}
+  #momwrap,#histwrap{overflow-x:auto}
+  table.momt{border-collapse:collapse;font-size:11.5px}
+  table.momt caption{text-align:left;font-size:11.5px;color:var(--muted);padding-bottom:6px}
+  table.momt th{font-weight:700;color:var(--muted);text-align:center;padding:2px 3px;font-size:10px;white-space:nowrap}
+  table.momt th.rowh{text-align:left;color:var(--navy);font-size:11.5px;padding-right:12px;white-space:nowrap;font-weight:700;
+    position:sticky;left:0;background:var(--card);z-index:1}
+  table.momt tr.focusrow th.rowh{color:#000}
+  table.momt td{padding:2px 3px}
+  table.momt td.gap{padding:0 5px;color:#94a3b8}
+  .mcell{width:26px;height:24px;border-radius:5px;background:#f1f5f9;border:1px solid #e2e8f0;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;
+    padding:0;line-height:1}
+  button.mcell{cursor:pointer}
+  .mcell.empty{color:#7c8798;font-weight:600}
+  .mcell.sel{outline:2px solid var(--navy);outline-offset:1px}
+  th.wsel{color:var(--navy);text-decoration:underline}
+  .mcolbtn{background:none;border:none;font:inherit;color:inherit;cursor:pointer;padding:6px 3px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:11.5px;color:var(--muted);margin-top:10px}
+  .legend .sw{display:inline-block;width:16px;height:16px;border-radius:4px;margin-right:5px;vertical-align:-3px;
+    color:#fff;font-size:11px;font-weight:800;text-align:center;line-height:16px}
+
+  table.hist{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.hist th{text-align:left;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    padding:0 10px 6px 0;font-weight:800}
+  table.hist td{padding:9px 10px 9px 0;border-top:1px solid var(--line);vertical-align:top}
+  table.hist td.wk{white-space:nowrap;font-weight:700;color:var(--navy)}
+  table.hist td.gr{white-space:nowrap}
+  .gpill{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;color:#fff}
+  .gpill.pending{background:#e2e8f0;color:#334155}
+  .hnote{color:var(--muted);font-size:11.5px;margin-top:3px;white-space:normal}
+
+  @keyframes flashk{0%{box-shadow:0 0 0 0 rgba(232,184,75,.9)}100%{box-shadow:0 0 0 14px rgba(232,184,75,0)}}
+  .flash{animation:flashk 1.2s ease-out 1;border-radius:12px}
+  @media(prefers-reduced-motion:reduce){.flash{animation:none;outline:3px solid var(--gold);outline-offset:3px}}
+  .prisum{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .prisum b{color:var(--ink);font-weight:600}
+
+  /* The momentum grid's week headers and cells jump the whole page to a different
+     week. At 27px on a phone a mis-tap silently changes which week you are editing,
+     so they get real targets there even though it makes the grid taller. */
+  @media(max-width:620px){
+    .mcolbtn{min-height:44px;min-width:40px}
+    .mcell{height:38px;width:34px;font-size:14px}
+  }
 
   footer{max-width:1240px;margin:0 auto;padding:24px 28px 50px;font-size:12px;color:var(--muted);line-height:1.55}
   footer b{color:var(--ink)}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to this week</a>
 <header>
   <div>
     <div class="brand">TWO BLIND BROTHERS</div>
     <h1>Weekly Progress</h1>
-    <div class="sub">Six pillars. One honest read a week: did it go backwards, sit still, move a
-      little, or land something big — and what has to be done before next Sunday.</div>
+    <div class="sub">Log your pillars before the Tuesday 3pm meeting. Tick a box, write one sentence.</div>
   </div>
   <div class="meta">
     <a class="navlink gold" href="https://docs.google.com/spreadsheets/d/1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w/edit" target="_blank" rel="noopener">📊 The Sheet ↗</a>
     <a class="navlink" href="ecomm.html">Ecomm Metrics →</a>
-    <a class="navlink" href="goal-tree-archive.html" title="The metric-scoring goal tree this replaced. Still live, still reading the same sheet.">📦 Old goal tree</a>
   </div>
 </header>
 
-<div class="wrap">
-  <div class="status" id="status">Loading this week…</div>
+<main class="wrap" id="main" tabindex="-1">
+  <!-- What you owe and by when, before anything else on the page. -->
+  <div class="ask" id="ask"></div>
+
+  <div class="status" id="status" role="status" aria-live="polite"></div>
 
   <div class="weekbar">
     <div class="wnav">
       <button class="wbtn" id="wprev" onclick="stepWeek(-1)" aria-label="Previous week">◀</button>
-      <div class="wlabel" id="wlabel" aria-live="polite">…<span class="wsub" id="wsub"></span></div>
+      <div class="wlabel" id="wlabel">…<span class="wsub" id="wsub"></span></div>
       <button class="wbtn" id="wnext" onclick="stepWeek(1)" aria-label="Next week">▶</button>
-      <button class="wtoday" id="wtoday" onclick="goToday()" hidden>this week</button>
+      <button class="wtoday" id="wtoday" onclick="goToday()" hidden>the week we're logging</button>
     </div>
-    <div class="whoami">
-      <label for="whoin">You are</label>
-      <input id="whoin" class="ptxt" style="width:11ch" placeholder="name" onchange="setWho(this.value.trim().toLowerCase())">
-    </div>
-    <div class="wcount" id="wcount"></div>
+    <div class="whobar" id="whobar"></div>
   </div>
 
-  <div class="tally" id="tally"></div>
+  <!-- The one thing. Everything else on this page is a supporting detail. -->
+  <section class="focus" id="focus" aria-labelledby="focuslab"></section>
 
-  <section class="mom" aria-labelledby="momh">
+  <div class="waiting" id="waiting"></div>
+
+  <div class="cards" id="cards"></div>
+
+  <section class="panel" id="mompanel" aria-labelledby="momh" hidden>
     <h2 id="momh">Momentum</h2>
     <div class="h2sub">Every pillar, every week. Click a week to open it.</div>
+    <div class="tally" id="tally"></div>
     <div id="momwrap"></div>
     <div class="legend" id="momlegend"></div>
   </section>
 
-  <div class="cards" id="cards"></div>
-</div>
+  <section class="panel" aria-labelledby="histh">
+    <h2 id="histh">Did the #1 priority land?</h2>
+    <div class="h2sub">Every week's one thing, and what happened to it. This is the record the Tuesday
+      meeting reads.</div>
+    <div id="histwrap"></div>
+  </section>
+</main>
 
 <div class="rubmask" id="rubmask" onclick="if(event.target===this)closeRubric()">
   <div class="rubbox" role="dialog" aria-modal="true" aria-labelledby="rubtitle">
     <div class="rubhead">
       <div>
         <h2 id="rubtitle">…</h2>
-        <div class="sub">What counts as what — so the box isn't a matter of mood.</div>
+        <div class="sub">Concrete examples for each of the four levels.</div>
       </div>
       <button class="rubx" onclick="closeRubric()" aria-label="Close">&times;</button>
     </div>
     <div class="rubbody" id="rubbody"></div>
     <div class="rubfoot">
       The through-line: <b>we did something = a little; the other side did something = a big win.</b>
-      Effort is little, commitment is big. If a week genuinely sits between two tiers, take the lower
+      Effort is little, commitment is big. If a week genuinely sits between two levels, take the lower
       one and say why in the sentence — that's what the sentence is for.
     </div>
   </div>
 </div>
 
 <footer>
-  <div style="margin-bottom:9px"><b>How this works.</b> One row per pillar per week in the
-    <b>Progress</b> tab of the goals Sheet — <code>week | pillar | state | note | priority | who | when</code>.
-    Saving overwrites that week's row for that pillar, so a correction replaces rather than duplicates.
-    Nothing is ever computed or inferred: a blank week is a week nobody read.</div>
-  <div style="margin-bottom:9px"><b>The justification is the point.</b> The checkbox is a headline; the
-    sentence is the record. "Big win" with no sentence is worth nothing three months from now, so the
-    save button stays off until there's a sentence.</div>
-  <div><b>Pillar names and one-liners</b> live at the top of <code>index.html</code> (<code>PILLARS</code>) —
-    change them there. Previous dashboard, with the full metric tree and its history:
+  <div style="margin-bottom:9px"><b>A blank week is a week nobody read.</b> Nothing here is computed
+    or inferred.</div>
+  <div id="exempt" style="margin-bottom:9px"></div>
+  <div>Owners, people, pillar names and rubrics are one line each at the top of <code>index.html</code>.
+    Your personal link is <code>?who=yourname</code>. Sheet schema and deploy steps are in
+    <b>DEPLOY.md</b>. Previous dashboard with the full metric tree:
     <a href="goal-tree-archive.html">archived goal tree ↗</a>.</div>
 </footer>
 
@@ -250,21 +372,83 @@ const SHEET_ID="1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w";
 const APPS_URL="https://script.google.com/macros/s/AKfycbxFYl7yMenuUkVCV9nSDSIvfP0-UnPN-R1NOYVrQM0kRzk8Z2WYtb9JTZBK-aQYwJGu3A/exec";
 const PROG_TAB="Progress";
 
+// The week's single org-wide priority is stored in the same Progress tab under
+// this pillar key, so it gets week history, upsert and audit logging for free
+// and the Apps Script needed no change to support it.
+//
+// ONE DELIBERATE DIFFERENCE from a pillar row: on a __focus row the `who` column
+// holds the person ACCOUNTABLE for the priority, not whoever typed it. Who typed
+// it is in the Log tab, which is the right place for it. That is what gives the
+// #1 the same "one responsible person" the six pillars have, without adding a
+// column and forcing an Apps Script redeploy.
+const FOCUS="__focus";
+
+// The Tuesday team meeting is the only forcing function in the org, so it is the
+// deadline the page quotes rather than inventing a new one. 2 = Tuesday, 15:00.
+const MEET_DOW=2, MEET_HOUR=15, MEET_NAME="Tuesday 3pm";
+
+// Who can be picked in "You are". `k` is what lands in the sheet's `who` column
+// and in a personal link (?who=krysta) — renaming a person is safe, changing
+// their `k` orphans their past saves. `role` shows on hover and should stay
+// truthful. Deliberately NOT leave dates, contract end dates or anything else
+// about a person's availability: this repo is public and GitHub Pages serves
+// it to anyone with the URL, so a tooltip here is a published statement about
+// someone's employment. Keep that in org.md, which is not public.
+const PEOPLE=[
+ {k:"brad",    name:"Brad",    role:"Co-founder"},
+ {k:"bryan",   name:"Bryan",   role:"Co-founder"},
+ {k:"kevin",   name:"Kevin",   role:"Executive Director"},
+ {k:"krysta",  name:"Krysta",  role:"Head of Growth"},
+ {k:"katie",   name:"Katie",   role:"Director of Product Development"},
+ {k:"angela",  name:"Angela",  role:"COO"},
+ {k:"shannen", name:"Shannen", role:"Team"}
+];
+const PERSON=Object.fromEntries(PEOPLE.map(p=>[p.k,p]));
+function personName(k){ const p=PERSON[String(k||"").trim().toLowerCase()]; return p?p.name:(k||""); }
+
+// Said out loud on the page rather than left as a silent zero next to his name.
+const EXEMPT="<b>Bryan owns no pillar by design.</b> Story capture, on-camera work and key "+
+  "relationships feed Public Engagement and Major Partners. Revisit when the Storytelling Producer is hired.";
+
 // The six north-star pillars. `k` is the key written to the sheet — renaming a
 // pillar is safe, changing its `k` orphans its history.
 //
-// `rubric` is what makes the checkbox defensible: concrete examples per tier, in
-// a pop-out on every card. The rule of thumb running through all six is the same
-// — WE did something = a little; THE OTHER SIDE did something = a big win.
-// Effort is little, commitment is big. Edit these freely; they're meant to get
-// sharper as real weeks accumulate and arguments about scoring come up.
+// `owner` is the ONE person accountable for the pillar moving. Not the only
+// person who works on it — the one who answers for it on Tuesday and whose name
+// shows up in "not logged yet" when nobody has read it.
+//
+// PROVENANCE: assigned 2026-08-13 from the 2026-07-30 structure in
+// SecondBrain/orgs/2bb/org.md, EXCEPT `partners`, which is deliberately not what
+// that doc's functional split implies. Kevin's mandate covers the corporate-partner
+// pipeline, but every live partner thread — OpenAI, IBM, L'Amy, Hadley, Waymo,
+// GitHub, FFB — is Brad's relationship and moves only when Brad moves. Putting the
+// pillar on Kevin would have him report "no progress" for the week containing a
+// two-day OpenAI production he had no lever on. A scoreboard that does that is
+// measuring the wrong person. It also leaves the founder who runs the meeting with
+// no row he can be graded in, and org.md is explicit that he is the org's
+// principal bottleneck — an unmeasured largest input variable.
+//
+// RATIFY ON TUESDAY, flagged rather than silently decided:
+//   1. `partners` on Brad, with Kevin owning the pipeline behind it. Both readings
+//      are defensible; this is Brad's call to confirm out loud, not the code's.
+//   2. Krysta owns three. Accurate to Head of Growth, and still a load question.
+//      If it bites, the merge to make is shop+campaigns — they are one P&L at the
+//      resolution of one weekly sentence — not a reassignment to someone who
+//      doesn't run them.
+//
+// `rubric` is what makes the checkbox defensible: concrete examples per level. Its
+// bullets double as the one-tap suggested sentences on the card, so the rubric is
+// something you use rather than a document you consult and forget. The rule of
+// thumb running through all six is the same — WE did something = a little; THE
+// OTHER SIDE did something = a big win. Effort is little, commitment is big.
 const PILLARS=[
- {k:"donors",    name:"Major Donors",           accent:"#B45309",
+ {k:"donors",    name:"Major Donors",           accent:"#B45309", owner:"kevin",
   desc:"Individuals giving at a level that changes what we can do.",
+  bar:"A donation secured, or a major prospect saying they're in.",
   rubric:{
-   regression:["A committed donor pulls out, cuts their amount, or lapses.",
-               "A live prospect says no, or goes cold after a proposal.",
-               "A relationship we were counting on has to be written off."],
+   regression:["A committed donor pulled out, cut their amount, or lapsed.",
+               "A live prospect said no, or went cold after a proposal.",
+               "A relationship we were counting on had to be written off."],
    none:      ["No new prospect identified.",
                "No outreach went out.",
                "Replies came back but nothing moved."],
@@ -274,12 +458,13 @@ const PILLARS=[
    big:       ["Verbal enthusiasm from a major prospect — they say they're in.",
                "A donation secured."]}},
 
- {k:"partners",  name:"Major Partners",         accent:"#7C3AED",
-  desc:"Companies and institutions committing real resources, not encouragement.",
+ {k:"partners",  name:"Major Partners",         accent:"#7C3AED", owner:"brad",
+  desc:"Companies and institutions committing real resources, not encouragement. Brad holds the relationships and answers for the pillar; Kevin owns the pipeline behind it.",
+  bar:"A partnership secured, or real enthusiasm from the partner.",
   rubric:{
-   regression:["A partner withdraws, pauses, or lets an agreement lapse.",
-               "A live partnership conversation dies.",
-               "A committed partner quietly stops delivering."],
+   regression:["A partner withdrew, paused, or let an agreement lapse.",
+               "A live partnership conversation died.",
+               "A committed partner quietly stopped delivering."],
    none:      ["No new prospects identified.",
                "No outreach went out.",
                "Conversations sat where they were."],
@@ -290,12 +475,13 @@ const PILLARS=[
    big:       ["Real enthusiasm from the partner.",
                "A partnership secured."]}},
 
- {k:"programs",  name:"Elite Programs",         accent:"#0369A1",
+ {k:"programs",  name:"Elite Programs",         accent:"#0369A1", owner:"kevin",
   desc:"Programs good enough that people seek them out.",
+  bar:"A new program partner, or a new donor to the program.",
   rubric:{
-   regression:["A program partner drops out.",
-               "Program funding lapses or is cut.",
-               "A compliance item slips past its deadline."],
+   regression:["A program partner dropped out.",
+               "Program funding lapsed or was cut.",
+               "A compliance item slipped past its deadline."],
    none:      ["Materials untouched.",
                "No follow-up with program partners.",
                "No compliance item cleared."],
@@ -305,65 +491,92 @@ const PILLARS=[
    big:       ["A new program partner.",
                "A new donor to the program."]}},
 
- {k:"public",    name:"Public Engagement",      accent:"#DB2777",
+ {k:"public",    name:"Public Engagement",      accent:"#DB2777", owner:"krysta",
   desc:"People who've heard us and then did something.",
+  bar:"An organic post past 50,000 views, or top-tier media picking us up.",
   rubric:{
-   regression:["Reach falls off — a channel goes quiet or declines.",
-               "A post lands badly and costs us goodwill.",
-               "Engaged people drop away faster than they arrive."],
+   regression:["Reach fell off — a channel went quiet or declined.",
+               "A post landed badly and cost us goodwill.",
+               "Engaged people dropped away faster than they arrived."],
    none:      ["Nothing shipped.",
                "Posts went out but none moved above baseline.",
                "No new coverage, no new engaged people."],
    little:    ["Posts shipped and performed above our normal baseline.",
                "A piece of earned coverage.",
-               "New people took a real step — volunteering, or telling us their understanding changed."],
+               "New people took a real step — volunteering, or telling us their understanding changed."],
    big:       ["An organic social post past 50,000 organic views.",
-               "Top-tier media pick us up."]}},
+               "Top-tier media picked us up."]}},
 
- {k:"shop",      name:"Shop Blind Performance", accent:"#16a34a",
+ {k:"shop",      name:"Shop Blind Performance", accent:"#16a34a", owner:"krysta",
   desc:"The commercial engine that pays for everything else.",
+  bar:"A structural improvement in conversion, contribution or repeat rate that should hold.",
   rubric:{
-   regression:["The week came in below the same week last year.",
+   // Anchored on internals the WBR produces every week (conversion, contribution
+   // after ads and shipping, repeat rate) rather than only on a year-over-year
+   // number this org has already had three arguments about. A week can beat last
+   // year and still be a regression, and the week ending 2026-08-09 was exactly
+   // that: revenue on target, conversion down 24.9%, Meta cost-per-purchase up 48%.
+   regression:["Conversion, contribution or repeat rate went backwards on the week.",
                "Contribution after ads and shipping went negative.",
-               "We only hit the number by cutting ads or quality in a way that will cost us later."],
-   none:      ["Flat against last year — inside the noise.",
+               "The week came in below the same week last year.",
+               "We only hit the number by cutting ads or quality in a way that will cost us later."],
+   none:      ["Flat on the internals — inside the noise.",
                "Nothing shipped, nothing tested, nothing learned."],
-   little:    ["Beat the same week last year.",
-               "Contribution improved on the week.",
+   little:    ["Conversion, contribution or repeat rate improved on the week.",
+               "Beat the same week last year.",
                "A test ran and gave us a real answer."],
-   big:       ["Beat last year decisively, not by a rounding error.",
-               "A structural improvement — margin, MER, or repeat rate — that should hold beyond this week.",
-               "A launch that lands."]}},
+   big:       ["A structural improvement — margin, MER, conversion or repeat rate — that should hold beyond this week.",
+               "Beat last year decisively, not by a rounding error.",
+               "A launch that landed."]}},
 
- {k:"campaigns", name:"Winning Campaigns",      accent:"#EA580C",
+ {k:"campaigns", name:"Winning Campaigns",      accent:"#EA580C", owner:"krysta",
   desc:"Campaigns that land and hold, not ones that merely shipped.",
+  bar:"250K+ impressions at neutral-or-better margin, or a campaign that scores well AFTER launch.",
   rubric:{
-   regression:["A campaign underperforms badly enough to pull.",
-               "Post-launch scoring drops one we'd counted as working.",
-               "A campaign burns margin without buying reach."],
+   regression:["A campaign underperformed badly enough to pull.",
+               "Post-launch scoring dropped one we'd counted as working.",
+               "A campaign burned margin without buying reach."],
    none:      ["Nothing new in development.",
                "Nothing scored, nothing launched."],
    little:    ["New campaign ideas generated.",
                "A campaign passed the pre-launch scorecard.",
                "A campaign moved into development, or launched."],
-   big:       ["A campaign clears 250K+ impressions at neutral-or-better margin — the standing definition of a winning campaign.",
-               "A campaign scores well AFTER launch, not just before."]}}
+   big:       ["A campaign cleared 250K+ impressions at neutral-or-better margin — the standing definition of a winning campaign.",
+               "A campaign scored well AFTER launch, not just before."]}}
 ];
+const PILLAR=Object.fromEntries(PILLARS.map(p=>[p.k,p]));
 
-// Ordered worst → best, which is also how they're drawn.
+// Ordered worst → best, which is also how they're drawn. `fl` is the label the
+// same state carries on the #1 priority, where the question is "did the one thing
+// land", not "how did the pillar move". `gl` is a text glyph so the momentum grid
+// is readable without colour — on a projector, in greyscale, and by a screen
+// reader, which for this organisation is not an optional consideration.
 const STATES=[
- {k:"regression", label:"Regression",        color:"var(--s-reg)",    hex:"#dc2626"},
- {k:"none",       label:"No progress",       color:"var(--s-none)",   hex:"#94a3b8"},
- {k:"little",     label:"A little progress", color:"var(--s-little)", hex:"#0891B2"},
- {k:"big",        label:"Big win",           color:"var(--s-big)",    hex:"#16a34a"}
+ {k:"regression", label:"Went backwards",    fl:"Went backwards", gl:"▼", hex:"#dc2626"},
+ {k:"none",       label:"No progress",       fl:"Not done",       gl:"–", hex:"#7c8798"},
+ {k:"little",     label:"A little progress", fl:"Partly done",    gl:"▲", hex:"#0e7490"},
+ {k:"big",        label:"Big win",           fl:"Done",           gl:"★", hex:"#15803d"}
 ];
 const STATE=Object.fromEntries(STATES.map(s=>[s.k,s]));
+function isState(s){ return Object.prototype.hasOwnProperty.call(STATE,String(s||"").trim().toLowerCase()); }
+// "This row exists" is not the same as "this row is a real read". A hand-edited
+// sheet can hold a blank or misspelled state, and counting that as logged tells
+// someone they are done when two of their pillars were never read.
+function logged(week,k){ const e=entry(week,k); return !!(e&&isState(e.state)); }
 
-// PROG[week][pillar] = {state,note,priority,who,when}
+// PROG[week][pillar] = {state,note,priority,who,when} — SAVED data only. Nothing
+// unsaved is ever written here, because everything else on the page reads it and
+// a phantom entry would show up in the momentum grid and the history table as a
+// fact. Unsaved edits live in DRAFT and nowhere else.
 let PROG={};
+let DRAFT={};           // DRAFT[pillar] = {state,note,priority,who} for the CURRENT week only
 let VIEW=null;          // ISO week being viewed
-let LOADED=false;
+let READ_OK=false;      // did the sheet load? writes are blocked until it has
+let FEDIT=false;        // is the #1's editor open? (NOT the same as "has unsaved changes")
+let OPEN_OPT={};        // which cards have the optional per-pillar priority open
+let MOMW=null;          // the week the momentum grid was last scrolled for
 const DIRTY=new Set();
+const SAVING=new Set(); // in-flight writes, so a double-click can't fire twice
 
 /* ---------- dates: weeks are the week-ENDING Sunday, same anchor as the sheet ---------- */
 const p2=n=>String(n).padStart(2,"0");
@@ -372,72 +585,134 @@ function weekEnd(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
 function fromIso(s){ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||"").trim()); return m?new Date(+m[1],+m[2]-1,+m[3]):null; }
 function shiftWeeks(isoStr,n){ const d=fromIso(isoStr); if(!d) return isoStr; d.setDate(d.getDate()+7*n); return iso(d); }
 function thisWeek(){ return iso(weekEnd(new Date())); }
+// THE WEEK BEING LOGGED. On Monday, and on Tuesday before the meeting, the week
+// people are reading is the one that just ENDED — that is what the meeting
+// reviews. Landing on the calendar-current week on those two days is how the
+// first grading meeting opens on an empty band reading "nobody named the one
+// thing", which is exactly wrong and exactly when it would be seen.
+function reviewWeek(){
+  const now=new Date(), dow=now.getDay(), w=thisWeek();
+  if(dow===1 || (dow===MEET_DOW && now.getHours()<MEET_HOUR)) return shiftWeeks(w,-1);
+  return w;
+}
 const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 function label(isoStr){ const d=fromIso(isoStr); return d?MO[d.getMonth()]+" "+d.getDate():isoStr; }
 function longLabel(isoStr){ const d=fromIso(isoStr); return d?MO[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear():isoStr; }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function daysToMeeting(){
+  const now=new Date(), d=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  let add=(MEET_DOW-d.getDay()+7)%7;
+  if(add===0&&now.getHours()>=MEET_HOUR) add=7;
+  return add;
+}
 
 /* ---------- identity ----------
-   No passcode. Saving used to need the team passcode; it was friction that cost
-   more than it bought for a weekly progress read, so writes are open as of
-   2026-08-11 and the Apps Script gate is off (REQUIRE_PASS there). A stored
-   passcode from the old dashboard is still sent if a browser happens to have
-   one — the server ignores it now, and putting the gate back is one flag. */
+   Writes are open — no passcode (2026-08-11, Brad's call; the Apps Script gate is
+   off via REQUIRE_PASS and putting it back is one flag). A stored passcode from
+   the old dashboard is still sent if a browser happens to have one; the server
+   ignores it.
+
+   Identity is a one-click pick from the roster rather than a text field: a typo
+   ("Kryssta") silently detaches a save from its owner and nobody proofreads their
+   own name. It is held in a variable, seeded once, NOT re-read from localStorage
+   on every save — another tab signing in as someone else used to silently
+   re-attribute the saves in this one while the address bar still said ?who=you. */
 const PASS_KEY="tbb_write_pass", WHO_KEY="tbb_who";
+let WHO="";
 function getPass(){ try{ return localStorage.getItem(PASS_KEY)||""; }catch(e){ return ""; } }
-function getWho(){ try{ return localStorage.getItem(WHO_KEY)||URL_WHO||""; }catch(e){ return URL_WHO||""; } }
-function setWho(v){ try{ v?localStorage.setItem(WHO_KEY,v):localStorage.removeItem(WHO_KEY); }catch(e){} render(); }
-const URL_WHO=(function(){ try{ return (new URLSearchParams(location.search).get("who")||"").trim().toLowerCase(); }catch(e){ return ""; } })();
-// Following your personal link once puts your name on your saves from then on.
-if(URL_WHO){ try{ if(!localStorage.getItem(WHO_KEY)) localStorage.setItem(WHO_KEY,URL_WHO); }catch(e){} }
+function getWho(){ return WHO; }
+function setWho(v){
+  WHO=String(v||"").trim().toLowerCase();
+  try{ WHO?localStorage.setItem(WHO_KEY,WHO):localStorage.removeItem(WHO_KEY); }catch(e){}
+  render();
+  const p=ownedBy(WHO)[0];
+  if(p) jumpTo(p.k);
+}
+function ownedBy(who){ return who?PILLARS.filter(p=>p.owner===who):[]; }
+(function bootWho(){
+  let u="";
+  try{ u=(new URLSearchParams(location.search).get("who")||"").trim().toLowerCase(); }catch(e){}
+  if(u&&Object.prototype.hasOwnProperty.call(PERSON,u)){ WHO=u; try{ localStorage.setItem(WHO_KEY,u); }catch(e){} return; }
+  try{ WHO=(localStorage.getItem(WHO_KEY)||"").trim().toLowerCase(); }catch(e){ WHO=""; }
+})();
 
 /* ---------- reading the sheet (gviz JSONP — public read, no passcode) ---------- */
 function gvDate(v){
   if(v instanceof Date) return v;
   const m=/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?/.exec(String(v||""));
   if(m) return new Date(+m[1],+m[2],+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));
-  const d=new Date(v); return isNaN(d)?null:d;
+  return null;
 }
-// A week cell should be text ("2026-08-16"), but a sheet that got reformatted by
-// hand will hand back a real date. Accept both rather than silently dropping rows.
-function cellWeek(v){
+// A week cell should be text ("2026-08-16"), but a sheet reformatted by hand will
+// hand back a real date, so both are accepted. Nothing else is: a free-text
+// header like "week of Aug 16" used to be parsed by `new Date()` into the year
+// 2001, which filed the row somewhere nobody would ever look.
+let BAD_WEEKS=0;
+function cellWeek(v,tally){
   if(v==null) return "";
   const s=String(v).trim();
   if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  const d=gvDate(v); return d?iso(weekEnd(d)):"";
+  const d=gvDate(v);
+  if(d) return iso(weekEnd(d));
+  if(s&&tally) tally.bad++;
+  return "";
 }
+// Each call gets its OWN callback name. A single shared global meant a slow
+// response could be delivered to a LATER call's handler, and a response arriving
+// after the timeout could replace PROG behind the page's back — leaving the
+// screen showing one week's data and memory holding another's.
+let GVSEQ=0;
 function loadProgress(cb){
-  window.__gvProg=function(res){
+  const name="__gvProg"+(++GVSEQ);
+  let settled=false;
+  const finish=(e,out)=>{
+    if(settled) return; settled=true;
+    try{ delete window[name]; }catch(_){ window[name]=undefined; }
+    if(!e&&out){ PROG=out.rows; BAD_WEEKS=out.bad; }   // only ever inside the guard
+    cb(e);
+  };
+  window[name]=function(res){
     try{
-      if(!res||res.status==="error"){ cb(new Error((res&&res.errors&&res.errors[0]&&res.errors[0].detailed_message)||"gviz error")); return; }
+      if(!res||res.status==="error"){ finish(new Error((res&&res.errors&&res.errors[0]&&res.errors[0].detailed_message)||"gviz error")); return; }
       const cols=(res.table.cols||[]).map(c=>String(c.label||"").trim().toLowerCase());
       const at=n=>{ const i=cols.indexOf(n); return i<0?null:i; };
       const iW=at("week"),iP=at("pillar"),iS=at("state"),iN=at("note"),iR=at("priority"),iO=at("who"),iT=at("when");
-      if(iW==null||iP==null||iS==null){ cb(new Error("Progress tab is missing week/pillar/state columns")); return; }
-      const out={};
+      if(iW==null||iP==null||iS==null){ finish(new Error("Progress tab is missing week/pillar/state columns")); return; }
+      const rows={}, tally={bad:0};
       for(const r of (res.table.rows||[])){
         const g=i=>(i==null||!r.c||!r.c[i])?null:r.c[i].v;
-        const wk=cellWeek(g(iW)), pl=String(g(iP)||"").trim();
+        const wk=cellWeek(g(iW),tally), pl=String(g(iP)||"").trim();
         if(!wk||!pl) continue;
-        (out[wk]=out[wk]||{})[pl]={
+        rows[wk]=rows[wk]||{};
+        // FIRST row wins, because saveProgress_ upserts into the FIRST matching
+        // row. If the tab ever acquires a duplicate (week,pillar) pair, reader and
+        // writer must agree which one is real — otherwise every later save lands
+        // in a row nobody displays. This is the v6 incident, avoided.
+        if(rows[wk][pl]) continue;
+        rows[wk][pl]={
           state:String(g(iS)||"").trim().toLowerCase(),
           note:String(g(iN)==null?"":g(iN)),
           priority:String(g(iR)==null?"":g(iR)),
-          who:String(g(iO)==null?"":g(iO)),
+          who:String(g(iO)==null?"":g(iO)).trim().toLowerCase(),
           when:gvDate(g(iT))
         };
       }
-      PROG=out; cb(null);
-    }catch(e){ cb(e); }
+      finish(null,{rows,bad:tally.bad});
+    }catch(e){ finish(e); }
   };
   const s=document.createElement("script");
-  s.onerror=()=>cb(new Error("network"));
-  s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:__gvProg&sheet="+encodeURIComponent(PROG_TAB)+"&headers=1&_="+Date.now();
+  s.onerror=()=>finish(new Error("network"));
+  s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:"+name+
+        "&sheet="+encodeURIComponent(PROG_TAB)+"&headers=1&_="+Date.now();
   document.head.appendChild(s);
+  // A revoked share serves an HTML sign-in page with status 200, which parses as
+  // script, throws, and fires no error event — so without this the page would sit
+  // on "Loading…" forever with a live, destructive form underneath it.
+  setTimeout(()=>finish(new Error("timed out reading the Sheet")),20000);
 }
 
 /* ---------- writing (JSONP to the Apps Script) ---------- */
-function jsonp(url){
+function jsonp(url,ms){
   return new Promise((resolve,reject)=>{
     const cb="__cb"+Math.random().toString(36).slice(2);
     let s=document.createElement("script");
@@ -446,239 +721,839 @@ function jsonp(url){
     s.onerror=()=>{ reject(new Error("network")); done(); };
     s.src=url+(url.indexOf("?")>=0?"&":"?")+"callback="+cb+"&_="+Date.now();
     document.head.appendChild(s);
-    setTimeout(()=>{ if(window[cb]){ reject(new Error("timeout")); done(); } },15000);
+    // Apps Script cold start plus LockService.waitLock(10s) can genuinely run
+    // long. A short timeout reports "not saved" for saves that landed.
+    setTimeout(()=>{ if(window[cb]){ reject(new Error("timeout")); done(); } },ms||30000);
   });
+}
+// TRANSPORT, and why there are two of them.
+//
+// Every write used to go out as a <script> tag (JSONP). That fails outright in a
+// browser signed into more than one Google account: script.google.com answers the
+// /macros/s/<id>/exec URL with a 503 and a redirect to /macros/u/1/s/<id>/exec,
+// and a script tag does not survive it. The gviz READ to docs.google.com follows
+// the same redirect happily — which is why the page looked completely healthy
+// right up until Save, and then blamed the user's wifi. Brad's Chrome has three
+// Google accounts on it and the team's will too, so this was every save, for
+// everyone, forever.
+//
+// fetch() follows the redirect and comes back 200 with the right body, so it is
+// the primary path now. The response is still JSONP-wrapped (`cb({...})`) because
+// doGet always wraps, so the wrapper is stripped before parsing. JSONP stays as
+// the fallback for anything that blocks fetch — it works fine on a single-account
+// browser, and having two paths is cheaper than being wrong about which one a
+// given machine allows.
+function callApi(qs){
+  const url=APPS_URL+"?"+qs;
+  return fetch(url,{method:"GET",redirect:"follow",credentials:"omit"})
+    .then(r=>{ if(!r.ok) throw new Error("http "+r.status); return r.text(); })
+    .then(t=>{
+      const m=/^[^(]*\(([\s\S]*)\)\s*;?\s*$/.exec(String(t).trim());
+      const body=m?m[1]:t;
+      const j=JSON.parse(body);
+      if(!j||typeof j!=="object") throw new Error("bad response");
+      return j;
+    })
+    .catch(()=>jsonp(url));     // one retry, on the other transport
+}
+function writeProgress(week,pillar,state,note,priority,who){
+  return callApi("fn=progress"+
+    "&week="+encodeURIComponent(week)+
+    "&pillar="+encodeURIComponent(pillar)+
+    "&state="+encodeURIComponent(state)+
+    "&note="+encodeURIComponent(note)+
+    "&priority="+encodeURIComponent(priority)+
+    "&who="+encodeURIComponent(who)+
+    "&pass="+encodeURIComponent(getPass()));
 }
 
 /* ---------- state helpers ---------- */
 function entry(week,pillar){ return (PROG[week]||{})[pillar]||null; }
+// The value a form should show: an unsaved edit if there is one, otherwise what
+// the sheet holds. Nothing else merges these two, so nothing else can confuse
+// "typed" with "saved".
+function cur(k){ return Object.assign({state:"",note:"",priority:"",who:""},entry(VIEW,k)||{},DRAFT[k]||{}); }
 function el(id){ return document.getElementById(id); }
-function setStatus(msg,kind){ const e=el("status"); e.className="status"+(kind?" "+kind:""); e.innerHTML=msg; }
+let LAST_STATUS=null;
+function setStatus(msg,kind){
+  const e=el("status"); if(!e) return;
+  const key=(kind||"")+"|"+(msg||"");
+  if(key===LAST_STATUS) return;             // live regions must not re-announce unchanged text
+  LAST_STATUS=key;
+  e.className="status"+(kind?" "+kind:"");
+  e.setAttribute("role",kind==="bad"?"alert":"status");
+  e.innerHTML=msg||"";
+}
+
+/* ---------- capturing unsaved edits before any re-render ----------
+   Every render rebuilds the cards from scratch, which would otherwise wipe
+   whatever someone had typed in a card they hadn't saved yet. */
+function capture(){
+  for(const k of Array.from(DIRTY)){
+    const d=DRAFT[k]||(DRAFT[k]={});
+    if(k===FOCUS){
+      if(el("fnote")) d.note=el("fnote").value;
+      if(el("fpri"))  d.priority=el("fpri").value;
+    }else{
+      if(el("note_"+k)) d.note=el("note_"+k).value;
+      if(el("pri_"+k))  d.priority=el("pri_"+k).value;
+      const r=document.querySelector('input[name="st_'+k+'"]:checked');
+      if(r) d.state=r.value;
+    }
+  }
+}
+// Mutate a draft the right way round: capture what is on screen FIRST, then apply
+// the change, then render without re-capturing. Doing it the other way meant a
+// deliberate change (picking a level from the rubric) was immediately overwritten
+// by the stale radio still sitting in the DOM.
+function applyDraft(k,patch){
+  capture();
+  DRAFT[k]=Object.assign({},DRAFT[k],patch);
+  DIRTY.add(k);
+  render(true);
+}
+function clearDrafts(){ DIRTY.clear(); DRAFT={}; FEDIT=false; }
+// Does this key hold an edit that actually differs from the sheet? Typing a
+// character and deleting it again leaves the key in DIRTY, which used to nag on
+// every week change about work that no longer exists.
+function changed(k){
+  const d=DRAFT[k]; if(!d) return false;
+  const s=entry(VIEW,k)||{state:"",note:"",priority:"",who:""};
+  return ["state","note","priority","who"].some(f=>d[f]!=null&&d[f]!==(s[f]||""));
+}
+// Disabling a button blurs it, and the blur happens before the network call
+// resolves — so by the time render() looks for something to restore focus to,
+// document.activeElement is already <body>. Stash it first.
+let SAVE_FOCUS_ID=null;
+function stashFocus(){ const a=document.activeElement; SAVE_FOCUS_ID=(a&&a.id)?a.id:null; }
+function popFocus(){
+  const id=SAVE_FOCUS_ID; SAVE_FOCUS_ID=null;
+  if(!id) return;
+  const n=el(id); if(n) try{ n.focus({preventScroll:true}); }catch(e){}
+}
 
 /* ---------- render ---------- */
-function render(){
-  renderWeekBar(); renderTally(); renderMomentum(); renderCards();
+function render(alreadyCaptured){
+  if(!alreadyCaptured) capture();
+  const a=document.activeElement;
+  const R=(a&&a.id)?{id:a.id,s:(typeof a.selectionStart==="number"?a.selectionStart:null),
+                     e:(typeof a.selectionEnd==="number"?a.selectionEnd:null)}:null;
+  renderAsk(); renderWeekBar(); renderWho(); renderFocus(); renderWaiting();
+  renderCards(); renderTally(); renderMomentum(); renderHistory();
+  el("exempt").innerHTML=EXEMPT;
+  if(R){
+    const n=el(R.id);
+    if(n){ try{ n.focus({preventScroll:true});
+      if(R.s!=null&&n.setSelectionRange) n.setSelectionRange(R.s,R.e); }catch(e){} }
+  }
 }
 
-function renderWeekBar(){
-  const now=thisWeek();
-  el("wlabel").innerHTML="Week ending "+esc(longLabel(VIEW))+
-    '<span class="wsub">'+(VIEW===now?"the week we're in":(VIEW<now?"a past week — you can still log it":"a future week"))+"</span>";
-  el("wnext").disabled = VIEW>=now;
-  el("wtoday").hidden  = VIEW===now;
-  const logged=PILLARS.filter(p=>entry(VIEW,p.k)).length;
-  el("wcount").innerHTML="<b>"+logged+"</b> of "+PILLARS.length+" pillars logged this week";
-  const w=el("whoin"); if(document.activeElement!==w) w.value=getWho();
+/* ---------- the ask ----------
+   The first thing on the page answers three questions with no prose: what am I
+   being asked for, how much of it is left, and by when. It only speaks about the
+   week actually being logged — nagging someone about a week that closed in June,
+   or one that hasn't started, is how a page teaches people to ignore it. */
+function renderAsk(){
+  const box=el("ask"), who=getWho(), owned=ownedBy(who), d=daysToMeeting();
+  if(VIEW!==reviewWeek()){
+    box.className="ask";
+    box.innerHTML=`<div class="big">${VIEW>thisWeek()?"That week hasn't happened yet."
+      :VIEW>reviewWeek()?"That week is still running — it gets logged once it ends."
+      :"You're looking at a past week."}</div>`+
+      `<div class="by">You can still read or correct it. <button class="optbtn" onclick="goToday()">Back to the week we're logging →</button></div>`;
+    return;
+  }
+  const by=`<div class="by">Before <b>${MEET_NAME}</b> — ${d===0?"today":d===1?"tomorrow":"in "+d+" days"}.</div>`;
+  if(!who){
+    box.className="ask";
+    box.innerHTML='<div class="big">Pick your name to see what you owe.</div>'+
+      '<div class="by">One tap, and it puts your name on your saves.</div>'+
+      '<button class="askgo" onclick="focusWhoBar()">Pick your name</button>';
+    return;
+  }
+  if(!owned.length){
+    box.className="ask ok";
+    box.innerHTML=`<div class="big">${esc(personName(who))} — you don't own a pillar, so nothing here is owed by you.</div>`+
+      `<div class="by">You can still read the week and grade the #1.</div>`;
+    return;
+  }
+  const left=owned.filter(p=>!logged(VIEW,p.k));
+  if(!left.length){
+    box.className="ask ok";
+    box.innerHTML=`<div class="big">${esc(personName(who))} — all ${owned.length} of your pillars are logged. Nothing left.</div>`;
+    return;
+  }
+  box.className="ask"+(d<=1?" bad":d<=2?" warn":"");
+  box.innerHTML=`<div class="big">${esc(personName(who))} — ${left.length} of your ${owned.length} `+
+    `pillar${owned.length>1?"s":""} still need${left.length===1?"s":""} a read: `+
+    `${left.map(p=>esc(p.name)).join(", ")}.</div>`+by+
+    `<button class="askgo" onclick="jumpTo('${left[0].k}')">Start with ${esc(left[0].name)} ↓</button>`;
 }
-function stepWeek(n){ if(!guardDirty()) return; VIEW=shiftWeeks(VIEW,n); render(); }
-function goToday(){ if(!guardDirty()) return; VIEW=thisWeek(); render(); }
+// Scroll, THEN focus. focus({preventScroll:true}) cancels an in-flight smooth
+// scroll, which made the page's own primary call-to-action do nothing at all.
+// Scroll INSTANTLY, then focus. Smooth scrolling raced a hard-coded timer and
+// lost on any tall page: focus landed on a control 1,400-3,900px off-screen while
+// the page never moved, so the primary call-to-action did visibly nothing.
+function jumpTo(k){
+  const c=el("card_"+k); if(!c) return;
+  c.scrollIntoView({block:"start",behavior:"auto"});
+  const r=document.querySelector('input[name="st_'+k+'"]'); if(r) r.focus({preventScroll:true});
+  flash(c);
+}
+// `soft` = we just wrote an explanation next to the button the user pressed, so
+// do NOT drag them away from it. Point at the name chips instead, and only scroll
+// if they are genuinely off screen. (Scrolling away from your own error message
+// is how the message goes unread and the button still looks broken.)
+function focusWhoBar(soft){
+  const bar=el("whobar"); if(!bar) return;
+  const r=bar.getBoundingClientRect();
+  const visible=r.top>=0&&r.bottom<=(window.innerHeight||document.documentElement.clientHeight);
+  if(!visible&&!soft) bar.scrollIntoView({block:"center",behavior:"auto"});
+  if(!soft){ const b=bar.querySelector(".chipbtn"); if(b) b.focus({preventScroll:true}); }
+  flash(bar);   // the bar is often already on screen, so scrolling alone is no feedback at all
+}
+function flash(n){ if(!n) return; n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
+  setTimeout(()=>n.classList.remove("flash"),1400); }
+
+function renderWeekBar(){
+  const rw=reviewWeek();
+  const tw=thisWeek();
+  el("wlabel").innerHTML="Week ending "+esc(longLabel(VIEW))+
+    '<span class="wsub">'+(VIEW===rw?"the week we're logging"
+                          :VIEW>tw?"a future week"
+                          :VIEW===tw?"the week we're in — logged after it ends"
+                          :"a past week — you can still log it")+"</span>";
+  el("wnext").disabled = VIEW>=thisWeek();
+  el("wtoday").hidden  = VIEW===rw;
+}
+
+function renderWho(){
+  const who=getWho();
+  let h='<span class="wholab" id="wholab">You are</span>'+
+    PEOPLE.map(p=>{
+      const n=ownedBy(p.k).length;
+      return `<button class="chipbtn${p.k===who?" on":""}" id="who_${p.k}" onclick="setWho('${p.k}')"
+        title="${esc(p.name)} — ${esc(p.role)}${n?" · owns "+n+" pillar"+(n>1?"s":""):" · owns no pillar"}"
+        aria-pressed="${p.k===who}">${esc(p.name)}</button>`;
+    }).join("");
+  if(who) h+=`<button class="chipbtn ghost" id="who_none" onclick="setWho('')" title="Clear your name from this browser">not me</button>`;
+  el("whobar").innerHTML=h;
+}
+
+function stepWeek(n){ if(!guardDirty()) return; VIEW=shiftWeeks(VIEW,n); afterWeekChange(); }
+function goToday(){ if(!guardDirty()) return; VIEW=reviewWeek(); afterWeekChange(); }
+function jumpWeek(w){ if(!guardDirty()) return; VIEW=w; afterWeekChange(); }
+// A "Saved …" banner naming last week is worse than no banner at all.
+function afterWeekChange(){ setStatus("",""); OPEN_OPT={}; render(); }
+// Drafts belong to the week they were typed in. Leaving the week discards them —
+// and CLEARS them, so an abandoned edit can't follow you around forcing "unsaved
+// changes" prompts on weeks you never touched.
 function guardDirty(){
+  capture();
+  for(const k of Array.from(DIRTY)) if(!changed(k)){ DIRTY.delete(k); delete DRAFT[k]; }
   if(!DIRTY.size) return true;
-  return confirm("You have unsaved changes on "+DIRTY.size+" pillar"+(DIRTY.size>1?"s":"")+". Leave them unsaved?");
+  const names=Array.from(DIRTY).map(k=>k===FOCUS?"the #1 priority":(PILLAR[k]?PILLAR[k].name:k));
+  if(!confirm("Discard your unsaved answer for "+names.join(", ")+"?")) return false;
+  clearDrafts(); return true;
+}
+
+/* ---------- the #1 priority ----------
+   Same shape as a pillar card, deliberately: the priority written on week W is
+   the one thing to land BEFORE the end of week W+1, and the state written on
+   week W+1 grades it. So the band shows two different weeks' rows at once —
+   prev.priority is what you're being asked about, cur.state is your answer. */
+function focusChanged(){
+  const c=DRAFT[FOCUS]; if(!c) return false;
+  const s=entry(VIEW,FOCUS)||{state:"",note:"",priority:""};
+  return (c.state!=null&&c.state!==(s.state||""))
+      || (c.note!=null&&c.note!==(s.note||""))
+      || (c.priority!=null&&c.priority!==(s.priority||""))
+      || (c.who!=null&&c.who!==(s.who||""));
+}
+function renderFocus(){
+  const prevW=shiftWeeks(VIEW,-1);
+  const prev=entry(prevW,FOCUS), c=cur(FOCUS);
+  const target=prev&&prev.priority?prev.priority:"";
+  const owner=prev&&prev.who?prev.who:"";
+  const saved=entry(VIEW,FOCUS);
+  const savedSt=saved&&isState(saved.state)?STATE[saved.state]:null;
+  const draftSt=isState(c.state)?STATE[c.state]:null;
+  const changed=focusChanged();
+
+  let h='<h2 class="flab" id="focuslab">'+(VIEW===reviewWeek()?"This week's #1 · due Sunday "+esc(label(VIEW))
+                                                 :"The #1 for the week ending "+esc(longLabel(VIEW)))+'</h2>';
+  if(target){
+    h+=`<div class="ftext">${esc(target)}</div>`;
+    h+=`<div class="fmeta">${owner?"<b>"+esc(personName(owner))+"</b> owns this · ":""}set ${esc(label(prevW))}.`+
+       `${owner?` ${esc(personName(owner))} grades it at the ${MEET_NAME} meeting.`:""}</div>`;
+  }else{
+    h+=`<div class="ftext none">No #1 was set for this week.</div>`;
+    h+=`<div class="fmeta">You can still name it, for the record.</div>`;
+  }
+
+  if(target){
+    h+='<div class="fgrade" role="group" aria-label="Did the #1 priority land?">'+
+      STATES.slice().reverse().map(s=>
+        `<button class="gbtn${c.state===s.k?" on":""}" id="g_${s.k}" data-s="${s.k}" onclick="pickFocus('${s.k}')"
+           aria-pressed="${c.state===s.k}">${esc(s.fl)}</button>`).join("")+
+      '</div>';
+    // Only a row that is actually in the sheet gets the "recorded" panel.
+    if(savedSt&&!changed){
+      h+=`<div class="fresult"><b>${esc(savedSt.fl)}</b> — ${esc(saved.note||"no sentence recorded")}</div>`;
+    }else if(draftSt&&changed){
+      h+=`<div class="fresult" style="border:1px dashed rgba(255,255,255,.6)"><b>${esc(draftSt.fl)}</b> — not saved yet.</div>`;
+    }
+  }
+
+  const open=FEDIT||changed||!target;
+  // The owner of the NEXT #1 defaults to whoever is signed in — NOT to whoever
+  // owned the last one. Inheriting it meant Brad could type a brand-new priority,
+  // never touch these chips, and have it land in the sheet owned by Kevin.
+  const ownDefault=c.who||(saved&&saved.priority?saved.who:"")||getWho();
+  h+=`<div class="fedit${open?" open":""}" id="fedit">
+    ${target?`<div class="field">
+      <label class="fl" for="fnote">What happened to it — one sentence <span class="req" title="required">*</span></label>
+      <textarea id="fnote" maxlength="400" oninput="onFocusEdit()" aria-describedby="fhint" aria-required="true"
+        placeholder="Landed, stalled, or overtaken by something — say which.">${esc(c.note||"")}</textarea>
+    </div>`:""}
+    <div class="field">
+      <label class="fl" for="fpri">The one thing to land by Sunday ${esc(label(shiftWeeks(VIEW,1)))}</label>
+      <input class="ptxt" id="fpri" maxlength="400" oninput="onFocusEdit()" aria-describedby="fhint"
+        value="${esc(c.priority||"")}"
+        placeholder="One sentence. Specific enough that next Tuesday it is obviously done or obviously not.">
+    </div>
+    <div class="field">
+      <span class="fl" id="ownlab">Who owns it</span>
+      <div class="ownpick" role="group" aria-labelledby="ownlab">
+        ${PEOPLE.map(p=>`<button class="obtn${ownDefault===p.k?" on":""}" id="own_${p.k}" onclick="pickFocusOwner('${p.k}')"
+            aria-pressed="${ownDefault===p.k}">${esc(p.name)}</button>`).join("")}
+      </div>
+      <div class="hint" id="fhint"></div>
+    </div>
+    <div class="prow">
+      <button class="save" id="fbtn" onclick="saveFocus()">Save the #1</button>
+      <span class="fstat" id="fstat" role="status" aria-live="polite"></span>
+      ${target?'<button class="flink" id="fdiscard" onclick="discardFocus()">Discard</button>':""}
+    </div>
+  </div>`;
+  if(target&&!open) h+=`<div style="margin-top:6px"><button class="flink" id="fopen" onclick="openFocusEdit()">Set next week's #1 →</button></div>`;
+
+  el("focus").innerHTML=h;
+}
+// Opening the editor is not the same as changing something. Marking it dirty on
+// open made a saved, graded week render as "not saved yet" and armed two false
+// data-loss warnings.
+function openFocusEdit(){ FEDIT=true; render(); const i=el("fpri"); if(i) i.focus(); }
+// capture() FIRST. onFocusEdit only flags the row dirty — it never copies the
+// typed values into DRAFT — so without this, focusChanged() reads false and the
+// button literally labelled Discard is the one control on the page that destroys
+// text without asking. Changing weeks warned correctly the whole time, because
+// guardDirty captures first; this didn't.
+function discardFocus(){
+  capture();
+  if((DIRTY.has(FOCUS)||focusChanged())&&!confirm("Discard your unsaved answer for the #1 priority?")) return;
+  DIRTY.delete(FOCUS); delete DRAFT[FOCUS]; FEDIT=false; render();
+}
+function pickFocus(s){
+  applyDraft(FOCUS,{state:s});
+  const n=el("fnote"); if(n&&!n.value.trim()&&fromPointer()) n.focus();
+}
+function pickFocusOwner(k){ applyDraft(FOCUS,{who:k}); }
+function onFocusEdit(){ DIRTY.add(FOCUS); if(!DRAFT[FOCUS]) DRAFT[FOCUS]={}; }
+function focusProblem(){
+  const target=(entry(shiftWeeks(VIEW,-1),FOCUS)||{}).priority||"";
+  const c=cur(FOCUS);
+  const note=el("fnote")?el("fnote").value.trim():"";
+  const pri=el("fpri")?el("fpri").value.trim():"";
+  if(target){
+    if(!isState(c.state)) return {msg:"Pick one of the four buttons above first.",f:null};
+    if(!note)             return {msg:"Add one sentence saying what happened.",f:"fnote"};
+    if(note.length<12)    return {msg:"A few more words — this is the record.",f:"fnote"};
+  }else{
+    if(!pri)              return {msg:"Write the one thing, then save.",f:"fpri"};
+    if(pri.length<12)     return {msg:"A few more words — next Tuesday has to be able to grade it.",f:"fpri"};
+  }
+  return null;
+}
+function saveFocus(){
+  if(SAVING.has(FOCUS)) return;
+  const bad=focusProblem();
+  if(bad){
+    el("fhint").textContent=bad.msg; el("fhint").className="hint bad";
+    if(bad.f){ const n=el(bad.f); if(n){ n.setAttribute("aria-invalid","true"); n.focus(); } }
+    fstat(bad.msg,"err");
+    return;
+  }
+  if(!READ_OK){ fstat("The Sheet hasn't loaded, so saving now could overwrite real entries. Reload first.","err"); return; }
+  const who=getWho(); if(!who){ fstat("Pick your name at the top first — every save records who made it.","err"); focusWhoBar(true); return; }
+  const prevW=shiftWeeks(VIEW,-1), prev=entry(prevW,FOCUS);
+  const target=prev&&prev.priority?prev.priority:"";
+  const saved=entry(VIEW,FOCUS)||{};
+  const c=cur(FOCUS);
+  const pri=el("fpri")?el("fpri").value.trim():"";
+  // `who` on a __focus row names the owner OF THAT ROW'S PRIORITY. A grade-only
+  // save has no priority, so it must not invent an owner for one.
+  const owner=pri?(c.who||who):(saved.who||"");
+  // Never write "none" over a grade that is already in the sheet. Without this,
+  // opening a week whose PREVIOUS week has no priority and pressing save wipes a
+  // real grade and its justification.
+  const state=target?c.state:(isState(saved.state)?saved.state:"none");
+  const note=target?el("fnote").value.trim()
+                   :(saved.note||"No #1 was set for this week, so there was nothing to grade.");
+  // Snapshot every field the write will replace, not just two of them. `priority`
+  // on this row IS next week's #1, and a stale tab used to blank it silently.
+  const before={pri:target,state:saved.state||"",note:saved.note||"",next:saved.priority||"",who:saved.who||""};
+  SAVING.add(FOCUS);
+  stashFocus();
+  const btn=el("fbtn"); if(btn) btn.disabled=true;
+  fstat("Saving…","");
+  loadProgress(err=>{
+    if(err){ SAVING.delete(FOCUS); render(); fstat("Couldn't check for other edits ("+err.message+"). Nothing saved — try again.","err"); return; }
+    const nowPrev=entry(prevW,FOCUS)||{}, nowCur=entry(VIEW,FOCUS)||{};
+    if((nowPrev.priority||"")!==before.pri || (nowCur.state||"")!==before.state ||
+       (nowCur.note||"")!==before.note || (nowCur.priority||"")!==before.next || (nowCur.who||"")!==before.who){
+      SAVING.delete(FOCUS);
+      const btn2=el("fbtn"); if(btn2) btn2.disabled=false;
+      // Drop the stale draft BEFORE rendering. render() calls capture(), which
+      // would copy the now-stale field straight back out of the DOM — so the
+      // "page has been refreshed, save again" instruction would have completed
+      // the exact overwrite this check exists to prevent, one click later.
+      DIRTY.delete(FOCUS); delete DRAFT[FOCUS]; FEDIT=true;
+      render();   // render FIRST, then write the message — render rebuilds #fstat
+      fstat("Someone else changed the #1 while this was open. Nothing was saved, and your copy has been replaced with theirs. Read it, then make your change again.","err");
+      return;
+    }
+    writeProgress(VIEW,FOCUS,state,note,pri,owner).then(r=>{
+      SAVING.delete(FOCUS);
+      if(!r||!r.ok){ render(); fstat("Not saved: "+((r&&r.error)||"unknown error"),"err"); return; }
+      (PROG[VIEW]=PROG[VIEW]||{})[FOCUS]={state,note,priority:pri,who:owner,when:new Date()};
+      // Anything typed WHILE the save was in flight must survive it.
+      const stillNote=el("fnote")?el("fnote").value:note, stillPri=el("fpri")?el("fpri").value:pri;
+      if(stillNote.trim()!==note||stillPri.trim()!==pri){
+        DRAFT[FOCUS]={state,note:stillNote,priority:stillPri,who:owner}; DIRTY.add(FOCUS);
+        render(); fstat("Saved — but you kept typing, so the newer text is still unsaved. Save again.","err"); return;
+      }
+      DIRTY.delete(FOCUS); delete DRAFT[FOCUS]; FEDIT=false;
+      render(); popFocus();
+      setStatus(pri
+        ? "Saved. Next week's #1 is set for the week ending <b>"+esc(longLabel(shiftWeeks(VIEW,1)))+"</b>."
+        : "Saved the #1 for week ending <b>"+esc(longLabel(VIEW))+"</b>.","ok");
+    }).catch(e=>{
+      SAVING.delete(FOCUS); render();
+      fstat(e.message==="timeout"
+        ? "The server didn't answer in time. It MAY have saved — reload the page to check before saving again."
+        : "Not saved ("+e.message+"). Check your connection and try again.","err");
+    });
+  });
+}
+function owner0(prev){ return prev&&prev.who?prev.who:""; }
+function fstat(msg,kind){ const e=el("fstat"); if(!e) return; e.textContent=msg; e.className="fstat"+(kind?" "+kind:""); }
+
+/* ---------- who still owes this week ----------
+   A light redirect, not a leaderboard. Your own count is in the ask at the top of
+   the page; down here it is a plain alphabetical list, because sorting people by
+   how far behind they are points the biggest number at whoever took on the most
+   pillars, every single week. */
+function renderWaiting(){
+  const box=el("waiting");
+  if(VIEW!==reviewWeek()){ box.className="waiting"; box.innerHTML=""; return; }
+  const missing=PILLARS.filter(p=>!logged(VIEW,p.k));
+  if(!missing.length){
+    box.className="waiting done";
+    box.innerHTML='<span class="wl">All six logged</span><span>Every pillar has a read for this week.</span>';
+    return;
+  }
+  const names=Array.from(new Set(missing.map(p=>personName(p.owner)))).sort();
+  box.className="waiting";
+  box.innerHTML='<span class="wl">Not logged yet · week ending '+esc(label(VIEW))+'</span>'+
+    `<span class="names">${esc(missing.map(p=>p.name).join(" · "))}</span>`+
+    `<span class="names" style="margin-left:auto">${esc(names.join(", "))}</span>`;
 }
 
 function renderTally(){
   const counts=Object.fromEntries(STATES.map(s=>[s.k,0]));
-  for(const p of PILLARS){ const e=entry(VIEW,p.k); if(e&&counts[e.state]!=null) counts[e.state]++; }
+  for(const p of PILLARS){ const e=entry(VIEW,p.k); if(e&&isState(e.state)) counts[e.state]++; }
   el("tally").innerHTML=STATES.map(s=>
     `<div class="tcell"><div class="bar" style="background:${s.hex}"></div>
-       <div class="n" style="color:${counts[s.k]?s.hex:"#cbd5e1"}">${counts[s.k]}</div>
+       <div class="n" style="color:${counts[s.k]?s.hex:"#64748b"}">${counts[s.k]}</div>
        <div class="l">${esc(s.label.toUpperCase())}</div></div>`).join("");
 }
 
 function renderMomentum(){
-  // The 12 weeks ending at the one being viewed (oldest first), extended back if
-  // there's older history so nothing recorded ever falls off the left silently.
+  // Hidden until there is a pattern to see. A wall of 100 empty cells is a
+  // monument to non-adoption, and it is the first thing anyone would screenshot.
+  const dataWeeks=Object.keys(PROG).filter(w=>Object.keys(PROG[w]||{}).length);
+  el("mompanel").hidden = dataWeeks.length<2;
+  if(dataWeeks.length<2) return;
+
   const weeks=[]; for(let i=11;i>=0;i--) weeks.push(shiftWeeks(VIEW,-i));
-  const known=Object.keys(PROG).filter(w=>w<weeks[0]).sort();
-  const shown=known.slice(-4).concat(weeks);
-  let h='<table class="momt"><thead><tr><th class="rowh"></th>'+
-    shown.map(w=>`<th class="${w===VIEW?"wsel":""}"><button class="mcolbtn" onclick="jumpWeek('${w}')" title="Open week ending ${esc(longLabel(w))}">${esc(label(w))}</button></th>`).join("")+
+  const known=Object.keys(PROG).filter(w=>w<weeks[0]).sort().slice(-4);
+  const shown=known.concat(weeks);
+  const gapAfter=known.length?known.length-1:-1;   // a visible break, so a 3-month hole doesn't read as consecutive
+  let h='<table class="momt"><caption>Each cell is one pillar in one week: '+
+    STATES.map(s=>esc(s.gl)+" "+esc(s.label)).join(", ")+', blank = not logged.</caption>'+
+    '<thead><tr><th class="rowh"><span class="sr">Pillar</span></th>'+
+    shown.map((w,i)=>(i===gapAfter+1&&gapAfter>=0?'<th class="gap">⋯</th>':"")+
+      `<th class="${w===VIEW?"wsel":""}"><button class="mcolbtn" onclick="jumpWeek('${w}')" title="Open week ending ${esc(longLabel(w))}">${esc(label(w))}</button></th>`).join("")+
     "</tr></thead><tbody>";
-  for(const p of PILLARS){
-    h+=`<tr><th class="rowh" scope="row"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${p.accent};margin-right:6px"></span>${esc(p.name)}</th>`;
+  const rows=[{k:FOCUS,name:"★ The #1 priority",accent:"#111827",focus:true}].concat(PILLARS);
+  for(const p of rows){
+    h+=`<tr class="${p.focus?"focusrow":""}"><th class="rowh" scope="row"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${p.accent};margin-right:6px"></span>${esc(p.name)}</th>`;
     for(const w of shown){
-      const e=entry(w,p.k), st=e&&STATE[e.state];
-      const tip=e?`${label(w)} — ${st?st.label:e.state}${e.note?": "+e.note:""}`:`${label(w)} — not logged`;
-      h+=`<td><span class="mcell${st?" has":""}${w===VIEW?" sel":""}" style="${st?"background:"+st.hex:""}" title="${esc(tip)}"></span></td>`;
+      const e=entry(w,p.k), st=e&&isState(e.state)?STATE[e.state]:null;
+      const lab=st?(p.focus?st.fl:st.label):"not logged";
+      const tip=`${p.name}, week ending ${longLabel(w)}: ${lab}${e&&e.note?" — "+e.note:""}`;
+      // Only logged cells are buttons. 80 focusable "not logged" cells between the
+      // cards and the history table is a wall a keyboard user has to climb.
+      h+=st
+        ? `<td><button class="mcell${w===VIEW?" sel":""}" style="background:${st.hex};border-color:${st.hex}"
+             onclick="jumpWeek('${w}')" title="${esc(tip)}" aria-label="${esc(tip)}">${esc(st.gl)}</button></td>`
+        : `<td><span class="mcell empty${w===VIEW?" sel":""}" title="${esc(tip)}" aria-label="${esc(tip)}" role="img">·</span></td>`;
     }
     h+="</tr>";
   }
   h+="</tbody></table>";
   const mw=el("momwrap");
   mw.innerHTML=h;
-  mw.scrollLeft=mw.scrollWidth;      // open on the newest week
-  el("momlegend").innerHTML=STATES.map(s=>`<span><span class="sw" style="background:${s.hex}"></span>${esc(s.label)}</span>`).join("")+
-    '<span><span class="sw" style="background:#f1f5f9;border:1px solid #e2e8f0"></span>not logged</span>';
+  // Only jump to the newest week when the week actually changed — otherwise every
+  // click yanks the grid back and someone reading June loses their place.
+  if(MOMW!==VIEW){ mw.scrollLeft=mw.scrollWidth; MOMW=VIEW; }
+  el("momlegend").innerHTML=STATES.map(s=>
+    `<span><span class="sw" style="background:${s.hex}">${esc(s.gl)}</span>${esc(s.label)} <span style="opacity:.85">/ ${esc(s.fl)} on the #1</span></span>`).join("")+
+    '<span><span class="sw" style="background:#f1f5f9;border:1px solid #e2e8f0;color:#64748b">·</span>not logged</span>';
 }
-function jumpWeek(w){ if(!guardDirty()) return; VIEW=w; render(); }
+
+/* ---------- the #1 over time ----------
+   A priority written on week W is graded by the state on week W+1, so each row
+   here pairs two sheet rows. Newest first — the meeting reads the top row. */
+function renderHistory(){
+  const weeks=Object.keys(PROG).filter(w=>{ const e=PROG[w][FOCUS]; return e&&e.priority; }).sort().reverse();
+  if(!weeks.length){
+    el("histwrap").innerHTML='<div style="font-size:12.5px;color:var(--muted)">No #1 priority has been set yet. '+
+      'The first one goes in the navy band at the top of this page.</div>';
+    return;
+  }
+  let h='<table class="hist"><thead><tr><th>Due by</th><th>Owner</th><th>The one thing</th><th>Landed?</th></tr></thead><tbody>';
+  for(const w of weeks.slice(0,12)){
+    const set=PROG[w][FOCUS], gradeWeek=shiftWeeks(w,1), g=entry(gradeWeek,FOCUS);
+    const st=g&&isState(g.state)?STATE[g.state]:null;
+    const overdue=!st&&gradeWeek<reviewWeek();
+    h+=`<tr>
+      <td class="wk"><button class="mcolbtn" style="color:var(--navy);font-weight:700;text-decoration:underline"
+            onclick="jumpWeek('${gradeWeek}')">${esc(longLabel(gradeWeek))}</button></td>
+      <td>${set.who?esc(personName(set.who)):'<span style="color:var(--dim)">—</span>'}</td>
+      <td>${esc(set.priority)}</td>
+      <td class="gr">${st?`<span class="gpill" style="background:${st.hex}">${esc(st.fl)}</span>
+                            <div class="hnote">${esc(g.note||"")}</div>`
+                        :`<span class="gpill pending">${overdue?"never graded":"not graded yet"}</span>`}</td>
+    </tr>`;
+  }
+  h+="</tbody></table>";
+  el("histwrap").innerHTML=h;
+}
 
 function renderCards(){
   const prevWeek=shiftWeeks(VIEW,-1);
-  el("cards").innerHTML=PILLARS.map(p=>{
-    const cur=entry(VIEW,p.k)||{}, prev=entry(prevWeek,p.k);
-    const st=STATE[cur.state];
-    const chip=st?`<span class="chip" style="background:${st.hex}">${esc(st.label)}</span>`
-                 :`<span class="chip empty">not logged</span>`;
-    const prevSt=prev&&STATE[prev.state];
+  const who=getWho();
+  // Yours first. The order is the only thing that decides whether the person who
+  // owns three pillars has to scroll past three that aren't theirs to reach one
+  // that is — on a phone that was nearly five screens.
+  const ordered=who?PILLARS.slice().sort((a,b)=>(a.owner===who?0:1)-(b.owner===who?0:1)):PILLARS;
+  el("cards").innerHTML=ordered.map(p=>{
+    const c=cur(p.k), saved=entry(VIEW,p.k), prev=entry(prevWeek,p.k);
+    const savedSt=saved&&isState(saved.state)?STATE[saved.state]:null;
+    const chip=savedSt?`<span class="chip" style="background:${savedSt.hex}">${esc(savedSt.label)}</span>`
+                      :`<span class="chip empty">not logged</span>`;
+    const isMine=p.owner===who;
+    const ownerChip=`<span class="owner${isMine?" you":""}"
+        title="${esc(personName(p.owner))} answers for this pillar at the ${MEET_NAME} meeting">${isMine?"YOURS · "+esc(personName(p.owner)):esc(personName(p.owner))}</span>`;
+    // Two different weeks, said as two different things. prev.priority is the
+    // thing due THIS week; prev.state/note grade the priority set the week BEFORE
+    // that. Running them together under one "last week" heading labelled the
+    // undone priority with someone else's verdict.
+    const prevSt=prev&&isState(prev.state)?STATE[prev.state]:null;
     const lastBlock=`
       <div class="lastwk">
-        <span class="lab">Last week's priority · ${esc(label(prevWeek))}${prevSt?" · "+esc(prevSt.label):""}</span>
+        <span class="lab">Priority set ${esc(label(prevWeek))} — due this week</span>
         <div class="pri${prev&&prev.priority?"":" none"}">${prev&&prev.priority?esc(prev.priority):(prev?"No priority was set.":"Nothing was logged last week.")}</div>
-        ${prev&&prev.note?`<div class="why">They said: “${esc(prev.note)}”</div>`:""}
+        ${prevSt?`<div class="why">How the week ending ${esc(label(prevWeek))} went: <b>${esc(prevSt.label)}</b>${prev.note?` — “${esc(prev.note)}”`:""}</div>`:""}
       </div>`;
     const states=STATES.map(s=>{
       const id=`st_${p.k}_${s.k}`;
-      return `<input type="radio" name="st_${p.k}" id="${id}" value="${s.k}"${cur.state===s.k?" checked":""}
+      return `<input type="radio" name="st_${p.k}" id="${id}" value="${s.k}"${c.state===s.k?" checked":""}
                  onchange="onState('${p.k}')">
               <label for="${id}" style="--c:${s.hex}"><span class="box"></span><span class="nmt">${esc(s.label)}</span></label>`;
     }).join("");
-    const savedBy=cur.who?` · last saved by ${esc(cur.who)}`:"";
+    // One-tap sentences drawn from the rubric for the level that was picked. The
+    // sentence is the record and it is also the thing that makes people close the
+    // tab, so it has to be possible to answer honestly without typing.
+    const sug=(isState(c.state)&&p.rubric[c.state])?
+      `<div class="suglab" id="suglab_${p.k}">Tap one to use it, then edit</div>
+       <div class="sug" role="group" aria-labelledby="suglab_${p.k}">${p.rubric[c.state].map((t,i)=>
+         `<button class="sugbtn" id="sug_${p.k}_${i}" onclick="useSug('${p.k}',${i})">${esc(t)}</button>`).join("")}</div>`:"";
+    const optOpen=!!OPEN_OPT[p.k];
+    const dirty=DIRTY.has(p.k);
+    const statTxt=dirty?"Unsaved changes":(savedSt?"Saved"+(saved.who?" · last saved by "+personName(saved.who):""):"");
     return `
-    <article class="pcard" id="card_${p.k}" style="--accent:${p.accent}">
+    <article class="pcard${isMine?" mine":""}${dirty?" dirty":""}" id="card_${p.k}"
+             style="--accent:${p.accent}" aria-labelledby="h_${p.k}">
       <fieldset>
         <legend>
-          <div class="ptitle"><span class="nm">${esc(p.name)}</span>${chip}
-            <button class="rubbtn" onclick="openRubric('${p.k}')"
-              title="What counts as a little win, a big win, or a regression for ${esc(p.name)}">📋 RUBRIC</button></div>
+          <div class="ptitle"><h2 id="h_${p.k}">${esc(p.name)}</h2>${ownerChip}${chip}
+            <button class="rubbtn" id="rub_${p.k}" onclick="openRubric('${p.k}')"
+              aria-label="What counts for ${esc(p.name)}"
+              title="What counts as a little win, a big win, or going backwards for ${esc(p.name)}">📋 RUBRIC</button></div>
           <div class="pdesc">${esc(p.desc)}</div>
         </legend>
         ${lastBlock}
         <div class="field">
-          <span class="fl">This week <span class="req">*</span>
-            <a onclick="openRubric('${p.k}')" style="float:right;font-weight:700;color:var(--blue);cursor:pointer;text-transform:none;letter-spacing:0">not sure? →</a></span>
-          <div class="states">${states}</div>
+          <span class="fl" id="stlab_${p.k}">How did this week go? <span class="req" title="required">*</span></span>
+          <div class="states" role="radiogroup" aria-labelledby="stlab_${p.k}">${states}</div>
+          <div class="bar1">The bar for a <b>big win</b>: ${esc(p.bar)}
+            <button class="rubbtn" id="rub2_${p.k}" style="margin-left:4px"
+              onclick="openRubric('${p.k}')">See all four levels for ${esc(p.name)}</button></div>
         </div>
         <div class="field">
-          <label class="fl" for="note_${p.k}">Why — one sentence <span class="req">*</span></label>
-          <textarea id="note_${p.k}" maxlength="400" oninput="onEdit('${p.k}')"
-            placeholder="What actually happened, in one sentence.">${esc(cur.note||"")}</textarea>
+          <label class="fl" for="note_${p.k}">Why — one sentence <span class="req" title="required">*</span></label>
+          <textarea id="note_${p.k}" maxlength="400" oninput="onEdit('${p.k}')" aria-describedby="hint_${p.k}"
+            aria-required="true"
+            placeholder="What actually happened, in one sentence.">${esc(c.note||"")}</textarea>
+          ${sug}
           <div class="hint" id="hint_${p.k}"></div>
         </div>
         <div class="field">
-          <label class="fl" for="pri_${p.k}">Biggest priority to finish before next week</label>
-          <input class="ptxt" id="pri_${p.k}" maxlength="400" oninput="onEdit('${p.k}')"
-            value="${esc(cur.priority||"")}" placeholder="The one thing that has to be done by ${esc(label(shiftWeeks(VIEW,1)))}.">
+          <button class="optbtn" id="opt_btn_${p.k}" onclick="toggleOpt('${p.k}')" aria-expanded="${optOpen}"
+            aria-controls="opt_${p.k}">${optOpen?"− Hide":"+ Add"} a priority for this pillar (optional)</button>
+          ${(!optOpen&&c.priority)?`<div class="prisum">Still set, and still saved: <b>${esc(c.priority)}</b></div>`:""}
+          <div class="optwrap${optOpen?" open":""}" id="opt_${p.k}">
+            <input class="ptxt" id="pri_${p.k}" maxlength="400" oninput="onEdit('${p.k}')"
+              value="${esc(c.priority||"")}" aria-label="Priority for ${esc(p.name)}"
+              placeholder="The one thing for this pillar by ${esc(label(shiftWeeks(VIEW,1)))}.">
+          </div>
         </div>
         <div class="prow">
-          <button class="save" id="btn_${p.k}" onclick="saveCard('${p.k}')">Save</button>
-          <span class="pstat" id="stat_${p.k}" role="status">${cur.state?"Saved"+savedBy:""}</span>
+          <button class="save" id="btn_${p.k}" onclick="saveCard('${p.k}')">Save ${esc(p.name)}</button>
+          <span class="pstat${dirty?" dirtytxt":""}" id="stat_${p.k}" role="status" aria-live="polite">${esc(statTxt)}</span>
         </div>
       </fieldset>
     </article>`;
   }).join("");
-  PILLARS.forEach(p=>validate(p.k));
+}
+function toggleOpt(k){
+  OPEN_OPT[k]=!OPEN_OPT[k];
+  render();
+  if(OPEN_OPT[k]){ const i=el("pri_"+k); if(i) i.focus(); }
+}
+// Never silently replace a sentence someone already wrote — a direct .value
+// assignment also wipes the browser's undo stack, so it is not recoverable.
+function useSug(k,i){
+  const p=PILLAR[k], c=cur(k);
+  const t=(p.rubric[c.state]||[])[i]; if(t==null) return;
+  const n=el("note_"+k); if(!n) return;
+  const existing=n.value.trim();
+  if(existing&&existing!==t&&!confirm("Replace what you've written with:\n\n“"+t+"”")) return;
+  n.value=t; onEdit(k);
+  n.focus(); if(n.setSelectionRange) n.setSelectionRange(t.length,t.length);
+  const h=el("hint_"+k); if(h){ h.textContent="Edit it to say what actually happened."; h.className="hint"; }
 }
 
 /* ---------- rubric pop-out ---------- */
 // Drawn best-first: the bar you're trying to clear should be the first thing you
-// read, not the last. Picking a tier here sets the box on the card, so the rubric
+// read, not the last. Picking a level here sets the box on the card, so the rubric
 // is a way to answer the question rather than a document you consult and forget.
-let RUB_FOR=null;
+let RUB_FOR=null, RUB_RETURN=null;
+const HIDE_ON_MODAL=["main","header","footer"];
 function openRubric(k){
-  const p=PILLARS.find(x=>x.k===k); if(!p||!p.rubric) return;
-  RUB_FOR=k;
+  const p=PILLAR[k]; if(!p||!p.rubric) return;
+  RUB_FOR=k; RUB_RETURN=document.activeElement;
   el("rubtitle").textContent=p.name+" — what counts";
   el("rubbody").innerHTML=STATES.slice().reverse().map(s=>{
     const items=(p.rubric[s.k]||[]);
     return `<div class="rubtier" style="--c:${s.hex}">
-      <h3>${esc(s.label)}
+      <h3>${esc(s.gl)} ${esc(s.label)}
         <button class="rubpick" onclick="pickFromRubric('${s.k}')">tick this ✓</button></h3>
       <ul>${items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>
     </div>`;
   }).join("");
   el("rubmask").classList.add("open");
+  HIDE_ON_MODAL.forEach(s=>{ const n=document.querySelector(s); if(n) n.setAttribute("aria-hidden","true"); });
+  const sk=document.querySelector(".skip"); if(sk) sk.setAttribute("aria-hidden","true");
+  document.body.style.overflow="hidden";
   const x=el("rubmask").querySelector(".rubx"); if(x) x.focus();
 }
-function closeRubric(){ el("rubmask").classList.remove("open"); RUB_FOR=null; }
-function pickFromRubric(state){
-  const k=RUB_FOR; closeRubric();
-  if(!k) return;
-  const r=document.getElementById(`st_${k}_${state}`);
-  if(r){ r.checked=true; onState(k); }
-  const card=el("card_"+k); if(card) card.scrollIntoView({block:"center",behavior:"smooth"});
+function closeRubric(){
+  el("rubmask").classList.remove("open"); RUB_FOR=null;
+  HIDE_ON_MODAL.forEach(s=>{ const n=document.querySelector(s); if(n) n.removeAttribute("aria-hidden"); });
+  const sk=document.querySelector(".skip"); if(sk) sk.removeAttribute("aria-hidden");
+  document.body.style.overflow="";
+  if(RUB_RETURN&&RUB_RETURN.focus) try{ RUB_RETURN.focus(); }catch(e){}
+  RUB_RETURN=null;
 }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&RUB_FOR) closeRubric(); });
+function pickFromRubric(state){
+  const k=RUB_FOR; RUB_RETURN=null; closeRubric();
+  if(!k) return;
+  applyDraft(k,{state});
+  const card=el("card_"+k); if(card) card.scrollIntoView({block:"center",behavior:"smooth"});
+  // Always land focus somewhere sensible — dropping it on <body> puts a keyboard
+  // user back at the top of a very long document.
+  setTimeout(()=>{
+    const n=el("note_"+k);
+    if(n&&!n.value.trim()) n.focus({preventScroll:true});
+    else { const hd=el("h_"+k); if(hd){ hd.setAttribute("tabindex","-1"); hd.focus({preventScroll:true}); } }
+  },380);
+}
+// Escape closes; Tab is trapped inside the dialog so a keyboard user can't walk
+// off into a page they can't see.
+document.addEventListener("keydown",e=>{
+  if(!RUB_FOR) return;
+  if(e.key==="Escape"){ closeRubric(); return; }
+  if(e.key!=="Tab") return;
+  const f=el("rubmask").querySelectorAll('button, [href], input, textarea, [tabindex]:not([tabindex="-1"])');
+  if(!f.length) return;
+  const first=f[0], last=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); }
+});
+
+// Arrow-keying through a radio group fires change on every option. Pulling focus
+// into the note field on each one made the four levels unbrowsable by keyboard —
+// so only do it when a pointer was what moved the selection.
+let POINTER_TS=0;
+document.addEventListener("pointerdown",()=>{ POINTER_TS=Date.now(); },true);
+function fromPointer(){ return Date.now()-POINTER_TS<700; }
 
 function onState(k){
-  DIRTY.add(k); el("card_"+k).classList.add("dirty"); validate(k);
-  const n=el("note_"+k); if(n&&!n.value.trim()) n.focus();
+  const r=document.querySelector('input[name="st_'+k+'"]:checked');
+  applyDraft(k,{state:r?r.value:""});
+  if(fromPointer()){ const n=el("note_"+k); if(n&&!n.value.trim()) n.focus({preventScroll:true}); }
 }
-function onEdit(k){ DIRTY.add(k); el("card_"+k).classList.add("dirty"); validate(k); }
-function chosen(k){ const r=document.querySelector(`input[name="st_${k}"]:checked`); return r?r.value:""; }
-function validate(k){
-  const st=chosen(k), note=(el("note_"+k).value||"").trim(), pri=(el("pri_"+k).value||"").trim();
-  const ok=!!st&&note.length>=3;
-  el("btn_"+k).disabled=!ok;
-  const h=el("hint_"+k);
-  if(!st) h.textContent="Tick a box first.";
-  else if(note.length<3) h.textContent="A sentence is required — the checkbox on its own tells nobody anything.";
-  else if(!pri) h.textContent="No priority set for next week. You can save without one, but that's the field that gets read on Monday.";
-  else h.textContent="";
-  h.className="hint"+(!st||note.length<3?" bad":"");
-  return ok;
+function onEdit(k){
+  DIRTY.add(k);
+  const d=DRAFT[k]||(DRAFT[k]={});
+  if(el("note_"+k)) d.note=el("note_"+k).value;
+  if(el("pri_"+k))  d.priority=el("pri_"+k).value;
+  const c=el("card_"+k); if(c) c.classList.add("dirty");
+  const s=el("stat_"+k); if(s&&s.className.indexOf("err")<0){ s.textContent="Unsaved changes"; s.className="pstat dirtytxt"; }
+  const h=el("hint_"+k); if(h&&h.className.indexOf("bad")>=0){ h.textContent=""; h.className="hint"; }
+  const n=el("note_"+k); if(n) n.removeAttribute("aria-invalid");
+}
+// Validate on click, not on load. Rendering an error next to a field nobody has
+// touched yet, above a button that is disabled and therefore unreachable by
+// keyboard, is how a form tells a screen-reader user nothing at all.
+function cardProblem(k){
+  const c=cur(k);
+  const note=el("note_"+k)?el("note_"+k).value.trim():"";
+  if(!isState(c.state)) return {msg:"Pick one of the four boxes above first.",f:null};
+  if(!note)             return {msg:"Add one sentence saying what happened. Tap a suggestion above if one fits.",f:"note_"+k};
+  if(note.length<12)    return {msg:"A few more words — this is the record.",f:"note_"+k};
+  return null;
 }
 
 function saveCard(k){
-  if(!validate(k)) return;
-  const p=PILLARS.find(x=>x.k===k);
-  const state=chosen(k), note=el("note_"+k).value.trim(), priority=el("pri_"+k).value.trim();
-  let who=getWho();
-  if(!who){
-    who=(prompt("Your first name (so the record says who read it):")||"").trim().toLowerCase();
-    if(who) setWho(who);
+  if(SAVING.has(k)) return;
+  const bad=cardProblem(k);
+  if(bad){
+    const h=el("hint_"+k); h.textContent=bad.msg; h.className="hint bad";
+    stat(k,bad.msg,"err");
+    if(bad.f){ const n=el(bad.f); if(n){ n.setAttribute("aria-invalid","true"); n.focus(); } }
+    else { const r=document.querySelector('input[name="st_'+k+'"]'); if(r) r.focus(); }
+    return;
   }
-  el("btn_"+k).disabled=true; stat(k,"Saving…","");
-  const url=APPS_URL+"?fn=progress"+
-    "&week="+encodeURIComponent(VIEW)+
-    "&pillar="+encodeURIComponent(k)+
-    "&state="+encodeURIComponent(state)+
-    "&note="+encodeURIComponent(note)+
-    "&priority="+encodeURIComponent(priority)+
-    "&who="+encodeURIComponent(who)+
-    "&pass="+encodeURIComponent(getPass());
-  jsonp(url).then(r=>{
+  if(!READ_OK){ stat(k,"The Sheet hasn't loaded, so saving now could overwrite real entries. Reload first.","err"); return; }
+  // Say it where the click was. This message used to go to a banner a thousand
+  // pixels up the page, so a first-time save looked like a dead button.
+  if(!getWho()){ stat(k,"Pick your name at the top of the page first — every save records who made it.","err"); focusWhoBar(true); return; }
+  const who=getWho(), p=PILLAR[k], c=cur(k);
+  const state=c.state, note=el("note_"+k).value.trim(), priority=el("pri_"+k)?el("pri_"+k).value.trim():(c.priority||"");
+  SAVING.add(k);
+  stashFocus();
+  const btn=el("btn_"+k); if(btn) btn.disabled=true;
+  stat(k,"Saving…","");
+  writeProgress(VIEW,k,state,note,priority,who).then(r=>{
+    SAVING.delete(k);
     if(!r||!r.ok){
       // Report what the server actually said. A save that fails silently, or that
       // blames the wrong thing, is how a week goes unrecorded and nobody notices.
       const e=(r&&r.error)||"unknown error";
+      const b=el("btn_"+k); if(b) b.disabled=false;
       stat(k,/passcode/i.test(e)
         ? "The Apps Script is still asking for a passcode — redeploy it with REQUIRE_PASS = false."
         : "Not saved: "+e,"err");
-      el("btn_"+k).disabled=false;
       return;
     }
-    // Reflect it locally so the grid and tally move without a reload.
-    (PROG[VIEW]=PROG[VIEW]||{})[k]={state,note,priority,who,when:new Date()};
-    DIRTY.delete(k);
-    render();
+    // The server decides the week key when the client's is malformed. If it wrote
+    // somewhere else, say so rather than showing a row that isn't there.
+    const wk=(r.week&&/^\d{4}-\d{2}-\d{2}$/.test(r.week))?r.week:VIEW;
+    (PROG[wk]=PROG[wk]||{})[k]={state,note,priority,who,when:new Date()};
+    // Anything typed WHILE the save was in flight must survive it.
+    const stillNote=el("note_"+k)?el("note_"+k).value:note;
+    const stillPri=el("pri_"+k)?el("pri_"+k).value:priority;
+    if(stillNote.trim()!==note||stillPri.trim()!==priority){
+      DRAFT[k]={state,note:stillNote,priority:stillPri}; DIRTY.add(k);
+      render(); stat(k,"Saved — but you kept typing, so the newer text is still unsaved. Save again.","err"); return;
+    }
+    DIRTY.delete(k); delete DRAFT[k];
+    render(); popFocus();
     stat(k,"Saved ✓","ok");
-    setStatus("Saved <b>"+esc(p.name)+"</b> for week ending "+esc(longLabel(VIEW))+".","");
+    setStatus("Saved <b>"+esc(p.name)+"</b> for week ending "+esc(longLabel(wk))+
+      (wk!==VIEW?" — note the server filed it under that week, not the one on screen.":"."),wk!==VIEW?"warn":"ok");
   }).catch(err=>{
-    stat(k,"Not saved ("+err.message+"). Check your connection and try again.","err");
-    el("btn_"+k).disabled=false;
+    SAVING.delete(k);
+    const b=el("btn_"+k); if(b) b.disabled=false;
+    stat(k,err.message==="timeout"
+      ? "The server didn't answer in time. It MAY have saved — reload to check before saving again."
+      : "Not saved ("+err.message+"). Check your connection and try again.","err");
   });
 }
 function stat(k,msg,kind){ const e=el("stat_"+k); if(!e) return; e.textContent=msg; e.className="pstat"+(kind?" "+kind:""); }
 
-window.addEventListener("beforeunload",e=>{ if(DIRTY.size){ e.preventDefault(); e.returnValue=""; } });
+window.addEventListener("beforeunload",e=>{ capture(); if(DIRTY.size){ e.preventDefault(); e.returnValue=""; } });
+// A tab left open all week goes stale, and a stale tab is what overwrites someone
+// else's entry. Re-read when it comes back to the foreground — unless there are
+// unsaved edits or a save is in flight, neither of which may be disturbed.
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="visible"||DIRTY.size||SAVING.size||!READ_OK) return;
+  loadProgress(err=>{ if(!err){ render(); banners(); } });
+});
+
+/* ---------- banners, in priority order ---------- */
+function banners(){
+  // Rows being silently dropped beats a missing grade, so it is checked first.
+  if(BAD_WEEKS){
+    setStatus("⚠️ "+BAD_WEEKS+" row"+(BAD_WEEKS>1?"s":"")+" in the Progress tab "+(BAD_WEEKS>1?"have":"has")+
+      " a week value that isn't a date like <code>2026-08-16</code>, so "+(BAD_WEEKS>1?"they are":"it is")+
+      " being ignored. Fix column A in the Sheet.","warn");
+    return;
+  }
+  const un=Object.keys(PROG).filter(w=>{
+    const s=PROG[w][FOCUS]; if(!s||!s.priority) return false;
+    const g=entry(shiftWeeks(w,1),FOCUS);
+    return shiftWeeks(w,1)<=reviewWeek() && !(g&&isState(g.state));
+  }).sort();
+  if(un.length){
+    const gw=shiftWeeks(un[un.length-1],1);
+    if(gw!==VIEW){ setStatus('The #1 due <b>'+esc(longLabel(gw))+'</b> was never graded. '+
+      '<a href="#" onclick="jumpWeek(\''+gw+'\');return false;">Grade it →</a>',"warn"); return; }
+  }
+  setStatus("","");
+}
 
 /* ---------- boot ---------- */
-VIEW=thisWeek();
+VIEW=reviewWeek();
+setStatus("Loading this week…","");
 render();
 loadProgress(err=>{
-  LOADED=!err;
   if(err){
+    READ_OK=false;
     const missing=/missing week|invalid|not found|does not exist|unable to parse/i.test(err.message);
     setStatus(missing
-      ? "⚠️ The Sheet has no <b>Progress</b> tab yet, so nothing can load or save. Deploy Apps Script v7 and hit <code>?fn=progress_init&amp;pass=…</code> once — see <b>DEPLOY.md</b>. The form below is live but every save will fail until then."
-      : "⚠️ Couldn't read the Sheet ("+esc(err.message)+"). Check it's shared <b>Anyone with the link → Viewer</b>, then refresh.","warn");
+      ? "⚠️ Can't find the <b>Progress</b> tab in the Sheet — it may have been renamed. Nothing can load, and saving is blocked so nothing gets overwritten. See <b>DEPLOY.md</b>."
+      : "⚠️ Couldn't read the Sheet ("+esc(err.message)+"). Saving is blocked until it loads, so nothing gets overwritten. Check the Sheet is shared <b>Anyone with the link → Viewer</b>, then reload.","bad");
     render(); return;
   }
-  const n=Object.keys(PROG).length;
-  setStatus(n? "Live — "+n+" week"+(n>1?"s":"")+" of progress recorded in the Sheet's <b>Progress</b> tab."
-            : "Live — nothing recorded yet. This week's read is the first one.","");
+  READ_OK=true;
   render();
+  banners();
 });
 </script>
 </body>
