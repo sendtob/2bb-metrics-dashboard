@@ -282,6 +282,98 @@
     .mcell{height:38px;width:34px;font-size:14px}
   }
 
+  /* ---- the personal page ----
+     One person, one screen. The team page is a dashboard; this is a form, and it
+     is sized so that on a phone the last field and the Save button are reachable
+     without hunting. Nothing here is optional and nothing here is decoration. */
+  .mepage[hidden]{display:none}
+  .mehead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+  .mehead h2{font-size:19px;color:var(--navy);font-weight:800}
+  .mehead .wk{font-size:12.5px;color:var(--muted);font-weight:600}
+  .mehead .due{font-size:12.5px;font-weight:800;color:var(--navy);background:#fff7e3;
+    border:1px solid #f2ddad;border-radius:99px;padding:3px 10px}
+  .mehead .due.soon{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+  .meteam{background:var(--navygrad);color:#fff;border-radius:11px;padding:9px 13px;margin-bottom:10px;
+    font-size:12.5px;line-height:1.38}
+  /* Context, not an input — so it is clamped. Tap to read the whole thing. */
+  .meteam .txt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .meteam.open .txt{-webkit-line-clamp:unset;overflow:visible}
+  .meteam .more{background:none;border:none;color:#fff;font:inherit;font-size:11.5px;font-weight:800;
+    text-decoration:underline;cursor:pointer;padding:11px 0 4px;min-height:44px;opacity:.92}
+  /* The personal page is a form, not a dashboard — the masthead blurb is a team-page
+     instruction and it costs 70px of a phone screen here. */
+  body.memode header{padding-top:12px;padding-bottom:12px}
+  body.memode header .sub{display:none}
+  body.memode footer{display:none}
+  .meteam .lb{font-size:9.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;opacity:.8;
+    display:block;margin-bottom:2px}
+  .meteam b{font-weight:800}
+  .mebox{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 14px;
+    margin-bottom:10px;box-shadow:0 1px 3px rgba(20,40,80,.07)}
+  /* One sentence means one line. A textarea invites a paragraph and costs height
+     on every pillar; the input says what the field is for by its shape. */
+  .mepage input.sent,.mepage input.ptxt{width:100%;font:inherit;font-size:13px;border:1.5px solid var(--line);
+    border-radius:9px;padding:11px 10px;background:#fbfcfe;color:var(--ink);min-height:46px}
+  .mepage input.sent:focus{background:#fff;border-color:var(--blue)}
+  .mepage input[aria-invalid="true"]{border-color:#dc2626;background:#fff5f5}
+  .mebox.hero{border-left:5px solid var(--navy)}
+  .melab{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .melast{font-size:15px;font-weight:700;color:var(--ink);line-height:1.32;margin:3px 0 8px}
+  .melast.none{font-size:13.5px;font-weight:500;color:var(--dim);font-style:italic}
+  .merow{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+  /* Four across, always. Wrapping to two rows costs a whole line of screen per
+     pillar, and on three pillars that is most of the reason this used to scroll. */
+  .melvl{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .lvl{border:1.5px solid var(--line);background:#f8fafc;border-radius:9px;font:inherit;font-size:11.5px;
+    font-weight:700;color:var(--ink);padding:7px 4px;cursor:pointer;min-height:52px;line-height:1.2;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}
+  .lvl:hover{background:#eef2f7}
+  .lvl.on{color:#fff;border-color:var(--c);background:var(--c)}
+  .lvl .g{font-weight:800;font-size:13px;line-height:1}
+  .mepil{border-top:1px solid var(--line);padding:9px 0 2px}
+  .mepil:first-of-type{border-top:0;padding-top:2px}
+  .mepilh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .mepilh h3{font-size:14px;font-weight:800;color:var(--navy)}
+  .mepilh .dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+  .mehelp{border:1px solid var(--line);background:#f8fafc;color:var(--navy);border-radius:99px;font:inherit;
+    font-size:11px;font-weight:800;padding:7px 12px;cursor:pointer;min-height:44px;margin-left:auto}
+  .mehelp:hover{background:#eef2f7}
+  .mesave{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:14px 24px;font:inherit;
+    font-size:15px;font-weight:800;cursor:pointer;min-height:52px;width:100%}
+  .mesave:hover:not(:disabled){background:#2a4878}
+  .mesave:disabled{background:#94a3b8;cursor:default}
+  .mefoot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:11px;font-size:12.5px}
+  .melink{color:var(--blue);font-weight:700;text-decoration:underline;background:none;border:none;
+    font:inherit;font-size:12.5px;cursor:pointer;padding:10px 0;min-height:44px}
+  .mestat{font-size:12.5px;font-weight:700;min-height:1em;margin-top:8px}
+  .mestat.ok{color:#15803d} .mestat.err{color:#b91c1c}
+  .medone{background:#dcfce7;border:1px solid #86efac;color:#14532d;border-radius:11px;padding:12px 15px;
+    font-size:13.5px;font-weight:700;margin-bottom:12px}
+  .metiny{font-size:11.5px;color:var(--muted);margin-top:5px}
+  #teamwrap[hidden]{display:none}
+  /* Anything already saved collapses to one line. The page is meant to show what
+     is still owed, and a filled-in pillar is no longer owed. */
+  .medone-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:9px 0;
+    border-top:1px solid var(--line);font-size:13px}
+  .medone-row:first-of-type{border-top:0}
+  .medone-row .tick{width:20px;height:20px;border-radius:50%;color:#fff;font-size:11px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .medone-row .nm{font-weight:800;color:var(--navy)}
+  .medone-row .sy{color:var(--muted);flex:1 1 auto;min-width:12ch;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap}
+  .medone-row .ed{border:1px solid var(--line);background:#f8fafc;color:var(--navy);border-radius:8px;
+    font:inherit;font-size:11.5px;font-weight:700;padding:8px 12px;cursor:pointer;min-height:38px}
+  .medone-row .ed:hover{background:#eef2f7}
+  /* Use the width on a laptop. Vertically stacking five inputs down a 1280px screen
+     is what made this scroll when it did not have to. */
+  @media(min-width:760px){
+    .mepair{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+    .mepair .mebox{margin-bottom:0}
+    .mepilgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+    .mepilgrid .mepil:nth-child(2){border-top:0;padding-top:2px}
+    .mesave{width:auto;min-width:260px}
+  }
+
   footer{max-width:1240px;margin:0 auto;padding:24px 28px 50px;font-size:12px;color:var(--muted);line-height:1.55}
   footer b{color:var(--ink)}
 </style>
@@ -301,10 +393,15 @@
 </header>
 
 <main class="wrap" id="main" tabindex="-1">
+  <div class="status" id="status" role="status" aria-live="polite"></div>
+
+  <!-- The personal page. One person, one screen, only what they have to type.
+       Everything below it is the team view and is hidden while this is on. -->
+  <section class="mepage" id="mepage" hidden></section>
+
+  <div id="teamwrap">
   <!-- What you owe and by when, before anything else on the page. -->
   <div class="ask" id="ask"></div>
-
-  <div class="status" id="status" role="status" aria-live="polite"></div>
 
   <div class="weekbar">
     <div class="wnav">
@@ -337,6 +434,7 @@
       meeting reads.</div>
     <div id="histwrap"></div>
   </section>
+  </div><!-- /teamwrap -->
 </main>
 
 <div class="rubmask" id="rubmask" onclick="if(event.target===this)closeRubric()">
@@ -382,6 +480,20 @@ const PROG_TAB="Progress";
 // #1 the same "one responsible person" the six pillars have, without adding a
 // column and forcing an Apps Script redeploy.
 const FOCUS="__focus";
+
+// Each PERSON also gets a #1 of their own, stored the same way: a row in the same
+// Progress tab under the pillar key `__me_<name>`. Same semantics as the team #1 —
+// a priority written on week W is due during W+1, and the state on week W grades
+// what was set on W-1 — so one mechanism carries the team's one thing and seven
+// people's one thing with no schema change and no Apps Script redeploy.
+const MEPREFIX="__me_";
+function MEKEY(who){ return MEPREFIX+String(who||"").trim().toLowerCase(); }
+function isMeKey(k){ return String(k||"").indexOf(MEPREFIX)===0; }
+
+// "me" = the personal page: one screen, only what that person types this week.
+// "team" = the full dashboard. A personal link lands on "me"; the toggle is a
+// link on both, and it writes itself into the URL so a bookmark keeps the choice.
+let MODE="team";
 
 // The Tuesday team meeting is the only forcing function in the org, so it is the
 // deadline the page quotes rather than inventing a new one. 2 = Tuesday, 15:00.
@@ -624,16 +736,23 @@ function getWho(){ return WHO; }
 function setWho(v){
   WHO=String(v||"").trim().toLowerCase();
   try{ WHO?localStorage.setItem(WHO_KEY,WHO):localStorage.removeItem(WHO_KEY); }catch(e){}
+  if(!WHO&&MODE==="me") MODE="team";      // clearing your name must not leave a personal page with no person
   render();
-  const p=ownedBy(WHO)[0];
-  if(p) jumpTo(p.k);
+  if(MODE==="team"){ const p=ownedBy(WHO)[0]; if(p) jumpTo(p.k); }
 }
 function ownedBy(who){ return who?PILLARS.filter(p=>p.owner===who):[]; }
 (function bootWho(){
-  let u="";
-  try{ u=(new URLSearchParams(location.search).get("who")||"").trim().toLowerCase(); }catch(e){}
-  if(u&&Object.prototype.hasOwnProperty.call(PERSON,u)){ WHO=u; try{ localStorage.setItem(WHO_KEY,u); }catch(e){} return; }
-  try{ WHO=(localStorage.getItem(WHO_KEY)||"").trim().toLowerCase(); }catch(e){ WHO=""; }
+  let u="",v="";
+  try{ const q=new URLSearchParams(location.search);
+       u=(q.get("who")||"").trim().toLowerCase(); v=(q.get("view")||"").trim().toLowerCase(); }catch(e){}
+  const known=u&&Object.prototype.hasOwnProperty.call(PERSON,u);
+  if(known){ WHO=u; try{ localStorage.setItem(WHO_KEY,u); }catch(e){} }
+  else{ try{ WHO=(localStorage.getItem(WHO_KEY)||"").trim().toLowerCase(); }catch(e){ WHO=""; } }
+  // A personal link opens the personal page. Anything else opens the team page,
+  // including picking your name from the chips — landing on the team page and
+  // being thrown somewhere else for choosing your own name would be rude.
+  MODE = v==="me" ? "me" : v==="team" ? "team" : (known?"me":"team");
+  if(MODE==="me"&&!WHO) MODE="team";
 })();
 
 /* ---------- reading the sheet (gviz JSONP — public read, no passcode) ---------- */
@@ -794,6 +913,9 @@ function capture(){
     if(k===FOCUS){
       if(el("fnote")) d.note=el("fnote").value;
       if(el("fpri"))  d.priority=el("fpri").value;
+    }else if(isMeKey(k)){
+      if(el("mnote")) d.note=el("mnote").value;
+      if(el("mpri"))  d.priority=el("mpri").value;
     }else{
       if(el("note_"+k)) d.note=el("note_"+k).value;
       if(el("pri_"+k))  d.priority=el("pri_"+k).value;
@@ -838,9 +960,21 @@ function render(alreadyCaptured){
   const a=document.activeElement;
   const R=(a&&a.id)?{id:a.id,s:(typeof a.selectionStart==="number"?a.selectionStart:null),
                      e:(typeof a.selectionEnd==="number"?a.selectionEnd:null)}:null;
-  renderAsk(); renderWeekBar(); renderWho(); renderFocus(); renderWaiting();
-  renderCards(); renderTally(); renderMomentum(); renderHistory();
-  el("exempt").innerHTML=EXEMPT;
+  // Only ONE view is ever in the DOM. Rendering both would put two elements with
+  // the same id on the page, and every el() lookup after that is a coin toss.
+  const onMe = MODE==="me" && !!getWho();
+  document.body.classList.toggle("memode",onMe);
+  el("mepage").hidden   = !onMe;
+  el("teamwrap").hidden = onMe;
+  if(onMe){
+    el("cards").innerHTML="";
+    renderMe();
+  }else{
+    el("mepage").innerHTML="";
+    renderAsk(); renderWeekBar(); renderWho(); renderFocus(); renderWaiting();
+    renderCards(); renderTally(); renderMomentum(); renderHistory();
+    el("exempt").innerHTML=EXEMPT;
+  }
   if(R){
     const n=el(R.id);
     if(n){ try{ n.focus({preventScroll:true});
@@ -937,6 +1071,8 @@ function renderWho(){
         aria-pressed="${p.k===who}">${esc(p.name)}</button>`;
     }).join("");
   if(who) h+=`<button class="chipbtn ghost" id="who_none" onclick="setWho('')" title="Clear your name from this browser">not me</button>`;
+  if(who) h+=`<button class="chipbtn" id="who_mine" onclick="setMode('me')"
+      title="Just the things ${esc(personName(who))} has to fill in this week">My page →</button>`;
   el("whobar").innerHTML=h;
 }
 
@@ -1537,6 +1673,228 @@ function banners(){
   }
   setStatus("","");
 }
+
+
+/* ================= THE PERSONAL PAGE =================
+   What one person has to answer this week, on one screen, in this order:
+     1. the team's one thing        (read-only context — the redirect)
+     2. YOUR #1 from last week      + did it land, and one sentence
+     3. YOUR #1 for the week ahead
+     4. your pillars                one level + one sentence each
+   No optional fields, no history, no grid. If it isn't something they type, it
+   isn't here. The team page is one link away and stays exactly as it was. */
+
+function setMode(m){
+  MODE=(m==="me")?"me":"team";
+  try{
+    const u=new URL(location.href);
+    if(MODE==="me"){ u.searchParams.set("view","me"); if(getWho()) u.searchParams.set("who",getWho()); }
+    else u.searchParams.set("view","team");
+    history.replaceState(null,"",u.toString());
+  }catch(e){}
+  window.scrollTo(0,0);
+  render();
+}
+
+function renderMe(){
+  const who=getWho(), meK=MEKEY(who), mine=ownedBy(who);
+  const prevW=shiftWeeks(VIEW,-1);
+  const prevMe=entry(prevW,meK), c=cur(meK);
+  const target=prevMe&&prevMe.priority?prevMe.priority:"";
+  const savedMe=entry(VIEW,meK);
+  const d=daysToMeeting();
+  const teamPrev=entry(prevW,FOCUS);
+  const teamPri=teamPrev&&teamPrev.priority?teamPrev.priority:"";
+
+  let h='<div class="mehead"><h2>'+esc(personName(who))+"’s week</h2>"+
+    '<span class="wk">week ending '+esc(longLabel(VIEW))+'</span>'+
+    '<span class="due'+(d<=1?" soon":"")+'">'+(d===0?"due today":d===1?"due tomorrow":"due in "+d+" days")+'</span></div>';
+
+  // 1. The team's one thing. Context, not an input — unless it's yours to grade,
+  //    in which case the team page is where that happens and this says so.
+  if(teamPri){
+    const owner=teamPrev.who||"";
+    h+='<div class="meteam" id="meteam"><span class="lb">The team’s #1 this week</span>'+
+       '<span class="txt">'+esc(teamPri)+
+       (owner?' <b>— '+esc(personName(owner))+'</b>':"")+'</span>'+
+       '<button class="more" onclick="document.getElementById(\'meteam\').classList.toggle(\'open\')">show all / less</button>'+
+       (owner===who?' <button class="melink" style="color:#fff" onclick="setMode(\'team\')">You own this — grade it on the team page →</button>':"")+
+       '</div>';
+  }
+
+  // 2. Last week's personal #1, and whether it landed.
+  h+='<div class="mepair">';
+  h+='<div class="mebox hero"><span class="melab">Your #1 last week — did it land?</span>';
+  if(target){
+    h+='<div class="melast">'+esc(target)+'</div>'+
+       '<div class="melvl" role="group" aria-label="Did your #1 land?">'+
+       STATES.slice().reverse().map(s2=>
+         `<button class="lvl${c.state===s2.k?" on":""}" id="mlvl_${s2.k}" style="--c:${s2.hex}"
+            onclick="pickMe('${s2.k}')" aria-pressed="${c.state===s2.k}">
+            <span class="g">${esc(s2.gl)}</span>${esc(s2.fl)}</button>`).join("")+
+       '</div>'+
+       '<div class="field" style="margin:9px 0 0">'+
+       '<label class="fl" for="mnote">One sentence — what happened <span class="req" title="required">*</span></label>'+
+       '<input class="sent" id="mnote" maxlength="400" aria-required="true" oninput="onMeEdit()" '+
+       'value="'+esc(c.note||"")+'" placeholder="Landed, stalled, or overtaken — say which."></div>';
+  }else{
+    h+='<div class="melast none">You didn’t set a #1 last week, so there’s nothing to grade. '+
+       'Set one below and this is where it will be waiting next week.</div>';
+  }
+  h+='</div>';
+
+  // 3. Next week's personal #1.
+  h+='<div class="mebox"><span class="melab">Your #1 for the week ahead</span>'+
+     '<div class="field" style="margin:6px 0 0">'+
+     '<label class="sr" for="mpri">Your one thing to land by Sunday '+esc(label(shiftWeeks(VIEW,1)))+'</label>'+
+     '<input class="ptxt" id="mpri" maxlength="400" oninput="onMeEdit()" value="'+esc(c.priority||"")+'" '+
+     'placeholder="The one thing you will land by Sunday '+esc(label(shiftWeeks(VIEW,1)))+'.">'+
+     '<div class="metiny">Specific enough that next Tuesday it is obviously done or obviously not.</div>'+
+     '</div></div></div>';
+
+  // 4. The pillars this person answers for.
+  if(mine.length){
+    h+='<div class="mebox"><span class="melab">Your pillar'+(mine.length>1?"s":"")+' this week</span>'+
+       '<div class="mepilgrid">';
+    for(const p of mine){
+      const pc=cur(p.k), pSaved=entry(VIEW,p.k);
+      const pDone=pSaved&&isState(pSaved.state)&&!DIRTY.has(p.k)&&!OPEN_OPT[p.k];
+      if(pDone){
+        const ps=STATE[pSaved.state];
+        h+='<div class="medone-row"><span class="tick" style="background:'+ps.hex+'">'+esc(ps.gl)+'</span>'+
+           '<span class="nm">'+esc(p.name)+'</span>'+
+           '<span class="sy" title="'+esc(pSaved.note||"")+'">'+esc(ps.label)+' — '+esc(pSaved.note||"")+'</span>'+
+           '<button class="ed" onclick="reopen(\''+p.k+'\')">edit</button></div>';
+        continue;
+      }
+      h+='<div class="mepil"><div class="mepilh">'+
+         '<span class="dot" style="background:'+p.accent+'"></span>'+
+         '<h3 id="h_'+p.k+'">'+esc(p.name)+'</h3>'+
+         '<button class="mehelp" onclick="openRubric(\''+p.k+'\')" '+
+         'aria-label="What counts for '+esc(p.name)+'">what counts?</button></div>'+
+         '<div class="melvl" role="group" aria-label="How did '+esc(p.name)+' go this week?">'+
+         STATES.slice().reverse().map(s2=>
+           `<button class="lvl${pc.state===s2.k?" on":""}" id="plvl_${p.k}_${s2.k}" style="--c:${s2.hex}"
+              onclick="pickPillar('${p.k}','${s2.k}')" aria-pressed="${pc.state===s2.k}">
+              <span class="g">${esc(s2.gl)}</span>${esc(s2.label)}</button>`).join("")+
+         '</div>'+
+         '<div class="field" style="margin:8px 0 0">'+
+         '<label class="sr" for="note_'+p.k+'">Why, in one sentence, for '+esc(p.name)+'</label>'+
+         '<input class="sent" id="note_'+p.k+'" maxlength="400" aria-required="true" oninput="onEdit(\''+p.k+'\')" '+
+         'value="'+esc(pc.note||"")+'" placeholder="What actually happened, in one sentence.">'+
+         '</div></div>';
+    }
+    h+='</div></div>';
+  }else{
+    h+='<div class="mebox"><span class="melab">Your pillars</span>'+
+       '<div class="metiny" style="font-size:12.5px;margin-top:5px">You don’t own a pillar, so there’s '+
+       'nothing else to fill in. Your #1 above is the whole ask.</div></div>';
+  }
+
+  h+='<button class="mesave" id="mbtn" onclick="saveMe()">Save my week</button>'+
+     '<div class="mestat" id="mstat" role="status" aria-live="polite"></div>'+
+     '<div class="mefoot"><button class="melink" onclick="setMode(\'team\')">See the whole team →</button>'+
+     '<span style="color:var(--muted)">Not '+esc(personName(who))+'? '+
+     '<button class="melink" onclick="setMode(\'team\')">switch on the team page</button></span></div>';
+
+  el("mepage").innerHTML=h;
+}
+
+function reopen(k){ OPEN_OPT[k]=true; render();
+  const n=el("note_"+k)||el("mnote"); if(n) n.focus(); }
+function pickMe(st){ applyDraft(MEKEY(getWho()),{state:st});
+  if(fromPointer()){ const n=el("mnote"); if(n&&!n.value.trim()) n.focus({preventScroll:true}); } }
+function pickPillar(k,st){ applyDraft(k,{state:st});
+  if(fromPointer()){ const n=el("note_"+k); if(n&&!n.value.trim()) n.focus({preventScroll:true}); } }
+function onMeEdit(){
+  const k=MEKEY(getWho());
+  DIRTY.add(k);
+  const d=DRAFT[k]||(DRAFT[k]={});
+  if(el("mnote")) d.note=el("mnote").value;
+  if(el("mpri"))  d.priority=el("mpri").value;
+  const st=el("mstat"); if(st&&st.className.indexOf("err")>=0){ st.textContent=""; st.className="mestat"; }
+}
+
+// Save every row that is COMPLETE, and say plainly what is still missing rather
+// than refusing the lot. Someone who filled in two of three pillars should keep
+// those two; telling them "fix everything first" is how the tab gets closed.
+function meRowState(k){
+  const c=cur(k), note=(c.note||"").trim();
+  if(!isState(c.state)&&!note) return "empty";
+  if(!isState(c.state))        return "needs-level";
+  if(note.length<12)           return "needs-sentence";
+  return "ready";
+}
+function saveMe(){
+  const who=getWho(); if(!who) return;
+  if(SAVING.size) return;
+  if(!READ_OK){ mstat("The Sheet hasn’t loaded, so saving now could overwrite real entries. Reload first.","err"); return; }
+  capture();
+
+  const meK=MEKEY(who), mine=ownedBy(who);
+  const prevMe=entry(shiftWeeks(VIEW,-1),meK);
+  const target=prevMe&&prevMe.priority?prevMe.priority:"";
+  const c=cur(meK), pri=(c.priority||"").trim();
+  const jobs=[], missing=[];
+
+  // The personal #1 row carries both last week's grade and next week's priority.
+  const graded=isState(c.state)&&(c.note||"").trim().length>=12;
+  if(target){
+    if(graded) jobs.push({k:meK,state:c.state,note:(c.note||"").trim(),priority:pri,who:who,what:"your #1"});
+    else if(isState(c.state)||(c.note||"").trim()||pri){
+      missing.push(isState(c.state)?{t:"a sentence on how your #1 went",f:"mnote"}:{t:"a level for your #1",f:"mlvl_big"});
+    }else missing.push({t:"how last week’s #1 went",f:"mlvl_big"});
+  }else if(pri.length>=12){
+    jobs.push({k:meK,state:isState(c.state)?c.state:"none",
+               note:(c.note||"").trim()||"No #1 was set for this week, so there was nothing to grade.",
+               priority:pri,who:who,what:"your #1"});
+  }else if(pri) missing.push({t:"a few more words on your #1 for next week",f:"mpri"});
+  else missing.push({t:"your #1 for the week ahead",f:"mpri"});
+
+  for(const p of mine){
+    const st=meRowState(p.k);
+    if(st==="ready"){ const pc=cur(p.k);
+      jobs.push({k:p.k,state:pc.state,note:(pc.note||"").trim(),priority:(pc.priority||"").trim(),who:who,what:p.name}); }
+    else if(st==="needs-level")    missing.push({t:"a level for "+p.name,f:"plvl_"+p.k+"_big"});
+    else if(st==="needs-sentence") missing.push({t:"a sentence for "+p.name,f:"note_"+p.k});
+    else missing.push({t:p.name,f:"plvl_"+p.k+"_big"});
+  }
+
+  if(!jobs.length){
+    mstat("Nothing saved yet — still need "+missing.map(m=>m.t).join(", ")+".","err");
+    const f=missing[0]&&el(missing[0].f); if(f) f.focus();
+    return;
+  }
+
+  SAVING.add("me"); stashFocus();
+  const btn=el("mbtn"); if(btn){ btn.disabled=true; }
+  mstat("Saving "+jobs.length+"…","");
+  // Sequential on purpose: the Apps Script takes a script lock per write, so
+  // firing them together just makes them queue behind each other with no way to
+  // report which one failed.
+  let done=0, failed=null;
+  jobs.reduce((chain,j)=>chain.then(()=>{
+    if(failed) return null;
+    return writeProgress(VIEW,j.k,j.state,j.note,j.priority,j.who).then(r=>{
+      if(!r||!r.ok){ failed={what:j.what,err:(r&&r.error)||"unknown error"}; return; }
+      (PROG[VIEW]=PROG[VIEW]||{})[j.k]={state:j.state,note:j.note,priority:j.priority,who:j.who,when:new Date()};
+      DIRTY.delete(j.k); delete DRAFT[j.k];
+      done++;
+    });
+  }),Promise.resolve()).then(()=>{
+    SAVING.delete("me");
+    render(); popFocus();
+    if(failed){ mstat("Saved "+done+", then "+failed.what+" failed: "+failed.err+". Nothing else was sent.","err"); return; }
+    mstat("Saved "+done+(missing.length?" — still to do: "+missing.map(m=>m.t).join(", "):". That’s your week."),
+          missing.length?"err":"ok");
+  }).catch(e=>{
+    SAVING.delete("me"); render();
+    mstat(e&&e.message==="timeout"
+      ? "Saved "+done+", then the server stopped answering. Reload to see what landed before saving again."
+      : "Saved "+done+", then it failed ("+((e&&e.message)||"error")+"). Reload and check.","err");
+  });
+}
+function mstat(msg,kind){ const e=el("mstat"); if(!e) return; e.textContent=msg; e.className="mestat"+(kind?" "+kind:""); }
 
 /* ---------- boot ---------- */
 VIEW=reviewWeek();

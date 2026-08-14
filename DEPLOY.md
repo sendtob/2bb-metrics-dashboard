@@ -1,3 +1,33 @@
+# 🧑 Personal pages (2026-08-14)
+
+`?who=krysta` now opens **her page**, not the team dashboard: the team's #1 as a
+read-only strip, **her own #1 from last week with a did-it-land grade**, her #1 for
+the week ahead, and one level + one sentence per pillar she owns. Nothing optional,
+no history, no grid. "See the whole team →" switches; `?who=krysta&view=team` is
+bookmarkable, and the team page has a "My page →" chip back.
+
+**Each person's #1 is stored the same way the team's is** — a row in the same
+`Progress` tab under the pillar key **`__me_<name>`** (`__me_krysta`), with the same
+semantics: a `priority` on week W is due during W+1, and the `state` on week W
+grades what was set on W-1. One mechanism now carries the team's one thing and
+seven people's one thing, with **no schema change and no Apps Script redeploy**.
+
+**Save writes every row that is complete** and names what is still missing, rather
+than refusing the lot — someone who filled in two of three pillars keeps those two.
+Writes are sequential on purpose: the Apps Script takes a script lock per write, so
+firing them together only makes them queue with no way to report which one failed.
+
+**Anything already saved collapses to one line** with an `edit` button, so the page
+shows what is still owed rather than what is done.
+
+Height, measured: at 1280x800 Kevin, Brad and Bryan fit in **exactly one screen**;
+Krysta (three pillars) is 1.14 and shrinks as she saves. On a 375x812 phone it is
+1.1-1.7 screens depending on pillar count — one swipe, not one screen. Genuinely
+zero-scroll on a phone with five inputs needs a step-through (one question per
+screen); say the word if that is wanted.
+
+---
+
 # ⚠️ v9 IS IN THE REPO AND **NOT DEPLOYED** — plus one blocker fix that needs no deploy
 
 Two separate things landed 2026-08-13. Read both before touching anything.
