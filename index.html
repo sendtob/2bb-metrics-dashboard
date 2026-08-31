@@ -116,6 +116,31 @@ textarea::placeholder,input::placeholder{color:var(--muted)}
 .addbtn{font-weight:700;color:var(--ink);font-size:15px;padding:8px 0}
 .addbtn:hover{background:var(--brand);border-radius:6px}
 
+/* ---------- trend ---------- */
+.chart{display:flex;gap:14px;align-items:flex-end;padding:18px 20px 10px;background:var(--panel);
+  border:1.5px solid var(--line);border-radius:14px;overflow-x:auto}
+.cwrap{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:56px}
+.cval{font-family:"Figtree";font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
+.cbar{width:34px;background:var(--brand);border:1.5px solid var(--ink);border-radius:6px 6px 0 0}
+.clbl{font-size:12px;color:var(--muted);white-space:nowrap}
+.chartcap{color:var(--muted);font-size:13px;margin:6px 0 26px}
+.oitem{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:var(--bg);border:1.5px solid var(--line);border-radius:14px;
+  padding:16px 20px;margin-bottom:10px;box-shadow:var(--shadow)}
+.oitem .otext{font-weight:600;font-size:16px;line-height:1.35}
+.oitem .oweek{font-size:12.5px;color:var(--muted);margin-top:2px}
+.obtns{display:flex;gap:8px;flex:none}
+.obtn{border:1.5px solid var(--line-strong);border-radius:10px;padding:10px 16px;
+  font-weight:700;font-size:14.5px;background:var(--bg)}
+.obtn:disabled{opacity:.5;cursor:default}
+.obtn.done:hover:not(:disabled){background:var(--high);border-color:var(--high);color:#fff}
+.obtn.drop:hover:not(:disabled){background:var(--low);border-color:var(--low);color:#fff}
+.oresolved{color:var(--high);font-weight:600;font-size:14.5px;flex:none}
+.oresolved.dropped{color:var(--muted)}
+@media (max-width:560px){.oitem{flex-direction:column;align-items:stretch}.obtns .obtn{flex:1}}
+.oempty{color:var(--muted);text-align:center;padding:26px 0}
+.gatehint{color:var(--muted);font-size:14px;text-align:center;margin:0 0 10px;min-height:1.4em}
+
 /* ---------- save bar ---------- */
 .savebar{position:sticky;bottom:0;padding:14px 0 20px;background:linear-gradient(to top,var(--bg) 70%,transparent)}
 .save{
@@ -191,7 +216,10 @@ const SHEET_ID="1tvvGwAdkTx8Kzk91RMrUgGVV8fedHAmdgfy35rSpr6w";
 const WHO="team";
 const SCORE2ST={1:"regression",2:"none",3:"little",4:"big"};
 const ST2SCORE={regression:1,none:2,little:3,big:4};
+/* Legacy six-month key (period end date) — first-day saves landed here before
+   scores became week-keyed for the trend. Read as fallback, never written. */
 function sixSheetKey(){const d=new Date();return d.getFullYear()+(d.getMonth()<6?"-06-30":"-12-31");}
+function periodStartIso(){const d=new Date();return d.getFullYear()+(d.getMonth()<6?"-01-01":"-07-01");}
 
 /* gviz JSONP read (fetch can't read the cross-origin gviz body; a script tag can,
    and it survives the multi-account redirect that kills script-tag WRITES) */
@@ -309,37 +337,123 @@ async function saveWeek(weekIso,clean){
   }
   lsSet("weeks/"+weekIso,clean);
 }
-async function fetchSix(){
-  const M=await MODE_READY;
-  if(M.mode==="db"){
-    try{const s=await M.db.doc("six/"+periodKey()).get(); return s.exists?s.data():null}catch(e){return null}
-  }
-  if(M.mode==="sheet"){
-    try{
-      const rows=tableRows(await gviz("select * where A='"+sixSheetKey()+"'"));
-      const scores={},notes={};
-      rows.forEach(r=>{
-        const m=/^six_(.+)$/.exec(r.pillar);
-        if(m&&ST2SCORE[r.state]){ scores[m[1]]=ST2SCORE[r.state]; if(r.note&&r.note!=="(no note)") notes[m[1]]=r.note; }
-      });
-      return Object.keys(scores).length?{scores:scores,notes:notes}:null;
-    }catch(e){return null}
-  }
-  return lsGet("six/"+periodKey());
+function sixFromRows(rows){ // rows for ONE week → {scores,notes} or null
+  const scores={},notes={};
+  rows.forEach(r=>{
+    const m=/^six_(.+)$/.exec(r.pillar);
+    if(m&&ST2SCORE[r.state]){ scores[m[1]]=ST2SCORE[r.state]; if(r.note&&r.note!=="(no note)") notes[m[1]]=r.note; }
+  });
+  return Object.keys(scores).length?{scores:scores,notes:notes}:null;
 }
-async function saveSix(draft){
+/* All six_ rows grouped by week, current period only, week ascending. */
+async function fetchSixWeeks(){
+  const M=await MODE_READY, lo=periodStartIso(), hi=weekKey(), legacy=sixSheetKey();
+  const byWeek={};
+  if(M.mode==="db"){
+    try{
+      const snap=await M.db.collection("sixweeks").get();
+      snap.docs.forEach(d=>{ if(d.id>=lo&&d.id<=hi) byWeek[d.id]=d.data(); });
+      if(!Object.keys(byWeek).length){
+        const s=await M.db.doc("six/"+periodKey()).get();
+        if(s.exists) byWeek[legacy]=s.data();
+      }
+    }catch(e){}
+  }else if(M.mode==="sheet"){
+    try{
+      const rows=tableRows(await gviz("select * where B starts with 'six_'"));
+      const wk={};
+      rows.forEach(r=>{ (wk[r.week]=wk[r.week]||[]).push(r); });
+      Object.keys(wk).forEach(w=>{
+        if(w>=lo&&w<=hi){ const d=sixFromRows(wk[w]); if(d) byWeek[w]=d; }
+      });
+      if(!Object.keys(byWeek).length&&wk[legacy]){
+        const d=sixFromRows(wk[legacy]); if(d) byWeek[legacy]=d;
+      }
+    }catch(e){}
+  }else{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i), m=/^p2\.sixweeks\/(.+)$/.exec(k);
+      if(m&&m[1]>=lo&&m[1]<=hi){ const d=lsGet("sixweeks/"+m[1]); if(d) byWeek[m[1]]=d; }
+    }
+    if(!Object.keys(byWeek).length){ const d=lsGet("six/"+periodKey()); if(d) byWeek[legacy]=d; }
+  }
+  return byWeek;
+}
+async function fetchSix(){ // the latest week's scores — what the edit screen shows
+  const byWeek=await fetchSixWeeks();
+  const weeks=Object.keys(byWeek).sort();
+  return weeks.length?byWeek[weeks[weeks.length-1]]:null;
+}
+async function saveSix(draft){ // keyed by the current week, so the trend accumulates
   const M=await MODE_READY;
-  if(M.mode==="db"){ await M.db.doc("six/"+periodKey()).set(draft); return; }
+  if(M.mode==="db"){ await M.db.doc("sixweeks/"+weekKey()).set(draft); return; }
   if(M.mode==="sheet"){
     for(const g of GOALS){
       const s=draft.scores[g.k];
       if(Number.isInteger(s))
-        await writeRow(sixSheetKey(),"six_"+g.k,SCORE2ST[s],
+        await writeRow(weekKey(),"six_"+g.k,SCORE2ST[s],
           (draft.notes[g.k]||"").trim().slice(0,400)||"(no note)");
     }
     return;
   }
-  lsSet("six/"+periodKey(),draft);
+  lsSet("sixweeks/"+weekKey(),draft);
+}
+/* Open "no" items across all weeks, minus the ones already completed/dropped.
+   Sheet rows: wkres_<i> on the item's original week — state big=completed, none=dropped. */
+async function fetchOpenNos(){
+  const M=await MODE_READY;
+  const open=[];
+  if(M.mode==="sheet"){
+    const rows=tableRows(await gviz("select * where B starts with 'wk'"));
+    const res={};
+    rows.forEach(r=>{
+      const m=/^wkres_(\d+)$/.exec(r.pillar);
+      if(m) res[r.week+"|"+m[1]]=(r.state==="big")?"done":"dropped";
+    });
+    rows.forEach(r=>{
+      const m=/^wk_(\d+)$/.exec(r.pillar);
+      if(m&&r.state==="none"&&!res[r.week+"|"+m[1]])
+        open.push({week:r.week,i:+m[1],text:r.note});
+    });
+  }else if(M.mode==="db"){
+    try{
+      const snap=await M.db.collection("weeks").get();
+      snap.docs.forEach(d=>{
+        const w=d.data(), resv=w.resolutions||{};
+        (w.reviewedList||[]).forEach((t,i)=>{
+          if(w.review&&w.review[t]===false&&!resv[String(i)]) open.push({week:d.id,i:i,text:t});
+        });
+      });
+    }catch(e){}
+  }else{
+    for(let k=0;k<localStorage.length;k++){
+      const m=/^p2\.weeks\/(.+)$/.exec(localStorage.key(k));
+      if(!m) continue;
+      const w=lsGet("weeks/"+m[1]); if(!w) continue;
+      const resv=w.resolutions||{};
+      (w.reviewedList||[]).forEach((t,i)=>{
+        if(w.review&&w.review[t]===false&&!resv[String(i)]) open.push({week:m[1],i:i,text:t});
+      });
+    }
+  }
+  open.sort((a,b)=>a.week<b.week?-1:a.week>b.week?1:a.i-b.i);
+  return open;
+}
+async function resolveNo(item,done){ // done=true → completed; false → dropped
+  const M=await MODE_READY;
+  if(M.mode==="sheet"){
+    await writeRow(item.week,"wkres_"+item.i,done?"big":"none",item.text.slice(0,400));
+    return;
+  }
+  if(M.mode==="db"){
+    const ref=M.db.doc("weeks/"+item.week);
+    const s=await ref.get(); const w=s.exists?Object.assign({},s.data()):{};
+    w.resolutions=Object.assign({},w.resolutions||{},{[String(item.i)]:done?"done":"dropped"});
+    await ref.set(w); return;
+  }
+  const w=lsGet("weeks/"+item.week)||{};
+  w.resolutions=Object.assign({},w.resolutions||{},{[String(item.i)]:done?"done":"dropped"});
+  lsSet("weeks/"+item.week,w);
 }
 async function storageNote(){
   const M=await MODE_READY;
@@ -360,6 +474,7 @@ function go(v){VIEW=v;route();}
 function route(){
   if(VIEW==="weekly") renderWeekly();
   else if(VIEW==="sixmonth") renderSix();
+  else if(VIEW==="trend") renderTrend();
   else renderLanding();
   window.scrollTo(0,0);
 }
@@ -387,6 +502,11 @@ function renderLanding(){
     <button class="choice" data-go="sixmonth">
       <span><span class="t">Six-month priorities</span>
       <span class="d">Score the six goals, 1 to 4. Push the total up.</span></span>
+      <span class="arrow" aria-hidden="true">&rarr;</span>
+    </button>
+    <button class="choice" data-go="trend">
+      <span><span class="t">Trend</span>
+      <span class="d">The score week by week, and every &ldquo;no&rdquo; still waiting to be finished or dropped.</span></span>
       <span class="arrow" aria-hidden="true">&rarr;</span>
     </button>
     <div class="foot" id="modeNote"></div>
@@ -425,6 +545,7 @@ async function renderSix(){
       </section>`;
     }).join("")}
     <div class="savebar">
+      <div class="gatehint" id="gateHint"></div>
       <button class="save" id="saveBtn">Save six-month scores</button>
       <div class="toast" id="toast" role="status"></div>
       <div class="protonote" id="noteLine"></div>
@@ -432,11 +553,20 @@ async function renderSix(){
   </div>`;
   storageNote().then(t=>{const n=document.getElementById("noteLine"); if(n) n.textContent=t;});
 
+  /* the save is gated: every goal must be scored */
+  const gate=()=>{
+    const missing=GOALS.filter(g=>!Number.isInteger(draft.scores[g.k])).length;
+    document.getElementById("saveBtn").disabled=missing>0;
+    document.getElementById("gateHint").textContent=
+      missing?`To save: score ${missing} more goal${missing>1?"s":""}.`:"";
+  };
+  gate();
   app.querySelectorAll(".tick").forEach(b=>b.onclick=()=>{
     const goal=b.closest("[data-goal]").dataset.goal;
     draft.scores[goal]=+b.dataset.score;
     b.closest(".rail").querySelectorAll(".tick").forEach(t=>t.setAttribute("aria-pressed",String(+t.dataset.score===draft.scores[goal])));
     document.getElementById("totalVal").innerHTML=`${totalOf(draft.scores)}<small> / ${GOALS.length*4}</small>`;
+    gate();
   });
   app.querySelectorAll("[data-note]").forEach(t=>t.oninput=()=>{draft.notes[t.dataset.note]=t.value;});
   document.getElementById("saveBtn").onclick=async()=>{
@@ -445,12 +575,11 @@ async function renderSix(){
     draft.when=new Date().toISOString();
     try{
       await saveSix(draft);
-      const n=Object.keys(draft.scores).length;
-      toast.textContent=n===GOALS.length?"Saved. All six goals scored.":`Saved. ${GOALS.length-n} of ${GOALS.length} still unscored.`;
+      toast.textContent="Saved. All six goals scored.";
     }catch(e){
       toast.classList.add("err"); toast.textContent="Not saved. Check your connection and press Save again.";
     }
-    btn.disabled=false;
+    btn.disabled=false; gate();
   };
 }
 
@@ -492,6 +621,7 @@ async function renderWeekly(){
     </div>
     <button class="addbtn" id="addNext">+ Add another</button>
     <div class="savebar">
+      <div class="gatehint" id="gateHint"></div>
       <button class="save" id="saveBtn">Save the week</button>
       <div class="toast" id="toast" role="status"></div>
       <div class="protonote" id="noteLine"></div>
@@ -499,15 +629,27 @@ async function renderWeekly(){
   </div>`;
   storageNote().then(t=>{const n=document.getElementById("noteLine"); if(n) n.textContent=t;});
 
+  /* the save is gated: every yes/no answered AND at least one priority written */
+  const gate=()=>{
+    const unanswered=items.filter(t=>typeof draft.review[t]!=="boolean").length;
+    const nextOk=draft.next.some(s=>String(s).trim());
+    const parts=[];
+    if(unanswered) parts.push(`answer ${unanswered} more yes/no${unanswered>1?"s":""}`);
+    if(!nextOk) parts.push("write at least one priority for next week");
+    document.getElementById("saveBtn").disabled=parts.length>0;
+    document.getElementById("gateHint").textContent=parts.length?("To save: "+parts.join(", and ")+"."):"";
+  };
+  gate();
   app.querySelectorAll(".ynb").forEach(b=>b.onclick=()=>{
     const t=items[+b.closest("[data-item]").dataset.item];
     draft.review[t]=(b.dataset.ans==="yes");
     const row=b.closest(".yn");
     row.querySelector(".yes").setAttribute("aria-pressed",String(draft.review[t]===true));
     row.querySelector(".no").setAttribute("aria-pressed",String(draft.review[t]===false));
+    gate();
   });
   const syncNext=()=>{app.querySelectorAll("[data-next]").forEach(inp=>{draft.next[+inp.dataset.next]=inp.value;});};
-  app.querySelectorAll("[data-next]").forEach(inp=>inp.oninput=syncNext);
+  app.querySelectorAll("[data-next]").forEach(inp=>inp.oninput=()=>{syncNext();gate();});
   /* add/remove re-render; drafts live in memory, so nothing unsaved is lost */
   app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
     syncNext(); draft.next.splice(+b.dataset.del,1);
@@ -527,15 +669,76 @@ async function renderWeekly(){
     };
     try{
       await saveWeek(weekKey(),clean);
-      const unanswered=items.filter(t=>typeof draft.review[t]!=="boolean").length;
-      const parts=[unanswered?`Saved. ${unanswered} still unanswered.`:"Saved."];
-      if(!clean.next.length) parts.push("No priorities written for next week yet.");
-      toast.textContent=parts.join(" ");
+      toast.textContent=`Saved. ${clean.next.length} priorit${clean.next.length===1?"y":"ies"} set for next week.`;
     }catch(e){
       toast.classList.add("err"); toast.textContent="Not saved fully. Check your connection and press Save again.";
     }
     btn.disabled=false;
   };
+}
+
+/* ---------- trend ---------- */
+function weekShort(iso){
+  const d=new Date(iso+"T00:00:00");
+  return d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+}
+async function renderTrend(){
+  loadingScreen("Loading the trend&hellip;");
+  const [byWeek,open]=await Promise.all([fetchSixWeeks(),fetchOpenNos()]);
+  if(VIEW!=="trend") return; // navigated away while loading
+  const weeks=Object.keys(byWeek).filter(w=>w<=weekKey()).sort();
+  const points=weeks.map(w=>({week:w,total:totalOf(byWeek[w].scores||{})}));
+  const MAX=GOALS.length*4;
+
+  app.innerHTML=`
+  <div class="screen">
+    <div class="top"><button class="back" data-go="">&larr; Back</button><span class="period">${periodLabel()}</span></div>
+    <h2>Trend</h2>
+    <p class="lede">The six-month score, week by week, and every &ldquo;no&rdquo; that hasn't been finished or dropped.</p>
+    <h3 class="sech" style="margin-top:6px">Six-month score by week</h3>
+    ${points.length?`
+      <div class="chart" role="img" aria-label="Six-month score by week: ${points.map(p=>weekShort(p.week)+" "+p.total).join(", ")}, out of ${MAX}">
+        ${points.map(p=>`
+          <div class="cwrap">
+            <span class="cval">${p.total}</span>
+            <div class="cbar" style="height:${Math.max(8,Math.round(p.total/MAX*130))}px"></div>
+            <span class="clbl">${weekShort(p.week)}</span>
+          </div>`).join("")}
+      </div>
+      <p class="chartcap">Out of ${MAX}. Each bar is the cumulative score saved that week.</p>`
+    :`<p class="oempty">No six-month scores saved yet this period.</p>`}
+    <h3 class="sech">Open &ldquo;no&rdquo; items</h3>
+    <p class="sechsub">Priorities the team answered no on. They stay here until marked complete or dropped.</p>
+    <div id="openList">
+      ${open.length?open.map((o,idx)=>`
+        <div class="oitem" data-open="${idx}">
+          <span><span class="otext">${esc(o.text)}</span>
+          <div class="oweek">From the week ending ${weekShort(o.week)}, ${o.week.slice(0,4)}</div></span>
+          <span class="obtns">
+            <button class="obtn done" data-res="done">Complete</button>
+            <button class="obtn drop" data-res="drop">Drop</button>
+          </span>
+        </div>`).join("")
+      :`<p class="oempty">Nothing open. Every no has been finished or dropped.</p>`}
+    </div>
+    <div class="protonote" id="noteLine" style="margin-top:20px"></div>
+  </div>`;
+  storageNote().then(t=>{const n=document.getElementById("noteLine"); if(n) n.textContent=t;});
+
+  app.querySelectorAll(".obtn").forEach(b=>b.onclick=async()=>{
+    const row=b.closest("[data-open]");
+    const item=open[+row.dataset.open];
+    const done=b.dataset.res==="done";
+    row.querySelectorAll(".obtn").forEach(x=>x.disabled=true);
+    try{
+      await resolveNo(item,done);
+      row.querySelector(".obtns").outerHTML=
+        `<span class="oresolved ${done?"":"dropped"}">${done?"Marked complete":"Dropped"}</span>`;
+    }catch(e){
+      row.querySelectorAll(".obtn").forEach(x=>x.disabled=false);
+      alert("That didn't save. Check your connection and try again.");
+    }
+  });
 }
 
 route();
