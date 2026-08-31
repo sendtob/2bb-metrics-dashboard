@@ -32,10 +32,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;pad
 
 /* ---------- landing ---------- */
 .landing{min-height:92vh;display:flex;flex-direction:column;justify-content:center}
-.wordmark{
-  font-family:"Figtree";font-size:15px;font-weight:800;letter-spacing:.32em;
-  text-transform:uppercase;text-align:center;color:var(--ink);
-}
+.wordmark{text-align:center}
+.wordmark img{width:min(280px,70vw);height:auto;display:inline-block}
 .landing h1{
   font-size:clamp(44px,9vw,64px);font-weight:800;letter-spacing:-.015em;line-height:1.05;
   text-align:center;margin:14px 0 6px;
@@ -378,7 +376,7 @@ function loadingScreen(label){
 function renderLanding(){
   app.innerHTML=`
   <div class="landing">
-    <div class="wordmark">Two Blind Brothers</div>
+    <div class="wordmark"><img src="assets/2bb-logo.png" alt="Two Blind Brothers"></div>
     <h1><span class="hl">Priorities</span></h1>
     <p class="sub">One page. Say how it's going.</p>
     <button class="choice" data-go="weekly">
