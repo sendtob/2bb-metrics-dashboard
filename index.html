@@ -379,10 +379,9 @@ async function fetchSixWeeks(){
   }
   return byWeek;
 }
-async function fetchSix(){ // the latest week's scores — what the edit screen shows
+async function fetchSix(){ // ONLY this week's scores — a new week starts blank
   const byWeek=await fetchSixWeeks();
-  const weeks=Object.keys(byWeek).sort();
-  return weeks.length?byWeek[weeks[weeks.length-1]]:null;
+  return byWeek[weekKey()]||null;
 }
 async function saveSix(draft){ // keyed by the current week, so the trend accumulates
   const M=await MODE_READY;
@@ -501,7 +500,7 @@ function renderLanding(){
     </button>
     <button class="choice" data-go="sixmonth">
       <span><span class="t">Six-month priorities</span>
-      <span class="d">Score the six goals, 1 to 4. Push the total up.</span></span>
+      <span class="d">Score the six goals, 1 to 4, fresh each week. Push the total up.</span></span>
       <span class="arrow" aria-hidden="true">&rarr;</span>
     </button>
     <button class="choice" data-go="trend">
@@ -518,20 +517,26 @@ function renderLanding(){
 function totalOf(scores){return GOALS.reduce((n,g)=>n+(scores[g.k]||0),0);}
 
 async function renderSix(){
+  /* The draft is stamped with the week it belongs to. Scores are recorded per week
+     and then cleared: reopening inside the same week shows what was saved (so it can
+     be corrected), and the first visit of a new week comes up blank. The stamp also
+     clears a draft left open in a tab across a week boundary. */
+  if(SIX_DRAFT&&SIX_DRAFT.week!==weekKey()) SIX_DRAFT=null;
   if(!SIX_DRAFT){
-    loadingScreen("Loading the team's scores&hellip;");
+    loadingScreen("Loading this week's scores&hellip;");
     const saved=await fetchSix();
     if(VIEW!=="sixmonth") return; // navigated away while loading
     SIX_DRAFT=Object.assign({scores:{},notes:{}},saved||{});
     SIX_DRAFT.scores=SIX_DRAFT.scores||{}; SIX_DRAFT.notes=SIX_DRAFT.notes||{};
+    SIX_DRAFT.week=weekKey();
   }
   const draft=SIX_DRAFT;
 
   app.innerHTML=`
   <div class="screen">
-    <div class="top"><button class="back" data-go="">&larr; Back</button><span class="period">${periodLabel()}</span></div>
+    <div class="top"><button class="back" data-go="">&larr; Back</button><span class="period">Week ending ${weekLabel()}</span></div>
     <h2>Six-month priorities</h2>
-    <p class="lede">The team's honest read on each goal, scored against its bar. The aim is simple: get the total as high as it can honestly go.</p>
+    <p class="lede">The team's honest read on each goal this week, scored against its bar, for ${periodLabel()}. The aim is simple: get the total as high as it can honestly go. Each week is recorded on its own and the scores start clean the next week &mdash; the running picture lives on the Trend page.</p>
     <div class="total"><span class="lbl">Cumulative score</span><span class="val" id="totalVal">${totalOf(draft.scores)}<small> / ${GOALS.length*4}</small></span></div>
     ${GOALS.map(g=>{
       const s=draft.scores[g.k];
@@ -575,7 +580,7 @@ async function renderSix(){
     draft.when=new Date().toISOString();
     try{
       await saveSix(draft);
-      toast.textContent="Saved. All six goals scored.";
+      toast.textContent=`Recorded for week ending ${weekLabel()}. These scores clear next week.`;
     }catch(e){
       toast.classList.add("err"); toast.textContent="Not saved. Check your connection and press Save again.";
     }
