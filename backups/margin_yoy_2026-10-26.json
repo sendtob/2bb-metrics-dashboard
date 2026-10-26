@@ -1,0 +1,756 @@
+{
+"weeks": [
+"2026-07-26",
+"2026-08-02",
+"2026-08-09",
+"2026-08-16",
+"2026-08-23",
+"2026-08-30",
+"2026-09-06",
+"2026-09-13",
+"2026-09-20",
+"2026-09-27",
+"2026-10-04",
+"2026-10-11",
+"2026-10-18",
+"2026-10-25"
+],
+"labels": [
+"Jul 26",
+"Aug 2",
+"Aug 9",
+"Aug 16",
+"Aug 23",
+"Aug 30",
+"Sep 6",
+"Sep 13",
+"Sep 20",
+"Sep 27",
+"Oct 4",
+"Oct 11",
+"Oct 18",
+"Oct 25"
+],
+"shipPct": 0.1,
+"margin_basis": "net_sales * (1 - shipPct) - ad_spend  |  COGS NOT included",
+"revenue_note": "gross_revenue includes shipping + tax (what the dashboard used to show); net_sales excludes both and matches the weekly memo",
+"thisYear": {
+"net_sales": [
+16565.87,
+13087.89,
+12295.95,
+12119.35,
+16503.98,
+11728.4,
+11390.64,
+10825.2,
+10621.5,
+10887.64,
+15585.74,
+22901.83,
+20255.52,
+21200.48
+],
+"gross_revenue": [
+17897.13,
+14214.09,
+13398.51,
+13109.09,
+18055.74,
+12916.17,
+12468.54,
+11881.16,
+11808.66,
+12100.88,
+16916.15,
+25692.86,
+22419.56,
+23231.51
+],
+"ad_spend": [
+6680.45,
+null,
+6634.43,
+null,
+10063.25,
+7954.94,
+null,
+7368.18,
+7268.16,
+7323.09,
+5726.83,
+6403.18,
+6954.89,
+6388.39
+],
+"tax": [
+760.9,
+557.0,
+629.65,
+606.26,
+880.0,
+510.71,
+561.61,
+392.88,
+435.97,
+515.21,
+713.25,
+1102.62,
+991.66,
+971.46
+],
+"shipping_charged": [
+570.36,
+576.19,
+472.91,
+383.48,
+671.76,
+677.06,
+523.28,
+670.07,
+751.19,
+698.03,
+617.16,
+1695.4,
+1179.37,
+1059.57
+],
+"orders": [
+162.0,
+140.0,
+129.0,
+113.0,
+162.0,
+145.0,
+124.0,
+138.0,
+152.0,
+150.0,
+162.0,
+345.0,
+265.0,
+226.0
+],
+"net_revenue": [
+17897.13,
+14214.09,
+13398.51,
+13109.09,
+18055.74,
+12916.17,
+12468.54,
+11881.16,
+11808.66,
+12100.88,
+16916.15,
+25692.86,
+22419.56,
+23231.51
+],
+"margin_k": [
+8.23,
+null,
+4.43,
+null,
+4.79,
+2.6,
+null,
+2.37,
+2.29,
+2.48,
+8.3,
+14.21,
+11.28,
+12.69
+]
+},
+"lastYear": {
+"net_sales": [
+27100.75,
+19031.92,
+12408.12,
+19938.49,
+17379.56,
+15590.35,
+14910.38,
+13837.27,
+14398.39,
+22636.57,
+12690.31,
+29477.23,
+37636.29,
+60808.08
+],
+"gross_revenue": [
+29148.91,
+20908.36,
+13737.83,
+21574.3,
+18722.68,
+16915.54,
+16164.68,
+14985.76,
+15632.26,
+24852.68,
+13768.76,
+32837.17,
+41022.73,
+65983.13
+],
+"ad_spend": [
+286.79,
+1197.1,
+2152.06,
+2448.81,
+2507.64,
+2751.54,
+2411.44,
+2121.21,
+3450.52,
+3400.29,
+4767.93,
+6914.26,
+7218.98,
+29551.96
+],
+"net_revenue": [
+29148.91,
+20908.36,
+13737.83,
+21574.3,
+18722.68,
+16915.54,
+16164.68,
+14985.76,
+15632.26,
+24852.68,
+13768.76,
+32837.17,
+41022.73,
+65983.13
+],
+"margin_k": [
+24.1,
+15.93,
+9.02,
+15.5,
+13.13,
+11.28,
+11.01,
+10.33,
+9.51,
+16.97,
+6.65,
+19.62,
+26.65,
+25.18
+],
+"ad_spend_ratio_vs_this_year": [
+0.043,
+null,
+0.324,
+null,
+0.249,
+0.346,
+null,
+0.288,
+0.475,
+0.464,
+0.833,
+1.08,
+1.038,
+4.626
+],
+"ad_spend_verified": "Cross-checked against Meta Ads API 2026-07-30; Northbeam matches to the cent. The near-zero 2025 spend is real, not a tracking gap."
+},
+"generated_for": "2026-10-25",
+"generated_at": "2026-10-26T13:32:24.402301Z",
+"frozen": {
+"2026-04-26": {
+"thisYear": {
+"gross_revenue": 20114.32,
+"net_sales": 18557.13,
+"tax": 918.97,
+"shipping_charged": 694.14,
+"orders": 182,
+"ad_spend": 6996.03
+},
+"lastYear": {
+"gross_revenue": 32303.83,
+"net_sales": 29905.59,
+"tax": 1304.82,
+"shipping_charged": 1174.36,
+"orders": 282,
+"ad_spend": 10138.59
+}
+},
+"2026-05-03": {
+"thisYear": {
+"gross_revenue": 24045.15,
+"net_sales": 21968.88,
+"tax": 1002.12,
+"shipping_charged": 1102.11,
+"orders": 222,
+"ad_spend": 7679.32
+},
+"lastYear": {
+"gross_revenue": 56304.43,
+"net_sales": 52151.72,
+"tax": 2571.28,
+"shipping_charged": 1543.74,
+"orders": 431,
+"ad_spend": 10892.78
+}
+},
+"2026-05-10": {
+"thisYear": {
+"gross_revenue": 23199.53,
+"net_sales": 21207.64,
+"tax": 1056.1,
+"shipping_charged": 959.77,
+"orders": 207,
+"ad_spend": 7558.14
+},
+"lastYear": {
+"gross_revenue": 34200.48,
+"net_sales": 31287.56,
+"tax": 1643.26,
+"shipping_charged": 1241.41,
+"orders": 276,
+"ad_spend": 6392.64
+}
+},
+"2026-05-17": {
+"thisYear": {
+"gross_revenue": 23024.29,
+"net_sales": 21037.45,
+"tax": 1135.89,
+"shipping_charged": 864.93,
+"orders": 202,
+"ad_spend": 7655.98
+},
+"lastYear": {
+"gross_revenue": 27655.34,
+"net_sales": 25455.16,
+"tax": 1232.21,
+"shipping_charged": 936.48,
+"orders": 234,
+"ad_spend": 1359.17
+}
+},
+"2026-05-24": {
+"thisYear": {
+"gross_revenue": 18733.83,
+"net_sales": 17232.51,
+"tax": 913.59,
+"shipping_charged": 587.73,
+"orders": 167,
+"ad_spend": 7703.59
+},
+"lastYear": {
+"gross_revenue": 20495.67,
+"net_sales": 19020.51,
+"tax": 803.82,
+"shipping_charged": 671.52,
+"orders": 173,
+"ad_spend": 1343.19
+}
+},
+"2026-05-31": {
+"thisYear": {
+"gross_revenue": 14912.16,
+"net_sales": 13575.75,
+"tax": 601.2,
+"shipping_charged": 770.48,
+"orders": 141,
+"ad_spend": 7872.66
+},
+"lastYear": {
+"gross_revenue": 11675.07,
+"net_sales": 10683.89,
+"tax": 498.23,
+"shipping_charged": 576.19,
+"orders": 127,
+"ad_spend": 1385.91
+}
+},
+"2026-06-07": {
+"thisYear": {
+"gross_revenue": 14720.35,
+"net_sales": 13334.33,
+"tax": 736.92,
+"shipping_charged": 673.08,
+"orders": 142,
+"ad_spend": 7828.97
+},
+"lastYear": {
+"gross_revenue": 14969.36,
+"net_sales": 13628.13,
+"tax": 717.1,
+"shipping_charged": 669.1,
+"orders": 147,
+"ad_spend": 1492.5
+}
+},
+"2026-06-14": {
+"thisYear": {
+"gross_revenue": 9747.02,
+"net_sales": 8808.02,
+"tax": 445.46,
+"shipping_charged": 500.53,
+"orders": 111,
+"ad_spend": 6851.58
+},
+"lastYear": {
+"gross_revenue": 10376.12,
+"net_sales": 9535.53,
+"tax": 442.37,
+"shipping_charged": 467.88,
+"orders": 109,
+"ad_spend": 1491.97
+}
+},
+"2026-06-21": {
+"thisYear": {
+"gross_revenue": 18939.9,
+"net_sales": 17436.96,
+"tax": 797.75,
+"shipping_charged": 736.78,
+"orders": 174,
+"ad_spend": 6772.44
+},
+"lastYear": {
+"gross_revenue": 19118.58,
+"net_sales": 17729.46,
+"tax": 786.3,
+"shipping_charged": 621.06,
+"orders": 175,
+"ad_spend": 645.71
+}
+},
+"2026-06-28": {
+"thisYear": {
+"gross_revenue": 12588.97,
+"net_sales": 11616.95,
+"tax": 494.66,
+"shipping_charged": 477.36,
+"orders": 119,
+"ad_spend": 6842.72
+},
+"lastYear": {
+"gross_revenue": 22690.04,
+"net_sales": 21055.23,
+"tax": 805.35,
+"shipping_charged": 890.88,
+"orders": 219,
+"ad_spend": 4385.63
+}
+},
+"2026-07-05": {
+"thisYear": {
+"gross_revenue": 11408.36,
+"net_sales": 10509.79,
+"tax": 497.13,
+"shipping_charged": 415.42,
+"orders": 109,
+"ad_spend": 6640.21
+},
+"lastYear": {
+"gross_revenue": 10652.2,
+"net_sales": 9682.55,
+"tax": 395.51,
+"shipping_charged": 605.22,
+"orders": 119,
+"ad_spend": 1661.68
+}
+},
+"2026-07-12": {
+"thisYear": {
+"gross_revenue": 17302.34,
+"net_sales": 15958.83,
+"tax": 784.99,
+"shipping_charged": 558.52,
+"orders": 147,
+"ad_spend": 6710.18
+},
+"lastYear": {
+"gross_revenue": 11427.15,
+"net_sales": 10430.82,
+"tax": 403.5,
+"shipping_charged": 629.82,
+"orders": 112,
+"ad_spend": 1338.96
+}
+},
+"2026-07-19": {
+"thisYear": {
+"gross_revenue": 16647.74,
+"net_sales": 15424.67,
+"tax": 711.06,
+"shipping_charged": 525.99,
+"orders": 150,
+"ad_spend": 6611.1
+},
+"lastYear": {
+"gross_revenue": 8830.57,
+"net_sales": 8071.4,
+"tax": 401.45,
+"shipping_charged": 390.47,
+"orders": 88,
+"ad_spend": 1494.1
+}
+},
+"2026-07-26": {
+"thisYear": {
+"gross_revenue": 17897.13,
+"net_sales": 16565.87,
+"tax": 760.9,
+"shipping_charged": 570.36,
+"orders": 162,
+"ad_spend": 6680.45
+},
+"lastYear": {
+"gross_revenue": 29148.91,
+"net_sales": 27100.75,
+"tax": 1252.72,
+"shipping_charged": 767.93,
+"orders": 255,
+"ad_spend": 286.79
+}
+},
+"2026-08-02": {
+"thisYear": {
+"gross_revenue": 14214.09,
+"net_sales": 13087.89,
+"tax": 557.0,
+"shipping_charged": 576.19,
+"orders": 140,
+"ad_spend": null
+},
+"lastYear": {
+"gross_revenue": 20908.36,
+"net_sales": 19031.92,
+"tax": 891.92,
+"shipping_charged": 1021.55,
+"orders": 208,
+"ad_spend": 1197.1
+}
+},
+"2026-08-09": {
+"thisYear": {
+"gross_revenue": 13398.51,
+"net_sales": 12295.95,
+"tax": 629.65,
+"shipping_charged": 472.91,
+"orders": 129,
+"ad_spend": 6634.43
+},
+"lastYear": {
+"gross_revenue": 13737.83,
+"net_sales": 12408.12,
+"tax": 661.03,
+"shipping_charged": 691.04,
+"orders": 150,
+"ad_spend": 2152.06
+}
+},
+"2026-08-16": {
+"thisYear": {
+"gross_revenue": 13109.09,
+"net_sales": 12119.35,
+"tax": 606.26,
+"shipping_charged": 383.48,
+"orders": 113,
+"ad_spend": null
+},
+"lastYear": {
+"gross_revenue": 21574.3,
+"net_sales": 19938.49,
+"tax": 922.88,
+"shipping_charged": 737.91,
+"orders": 192,
+"ad_spend": 2448.81
+}
+},
+"2026-08-23": {
+"thisYear": {
+"gross_revenue": 18055.74,
+"net_sales": 16503.98,
+"tax": 880.0,
+"shipping_charged": 671.76,
+"orders": 162,
+"ad_spend": 10063.25
+},
+"lastYear": {
+"gross_revenue": 18722.68,
+"net_sales": 17379.56,
+"tax": 833.3,
+"shipping_charged": 513.28,
+"orders": 168,
+"ad_spend": 2507.64
+}
+},
+"2026-08-30": {
+"thisYear": {
+"gross_revenue": 12916.17,
+"net_sales": 11728.4,
+"tax": 510.71,
+"shipping_charged": 677.06,
+"orders": 145,
+"ad_spend": 7954.94
+},
+"lastYear": {
+"gross_revenue": 16915.54,
+"net_sales": 15590.35,
+"tax": 741.32,
+"shipping_charged": 615.12,
+"orders": 163,
+"ad_spend": 2751.54
+}
+},
+"2026-09-06": {
+"thisYear": {
+"gross_revenue": 12468.54,
+"net_sales": 11390.64,
+"tax": 561.61,
+"shipping_charged": 523.28,
+"orders": 124,
+"ad_spend": null
+},
+"lastYear": {
+"gross_revenue": 16164.68,
+"net_sales": 14910.38,
+"tax": 710.39,
+"shipping_charged": 567.77,
+"orders": 139,
+"ad_spend": 2411.44
+}
+},
+"2026-09-13": {
+"thisYear": {
+"gross_revenue": 11881.16,
+"net_sales": 10825.2,
+"tax": 392.88,
+"shipping_charged": 670.07,
+"orders": 138,
+"ad_spend": 7368.18
+},
+"lastYear": {
+"gross_revenue": 14985.76,
+"net_sales": 13837.27,
+"tax": 537.68,
+"shipping_charged": 679.74,
+"orders": 124,
+"ad_spend": 2121.21
+}
+},
+"2026-09-20": {
+"thisYear": {
+"gross_revenue": 11808.66,
+"net_sales": 10621.5,
+"tax": 435.97,
+"shipping_charged": 751.19,
+"orders": 152,
+"ad_spend": 7268.16
+},
+"lastYear": {
+"gross_revenue": 15632.26,
+"net_sales": 14398.39,
+"tax": 754.21,
+"shipping_charged": 591.24,
+"orders": 147,
+"ad_spend": 3450.52
+}
+},
+"2026-09-27": {
+"thisYear": {
+"gross_revenue": 12100.88,
+"net_sales": 10887.64,
+"tax": 515.21,
+"shipping_charged": 698.03,
+"orders": 150,
+"ad_spend": 7323.09
+},
+"lastYear": {
+"gross_revenue": 24852.68,
+"net_sales": 22636.57,
+"tax": 1082.09,
+"shipping_charged": 1143.49,
+"orders": 250,
+"ad_spend": 3400.29
+}
+},
+"2026-10-04": {
+"thisYear": {
+"gross_revenue": 16916.15,
+"net_sales": 15585.74,
+"tax": 713.25,
+"shipping_charged": 617.16,
+"orders": 162,
+"ad_spend": 5726.83
+},
+"lastYear": {
+"gross_revenue": 13768.76,
+"net_sales": 12690.31,
+"tax": 496.41,
+"shipping_charged": 588.23,
+"orders": 138,
+"ad_spend": 4767.93
+}
+},
+"2026-10-11": {
+"thisYear": {
+"gross_revenue": 25692.86,
+"net_sales": 22901.83,
+"tax": 1102.62,
+"shipping_charged": 1695.4,
+"orders": 345,
+"ad_spend": 6403.18
+},
+"lastYear": {
+"gross_revenue": 32837.17,
+"net_sales": 29477.23,
+"tax": 1332.52,
+"shipping_charged": 2026.76,
+"orders": 388,
+"ad_spend": 6914.26
+}
+},
+"2026-10-18": {
+"thisYear": {
+"gross_revenue": 22419.56,
+"net_sales": 20255.52,
+"tax": 991.66,
+"shipping_charged": 1179.37,
+"orders": 265,
+"ad_spend": 6954.89
+},
+"lastYear": {
+"gross_revenue": 41022.73,
+"net_sales": 37636.29,
+"tax": 1566.38,
+"shipping_charged": 1861.68,
+"orders": 397,
+"ad_spend": 7218.98
+}
+},
+"2026-10-25": {
+"thisYear": {
+"gross_revenue": 23231.51,
+"net_sales": 21200.48,
+"tax": 971.46,
+"shipping_charged": 1059.57,
+"orders": 226,
+"ad_spend": 6388.39
+},
+"lastYear": {
+"gross_revenue": 65983.13,
+"net_sales": 60808.08,
+"tax": 2896.52,
+"shipping_charged": 2278.74,
+"orders": 560,
+"ad_spend": 29551.96
+}
+}
+}
+}
