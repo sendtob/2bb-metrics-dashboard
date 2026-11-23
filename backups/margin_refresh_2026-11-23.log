@@ -1,0 +1,60 @@
+/Users/bradfordmanning/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+/Users/bradfordmanning/Library/Python/3.9/lib/python/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/Users/bradfordmanning/Library/Python/3.9/lib/python/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/Users/bradfordmanning/Library/Python/3.9/lib/python/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/Users/bradfordmanning/Library/Python/3.9/lib/python/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.analytics.data_v1beta supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.analytics.data_v1beta.
+  warnings.warn(message, FutureWarning)
+2026-11-23 08:32:06,376 - extractor.shopify - INFO - Extracting orders from 2026-11-09 to 2026-11-16
+2026-11-23 08:32:10,862 - extractor.shopify - INFO - Saved data to output/Two Blind Brothers/data/raw/shopify/orders_2026-11-23.json
+2026-11-23 08:32:10,863 - extractor.shopify - INFO - Extracted 492 orders with $45,198.42 total revenue
+2026-11-23 08:32:10,891 - extractor.shopify - INFO - Extracting orders from 2025-11-10 to 2025-11-17
+2026-11-23 08:33:01,762 - extractor.shopify - INFO - Saved data to output/Two Blind Brothers/data/raw/shopify/orders_2026-11-23.json
+2026-11-23 08:33:01,773 - extractor.shopify - INFO - Extracted 821 orders with $107,809.46 total revenue
+2026-11-23 08:33:01,855 - extractor.northbeam - INFO - Extracting Northbeam channel performance from 2026-11-09 to 2026-11-15
+2026-11-23 08:33:01,856 - extractor.northbeam - INFO - Fetching available Northbeam metrics
+2026-11-23 08:33:03,208 - extractor.northbeam - INFO - Using 9 metrics: ['spend', 'rev', 'roas', 'txns', 'aov', 'cac', 'impressions', 'ctr', 'cpm']
+2026-11-23 08:33:03,210 - extractor.northbeam - INFO - Creating Northbeam data export: period=FIXED, level=platform, model=northbeam_custom__va
+2026-11-23 08:33:04,432 - extractor.northbeam - INFO - Created export with ID: d6b64395-ec44-4ee2-a420-42d7588cbcd3
+2026-11-23 08:33:04,449 - extractor.northbeam - INFO - Polling for export results: d6b64395-ec44-4ee2-a420-42d7588cbcd3
+2026-11-23 08:33:09,341 - extractor.northbeam - INFO - Export completed in 4.9s
+2026-11-23 08:33:09,960 - extractor.northbeam - INFO - Downloaded 1084 Northbeam rows from 1 export file(s)
+2026-11-23 08:33:09,963 - extractor.northbeam - INFO - Northbeam channel export returned 1084 rows
+2026-11-23 08:33:09,964 - extractor.northbeam - INFO - Sample row keys: ['breakdown_platform_northbeam', 'campaign_name', 'campaign_id', 'kind', 'platform', 'status', 'accounting_mode', 'attribution_model', 'attribution_window', 'spend', 'rev', 'roas', 'transactions', 'aov', 'cac', 'imprs', 'ctr', 'cpm']
+2026-11-23 08:33:10,091 - extractor.northbeam - INFO - Northbeam returned 2 attribution combos [('Accrual performance', '1.0'), ('Cash snapshot', 'lifetime')]; keeping ('Cash snapshot', 'lifetime') to avoid double-counting spend
+2026-11-23 08:33:10,092 - extractor.northbeam - INFO - After flattening + dedupe: 824 records
+2026-11-23 08:33:10,092 - extractor.northbeam - INFO - Flattened sample: {"breakdown_platform_northbeam": "Attentive", "campaign_name": "10-12-21-shop-blind-countdown", "campaign_id": "10-12-21-shop-blind-countdown", "kind": "utm", "platform": "{\"medium\":\"text\",\"source\":\"attentive\"}", "status": "", "accounting_mode": "Cash snapshot", "attribution_model": "Clicks + Modeled Views", "attribution_window": "lifetime", "spend": 0.0, "rev": 0.0, "roas": "", "transactions": 0.0, "aov": 0.0, "cac": "", "imprs": 0.0, "ctr": "", "cpm": ""}
+2026-11-23 08:33:10,267 - extractor.northbeam - INFO - Saved data to output/Two Blind Brothers/data/raw/northbeam/channel_performance_2026-11-23.json
+2026-11-23 08:33:10,269 - extractor.northbeam - INFO - Extracting Northbeam channel performance from 2025-11-10 to 2025-11-16
+2026-11-23 08:33:10,270 - extractor.northbeam - INFO - Using 9 metrics: ['spend', 'rev', 'roas', 'txns', 'aov', 'cac', 'impressions', 'ctr', 'cpm']
+2026-11-23 08:33:10,271 - extractor.northbeam - INFO - Creating Northbeam data export: period=FIXED, level=platform, model=northbeam_custom__va
+2026-11-23 08:33:10,987 - extractor.northbeam - INFO - Created export with ID: 9f379362-8d1d-408c-8bc3-0632cc754d42
+2026-11-23 08:33:10,988 - extractor.northbeam - INFO - Polling for export results: 9f379362-8d1d-408c-8bc3-0632cc754d42
+2026-11-23 08:33:14,135 - extractor.northbeam - INFO - Export completed in 3.1s
+2026-11-23 08:33:14,736 - extractor.northbeam - INFO - Downloaded 1172 Northbeam rows from 1 export file(s)
+2026-11-23 08:33:14,737 - extractor.northbeam - INFO - Northbeam channel export returned 1172 rows
+2026-11-23 08:33:14,737 - extractor.northbeam - INFO - Sample row keys: ['breakdown_platform_northbeam', 'campaign_name', 'campaign_id', 'kind', 'platform', 'status', 'accounting_mode', 'attribution_model', 'attribution_window', 'spend', 'rev', 'roas', 'transactions', 'aov', 'cac', 'imprs', 'ctr', 'cpm']
+2026-11-23 08:33:14,750 - extractor.northbeam - INFO - Northbeam returned 2 attribution combos [('Accrual performance', '1.0'), ('Cash snapshot', 'lifetime')]; keeping ('Cash snapshot', 'lifetime') to avoid double-counting spend
+2026-11-23 08:33:14,751 - extractor.northbeam - INFO - After flattening + dedupe: 886 records
+2026-11-23 08:33:14,751 - extractor.northbeam - INFO - Flattened sample: {"breakdown_platform_northbeam": "Attentive", "campaign_name": "2-30-March-Shop-Blind-Ending", "campaign_id": "2-30-March-Shop-Blind-Ending", "kind": "utm", "platform": "{\"medium\":\"sms\",\"source\":\"attentive\"}", "status": "", "accounting_mode": "Cash snapshot", "attribution_model": "Clicks + Modeled Views", "attribution_window": "lifetime", "spend": 0.0, "rev": 30.70285714285714, "roas": "", "transactions": 0.14285714285714285, "aov": 214.92, "cac": 0.0, "imprs": 0.0, "ctr": "", "cpm": ""}
+2026-11-23 08:33:14,768 - extractor.northbeam - INFO - Saved data to output/Two Blind Brothers/data/raw/northbeam/channel_performance_2026-11-23.json
+2026-08-23: frozen
+2026-08-30: frozen
+2026-09-06: frozen
+2026-09-13: frozen
+2026-09-20: frozen
+2026-09-27: frozen
+2026-10-04: frozen
+2026-10-11: frozen
+2026-10-18: frozen
+2026-10-25: frozen
+2026-11-01: frozen
+2026-11-08: frozen
+2026-11-15: TY net=40948.67 ad=17112.29 | LY net=100319.57 ad=34913.63
+2026-11-23 08:33:14,768 - extractor.shopify - INFO - Extracting orders from 2026-11-16 to 2026-11-23
+2026-11-23 08:38:28,935 - extractor.shopify - INFO - Saved data to output/Two Blind Brothers/data/raw/shopify/orders_2026-11-23.json
+2026-11-23 08:38:28,937 - extractor.shopify - INFO - Extracted 681 orders with $71,315.74 total revenue
+2026-11-23 08:38:28,998 - extractor.shopify - INFO - Extracting orders from 2025-11-17 to 2025-11-24
